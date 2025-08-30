@@ -135,7 +135,7 @@ export default {
       
       try {
         const response = await axios.get(
-          `http://127.0.0.1:8000/api/v1/produto-logs/produto/${this.produto._id}`
+          `https://abatedouro-jkax.onrender.com/api/v1/produto-logs/produto/${this.produto._id}`
         )
         
         this.historico = response.data.sort((a, b) => 

@@ -664,7 +664,7 @@ const zerarTodas = () => {
 
 const carregarPadrao = async () => {
   try {
-    const response = await fetch('http://127.0.0.1:8000/api/v1/despesas-padrao')
+    const response = await fetch('https://abatedouro-jkax.onrender.com/api/v1/despesas-padrao')
     if (response.ok) {
       const dadosPadrao = await response.json()
       if (dadosPadrao) {
@@ -733,7 +733,7 @@ const salvarComoPadrao = async () => {
       descarte: localFormData.value.despesas_fixas.descarte || 0
     }
     
-    const response = await fetch('http://127.0.0.1:8000/api/v1/despesas-padrao', {
+    const response = await fetch('https://abatedouro-jkax.onrender.com/api/v1/despesas-padrao', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -795,7 +795,7 @@ const todosValoresZero = () => {
 // Função para carregar valores padrão automaticamente
 const carregarPadraoAutomatico = async () => {
   try {
-    const response = await fetch('http://127.0.0.1:8000/api/v1/despesas-padrao')
+    const response = await fetch('https://abatedouro-jkax.onrender.com/api/v1/despesas-padrao')
     if (response.ok) {
       const dadosPadrao = await response.json()
       if (dadosPadrao && todosValoresZero()) {
