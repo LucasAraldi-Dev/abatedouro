@@ -5,9 +5,14 @@ from app.core.config import settings
 
 app = FastAPI(title=settings.APP_NAME)
 
+# Debug: Log das configurações CORS
+print(f"BACKEND_CORS_ORIGINS (raw): {settings.BACKEND_CORS_ORIGINS}")
+print(f"CORS origins (parsed): {settings.cors_origins}")
+
 # CORS
 origins = settings.cors_origins
 if origins:
+    print(f"Aplicando middleware CORS com origins: {origins}")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
@@ -15,6 +20,8 @@ if origins:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+else:
+    print("AVISO: Nenhuma origin CORS configurada!")
 
 # Compat: rota antiga
 @app.get("/saude")

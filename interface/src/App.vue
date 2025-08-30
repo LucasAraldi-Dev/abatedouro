@@ -40,16 +40,13 @@ const checkApi = async () => {
 }
 
 onMounted(() => {
-  // Carregar tema salvo ou usar padrão do sistema
+  // Carregar tema salvo ou usar modo claro como padrão
   const savedTheme = localStorage.getItem('theme')
-  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
   
   if (savedTheme) {
     currentTheme.value = savedTheme
-  } else if (systemPrefersDark) {
-    currentTheme.value = 'dark'
   } else {
-    currentTheme.value = 'light'
+    currentTheme.value = 'light' // Sempre usar modo claro como padrão
   }
   
   // Aplicar tema no documento
@@ -219,12 +216,9 @@ onMounted(() => {
 }
 
 .app-logo {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
-  border-radius: 8px;
-  border: 2px solid var(--primary-red);
-  padding: 2px;
 }
 
 .title-section {

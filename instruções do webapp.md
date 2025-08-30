@@ -224,3 +224,10 @@ Próxima Etapa proposta
 - **v0.3**: Lotes de Abate + Cálculos
 - **v0.4**: Painel + Relatórios + PDF
 - **v1.0**: Testes + Deploy + Documentação
+
+
+MongoDB Atlas
+usuario > lucasaraldi
+senha > R6pXvaislUmmKm8A
+
+mongodb+srv://lucasaraldi:R6pXvaislUmmKm8A@abatedouro.tvwmq9c.mongodb.net/

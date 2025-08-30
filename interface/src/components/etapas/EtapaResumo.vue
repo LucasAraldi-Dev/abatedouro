@@ -6,9 +6,9 @@
     </div>
 
     <div class="etapa-content">
-      <!-- Dados Básicos -->
+      <!-- Dados Básicos e Horários -->
       <div class="resumo-section">
-        <h4>📋 Dados Básicos</h4>
+        <h4>📋 Dados Básicos e Horários</h4>
         <div class="dados-grid">
           <div class="dado-item">
             <span class="label">Data do Abate:</span>
@@ -34,13 +34,6 @@
             <span class="label">Peso Médio por Ave:</span>
             <span class="value">{{ pesoMedioFormatted }}</span>
           </div>
-        </div>
-      </div>
-
-      <!-- Horários -->
-      <div class="resumo-section">
-        <h4>⏰ Controle de Horários</h4>
-        <div class="dados-grid">
           <div class="dado-item">
             <span class="label">Hora de Início:</span>
             <span class="value">{{ formData.hora_inicio || 'Não informado' }}</span>
@@ -132,7 +125,7 @@
           <div class="financeiro-item receita">
             <div class="financeiro-label">Receita Bruta</div>
             <div class="financeiro-valor">{{ receitaBrutaFormatted }}</div>
-            <div class="financeiro-desc">{{ formatWeight(formData.peso_total_kg) }} × {{ formatCurrency(formData.valor_kg_vivo) }}</div>
+            <div class="financeiro-desc">Total Produzido</div>
           </div>
           
           <div class="financeiro-item custo">
@@ -141,7 +134,7 @@
             <div class="financeiro-desc">Despesas fixas + Produtos</div>
           </div>
           
-          <div class="financeiro-item" :class="lucroLiquido >= 0 ? 'lucro' : 'prejuizo'">
+          <div class="financeiro-item" :class="lucroLiquido >= 0 ? 'lucro' : 'prejuizo'" @click="showPrejuizoAlert">
             <div class="financeiro-label">{{ lucroLiquido >= 0 ? 'Lucro Líquido' : 'Prejuízo' }}</div>
             <div class="financeiro-valor" :class="{ 'negativo': lucroLiquido < 0 }">{{ lucroLiquidoFormatted }}</div>
             <div class="financeiro-desc">Receita - Custos</div>
@@ -170,6 +163,29 @@
             <div class="indicador-label">Aves/Hora</div>
           </div>
         </div>
+      </div>
+
+      <!-- Validação de Peso -->
+      <div class="resumo-section validacao-peso">
+        <h4>⚖️ Controle de Peso</h4>
+        <div class="peso-comparacao">
+          <div class="peso-item">
+            <div class="peso-valor">{{ formatWeight(formData.peso_total_kg) }}</div>
+            <div class="peso-label">Peso Total Vivo</div>
+          </div>
+          <div class="peso-seta">→</div>
+          <div class="peso-item">
+            <div class="peso-valor">{{ formatWeight(pesoTotalProcessado) }}</div>
+            <div class="peso-label">Peso Total Processado</div>
+          </div>
+          <div class="peso-diferenca" :class="{ 'alerta': Math.abs((formData.peso_total_kg || 0) - pesoTotalProcessado) > 0.1 }">
+            <div class="diferenca-valor">{{ formatWeight(Math.abs((formData.peso_total_kg || 0) - pesoTotalProcessado)) }}</div>
+            <div class="diferenca-label">Diferença</div>
+          </div>
+        </div>
+        <button class="btn-validar" @click="validarPeso" type="button">
+          🔍 Verificar Pesos
+        </button>
       </div>
 
       <!-- Observações -->
@@ -209,10 +225,9 @@ const dataAbateFormatted = computed(() => {
 
 const tipoAveFormatted = computed(() => {
   const tipos = {
-    frango: 'Frango',
-    galinha: 'Galinha',
-    galo: 'Galo',
-    chester: 'Chester'
+    'Frango de Corte': 'Frango de Corte',
+    'Galinha Matriz': 'Galinha Matriz',
+    'Galinha Poedeira': 'Galinha Poedeira'
   }
   return tipos[props.formData.tipo_ave as keyof typeof tipos] || 'Não informado'
 })
@@ -315,6 +330,33 @@ const totalOperacionaisFormatted = computed(() => formatCurrency(totalOperaciona
 const totalPerdasFormatted = computed(() => formatCurrency(totalPerdas.value))
 const totalDespesasFormatted = computed(() => formatCurrency(totalDespesas.value))
 
+// Peso total dos produtos processados
+const pesoTotalProcessado = computed(() => {
+  if (!props.formData.produtos || props.formData.produtos.length === 0) return 0
+  return props.formData.produtos.reduce((total, produto) => {
+    return total + (produto.quantidade || 0)
+  }, 0)
+})
+
+// Validação de peso
+const validarPeso = () => {
+  const pesoVivo = props.formData.peso_total_kg || 0
+  const pesoProcessado = pesoTotalProcessado.value
+  const diferenca = pesoVivo - pesoProcessado
+  const percentualPerda = pesoVivo > 0 ? (diferenca / pesoVivo) * 100 : 0
+  
+  if (pesoVivo > 0 && pesoProcessado > 0 && Math.abs(diferenca) > 0.1) {
+    const mensagem = `⚠️ ATENÇÃO: Diferença detectada entre pesos!\n\n` +
+      `• Peso Total Vivo: ${pesoVivo.toFixed(2)} kg\n` +
+      `• Peso Total Processado: ${pesoProcessado.toFixed(2)} kg\n` +
+      `• Diferença: ${diferenca.toFixed(2)} kg (${percentualPerda.toFixed(1)}%)\n\n` +
+      `Esta diferença pode representar descarte, perdas no processamento ou erro de digitação.\n` +
+      `Por favor, verifique os dados. O sistema permitirá continuar por enquanto.`
+    
+    alert(mensagem)
+  }
+}
+
 // Cálculos financeiros
 const receitaBruta = computed(() => {
   // Receita bruta = total dos produtos vendidos (não o custo das aves)
@@ -339,7 +381,10 @@ const lucroLiquidoFormatted = computed(() => formatCurrency(lucroLiquido.value))
 
 // Indicadores de performance
 const custoKg = computed(() => {
-  const peso = props.formData.peso_total_kg || 0
+  // Usar peso dos produtos processados se disponível, senão peso total das aves
+  const pesoProcessado = valorTotalProdutos.value > 0 ? 
+    props.formData.produtos?.reduce((sum: number, produto: any) => sum + (produto.quantidade || 0), 0) || 0 : 0
+  const peso = pesoProcessado > 0 ? pesoProcessado : (props.formData.peso_total_kg || 0)
   return peso > 0 ? custosTotais.value / peso : 0
 })
 
@@ -370,10 +415,25 @@ const isValid = computed(() => {
          props.formData.peso_total_kg > 0
 })
 
+// Função para mostrar alerta de prejuízo
+const showPrejuizoAlert = () => {
+  if (lucroLiquido.value < 0) {
+    alert(`⚠️ ATENÇÃO: Prejuízo detectado!\n\nPrejuízo: ${lucroLiquidoFormatted.value}\nReceita: ${receitaBrutaFormatted.value}\nCustos: ${custosTotaisFormatted.value}\n\nRevise os custos e preços para melhorar a rentabilidade.`)
+  }
+}
+
 // Emitir validação
 watch(isValid, (valid) => {
   emit('validate', valid)
 }, { immediate: true })
+
+// Validação automática de peso quando dados mudarem
+watch([() => props.formData.peso_total_kg, () => props.formData.produtos], () => {
+  // Aguarda um pequeno delay para garantir que todos os dados foram atualizados
+  setTimeout(() => {
+    validarPeso()
+  }, 500)
+}, { deep: true })
 </script>
 
 <style scoped>
@@ -581,18 +641,29 @@ watch(isValid, (valid) => {
 }
 
 .financeiro-item.receita {
-  background: linear-gradient(135deg, #10B981, #059669);
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
   color: white;
 }
 
 .financeiro-item.custo {
-  background: linear-gradient(135deg, #F59E0B, #D97706);
+  background: linear-gradient(135deg, #DC2626, #B91C1C);
   color: white;
 }
 
 .financeiro-item.lucro {
-  background: linear-gradient(135deg, var(--primary-red), #B91C1C);
+  background: linear-gradient(135deg, #10B981, #059669);
   color: white;
+}
+
+.financeiro-item.prejuizo {
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: white;
+  cursor: pointer;
+}
+
+.financeiro-item.prejuizo:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 .financeiro-label {
@@ -722,10 +793,111 @@ watch(isValid, (valid) => {
   font-size: 1rem;
 }
 
+/* Validação de Peso */
+.validacao-peso {
+  background: linear-gradient(135deg, var(--bg-accent) 0%, rgba(59, 130, 246, 0.05) 100%);
+}
+
+.peso-comparacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.peso-item {
+  text-align: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid var(--border-light);
+  min-width: 120px;
+}
+
+.peso-valor {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-blue);
+  margin-bottom: 0.5rem;
+}
+
+.peso-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.peso-seta {
+  font-size: 1.5rem;
+  color: var(--text-muted);
+  font-weight: bold;
+}
+
+.peso-diferenca {
+  text-align: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid var(--border-light);
+  min-width: 120px;
+  transition: all 0.3s ease;
+}
+
+.peso-diferenca.alerta {
+  border-color: #F59E0B;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.peso-diferenca.alerta .diferenca-valor {
+  color: #D97706;
+}
+
+.diferenca-valor {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.diferenca-label {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.btn-validar {
+  display: block;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-validar:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .etapa-container {
     padding: 1rem;
+  }
+  
+  .peso-comparacao {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .peso-seta {
+    transform: rotate(90deg);
   }
   
   .dados-grid {
