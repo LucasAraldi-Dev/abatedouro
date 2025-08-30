@@ -1,0 +1,11 @@
+# Python
+servidor/.venv/
+servidor/__pycache__/
+*.pyc
+
+# Node
+interface/node_modules/
+interface/.vite/
+
+# Env
+.env

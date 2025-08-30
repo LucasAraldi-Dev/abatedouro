@@ -1,0 +1,32 @@
+[{
+  "_id": {
+    "$oid": "68b21c660a65fa7ef6126ba4"
+  },
+  "funcionarios": 8000,
+  "agua": 2000,
+  "energia": 6000,
+  "embalagem": 3000,
+  "refeicao": 450,
+  "materiais_limpeza": 150,
+  "gelo": 0,
+  "horas_extras": 600,
+  "amonia": 0,
+  "epi": 0,
+  "manutencao": 1000,
+  "lenha_caldeira": 800,
+  "diaristas": 980,
+  "depreciacao": 1000,
+  "recisao": 750,
+  "ferias": 888.5,
+  "inss": 1600,
+  "frango_morto_plataforma": 0,
+  "escaldagem_eviceracao": 0,
+  "pe_graxaria": 0,
+  "descarte": 0,
+  "updated_at": {
+    "$date": "2025-08-29T19:07:43.053Z"
+  },
+  "created_at": {
+    "$date": "2025-08-29T18:32:22.735Z"
+  }
+}]

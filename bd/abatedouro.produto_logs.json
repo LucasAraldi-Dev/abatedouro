@@ -1,0 +1,51 @@
+[{
+  "_id": {
+    "$oid": "68b0daa853c3275b6f2fb047"
+  },
+  "produto_id": {
+    "$oid": "68b0c8d3968ff85842507320"
+  },
+  "tipo_alteracao": "Atualização de Preço",
+  "campo_alterado": "preco_kg",
+  "valor_anterior": "14.5",
+  "valor_novo": "14.55",
+  "data_alteracao": {
+    "$date": "2025-08-28T19:39:36.721Z"
+  },
+  "usuario": "Sistema",
+  "observacoes": null
+},
+{
+  "_id": {
+    "$oid": "68b0db5e53c3275b6f2fb048"
+  },
+  "produto_id": {
+    "$oid": "68b0c8d3968ff85842507320"
+  },
+  "tipo_alteracao": "Atualização de Preço",
+  "campo_alterado": "preco_kg",
+  "valor_anterior": "14.55",
+  "valor_novo": "14.56",
+  "data_alteracao": {
+    "$date": "2025-08-28T19:42:38.690Z"
+  },
+  "usuario": "Sistema",
+  "observacoes": null
+},
+{
+  "_id": {
+    "$oid": "68b0dc2753c3275b6f2fb049"
+  },
+  "produto_id": {
+    "$oid": "68b0c8d3968ff85842507320"
+  },
+  "tipo_alteracao": "Atualização de Preço",
+  "campo_alterado": "preco_kg",
+  "valor_anterior": "14.56",
+  "valor_novo": "14.5",
+  "data_alteracao": {
+    "$date": "2025-08-28T19:45:59.259Z"
+  },
+  "usuario": "Sistema",
+  "observacoes": null
+}]

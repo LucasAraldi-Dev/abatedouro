@@ -1,0 +1,468 @@
+[{
+  "_id": {
+    "$oid": "68b0e56353c3275b6f2fb04a"
+  },
+  "nome": "PEITO",
+  "tipo": "Peito",
+  "preco_kg": 14.5,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:25:23.719Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0e5ac53c3275b6f2fb04b"
+  },
+  "nome": "COXA C SOBRE",
+  "tipo": "Coxa",
+  "preco_kg": 10.5,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:26:36.765Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0e5c153c3275b6f2fb04c"
+  },
+  "nome": "ASA",
+  "tipo": "Asa",
+  "preco_kg": 16,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:26:57.928Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0e5cf53c3275b6f2fb04d"
+  },
+  "nome": "FILÉ DE PEITO",
+  "tipo": "Peito",
+  "preco_kg": 19.99,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:27:11.242Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0e60153c3275b6f2fb04e"
+  },
+  "nome": "SASSAMI",
+  "tipo": "Peito",
+  "preco_kg": 19.8,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:28:01.723Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0e61653c3275b6f2fb04f"
+  },
+  "nome": "COXINHA DA ASA",
+  "tipo": "Asa",
+  "preco_kg": 17,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:28:22.540Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0e62453c3275b6f2fb050"
+  },
+  "nome": "MEIO DA ASA COM PONTA",
+  "tipo": "Asa",
+  "preco_kg": 15,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:28:36.213Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0e9d753c3275b6f2fb051"
+  },
+  "nome": "PERTENCE",
+  "tipo": "Miúdos",
+  "preco_kg": 2.49,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:44:23.857Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0e9e753c3275b6f2fb052"
+  },
+  "nome": "MOELA",
+  "tipo": "Miúdos",
+  "preco_kg": 9.5,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:44:39.054Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0e9f153c3275b6f2fb053"
+  },
+  "nome": "CORAÇÃO",
+  "tipo": "Miúdos",
+  "preco_kg": 30,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:44:49.133Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0e9ff53c3275b6f2fb054"
+  },
+  "nome": "FÍGADO",
+  "tipo": "Miúdos",
+  "preco_kg": 8,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:45:03.177Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0ea0f53c3275b6f2fb055"
+  },
+  "nome": "PELE",
+  "tipo": "Outros",
+  "preco_kg": 3.5,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:45:19.585Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0ea2053c3275b6f2fb056"
+  },
+  "nome": "CABEÇA",
+  "tipo": "Outros",
+  "preco_kg": 1.99,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:45:36.642Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0ea2f53c3275b6f2fb057"
+  },
+  "nome": "PÉS",
+  "tipo": "Miúdos",
+  "preco_kg": 4.5,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:45:51.263Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0ea3d53c3275b6f2fb058"
+  },
+  "nome": "SOBRA",
+  "tipo": "Outros",
+  "preco_kg": 10,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-28T23:46:05.960Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0ee9a53c3275b6f2fb059"
+  },
+  "nome": "PASSARINHA",
+  "tipo": "Outros",
+  "preco_kg": 9.49,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:04:42.068Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0eea653c3275b6f2fb05a"
+  },
+  "nome": "PESCOÇO",
+  "tipo": "Miúdos",
+  "preco_kg": 3.99,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:04:54.923Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0eeb153c3275b6f2fb05b"
+  },
+  "nome": "COXA",
+  "tipo": "Coxa",
+  "preco_kg": 10.49,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:05:05.552Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0eebd53c3275b6f2fb05c"
+  },
+  "nome": "SOBRECOXA",
+  "tipo": "Sobrecoxa",
+  "preco_kg": 10.49,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:05:17.851Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0ef6953c3275b6f2fb05d"
+  },
+  "nome": "FRANGO INTEIRO",
+  "tipo": "Congelado",
+  "preco_kg": 10,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:08:09.580Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0ef7253c3275b6f2fb05e"
+  },
+  "nome": "FRANGO INTEIRO ",
+  "tipo": "Resfriado",
+  "preco_kg": 10.3,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:08:18.689Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0ef8253c3275b6f2fb05f"
+  },
+  "nome": "CARCAÇA 0,7",
+  "tipo": "Carcaça",
+  "preco_kg": 13,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:08:34.807Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0ef9353c3275b6f2fb060"
+  },
+  "nome": "CARCAÇA 0,8",
+  "tipo": "Carcaça",
+  "preco_kg": 13,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:08:51.918Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0efad53c3275b6f2fb061"
+  },
+  "nome": "CARCAÇA 0,9",
+  "tipo": "Carcaça",
+  "preco_kg": 13,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:09:17.573Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0efbc53c3275b6f2fb062"
+  },
+  "nome": "CARCAÇA 1,0",
+  "tipo": "Carcaça",
+  "preco_kg": 13,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:09:32.752Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0efc853c3275b6f2fb063"
+  },
+  "nome": "CARCAÇA 1,1",
+  "tipo": "Carcaça",
+  "preco_kg": 13,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:09:44.070Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0efd253c3275b6f2fb064"
+  },
+  "nome": "CARCAÇA 1,2",
+  "tipo": "Carcaça",
+  "preco_kg": 13.3,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:09:54.769Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0efe053c3275b6f2fb065"
+  },
+  "nome": "CARCAÇA 1,3",
+  "tipo": "Carcaça",
+  "preco_kg": 13.3,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:10:08.591Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0efed53c3275b6f2fb066"
+  },
+  "nome": "CARCAÇA 1,4",
+  "tipo": "Carcaça",
+  "preco_kg": 13,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:10:21.762Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0eff953c3275b6f2fb067"
+  },
+  "nome": "CARCAÇA 1,5",
+  "tipo": "Carcaça",
+  "preco_kg": 13,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:10:33.326Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0f00153c3275b6f2fb068"
+  },
+  "nome": "CARCAÇA 1,6",
+  "tipo": "Carcaça",
+  "preco_kg": 12.9,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:10:41.049Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0f01153c3275b6f2fb069"
+  },
+  "nome": "CARCAÇA 1,7",
+  "tipo": "Carcaça",
+  "preco_kg": 12.9,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:10:57.521Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0f01d53c3275b6f2fb06a"
+  },
+  "nome": "CARCAÇA 1,8 ",
+  "tipo": "Carcaça",
+  "preco_kg": 12.9,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:11:09.376Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0f02553c3275b6f2fb06b"
+  },
+  "nome": "CARCAÇA 1,9",
+  "tipo": "Carcaça",
+  "preco_kg": 12.9,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:11:17.390Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0f05253c3275b6f2fb06c"
+  },
+  "nome": "SAMBICA",
+  "tipo": "Asa",
+  "preco_kg": 7.5,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:12:02.155Z"
+  },
+  "updated_at": null
+},
+{
+  "_id": {
+    "$oid": "68b0f08253c3275b6f2fb06d"
+  },
+  "nome": "COSTELINHA",
+  "tipo": "Outros",
+  "preco_kg": 4.99,
+  "unidade_origem": "Unidade Belo Jardim",
+  "created_at": {
+    "$date": "2025-08-29T00:12:50.806Z"
+  },
+  "updated_at": null
+}]
