@@ -45,129 +45,61 @@ const dadosFiltrados = computed(() => {
   return { lotesFiltrados, produtosFiltrados }
 })
 
-// Métricas computadas específicas para abatedouro
+// Métricas zeradas para desenvolvimento
 const metricas = computed(() => {
-  const { lotesFiltrados, produtosFiltrados } = dadosFiltrados.value
-  
-  const totalLotes = lotesFiltrados.length
-  const totalProdutos = produtosFiltrados.length
-  
-  const totalAves = lotesFiltrados.reduce((sum, lote) => sum + lote.quantidade_aves, 0)
-  const pesoTotalLotes = lotesFiltrados.reduce((sum, lote) => sum + lote.peso_total_kg, 0)
-  const pesoTotalProdutos = produtosFiltrados.reduce((sum, produto) => sum + produto.peso_kg, 0)
-  const valorTotalProdutos = produtosFiltrados.reduce((sum, produto) => sum + (produto.peso_kg * produto.preco_kg), 0)
-  
-  // Métricas específicas de abatedouro
-  const custoTotalAves = 129348.00 // Baseado na imagem - custo total de aves vivas
-  const custoAbatePorKg = 0.76 // Baseado na imagem - custo de abate por kg
-  const lucroPorAve = 3.20 // Baseado na imagem - lucro por ave
-  const lucroTotal = totalAves * lucroPorAve
-  const rendimentoAbate = pesoTotalProdutos > 0 ? (pesoTotalProdutos / pesoTotalLotes) * 100 : 0
-  
-  // Separação por tipo de ave (baseado na imagem)
-  const frangosCorte = lotesFiltrados.filter(lote => lote.tipo_ave?.toLowerCase().includes('frango')).reduce((sum, lote) => sum + lote.quantidade_aves, 0)
-  const galinhasPoedeiras = lotesFiltrados.filter(lote => lote.tipo_ave?.toLowerCase().includes('galinha')).reduce((sum, lote) => sum + lote.quantidade_aves, 0)
-  
-  const mediaAvesPorLote = totalLotes > 0 ? totalAves / totalLotes : 0
-  const mediaPesoPorLote = totalLotes > 0 ? pesoTotalLotes / totalLotes : 0
-  const precoMedioKg = pesoTotalProdutos > 0 ? valorTotalProdutos / pesoTotalProdutos : 0
-  
   return {
-    totalLotes,
-    totalProdutos,
-    totalAves,
-    frangosCorte,
-    galinhasPoedeiras,
-    pesoTotalLotes,
-    pesoTotalProdutos,
-    valorTotalProdutos,
-    custoTotalAves,
-    custoAbatePorKg,
-    lucroPorAve,
-    lucroTotal,
-    rendimentoAbate,
-    mediaAvesPorLote,
-    mediaPesoPorLote,
-    precoMedioKg
+    totalLotes: 0,
+    totalProdutos: 0,
+    totalAves: 0,
+    frangosCorte: 0,
+    galinhasPoedeiras: 0,
+    pesoTotalLotes: 0,
+    pesoTotalProdutos: 0,
+    valorTotalProdutos: 0,
+    custoTotalAves: 0,
+    custoAbatePorKg: 0,
+    lucroPorAve: 0,
+    lucroTotal: 0,
+    rendimentoAbate: 0,
+    mediaAvesPorLote: 0,
+    mediaPesoPorLote: 0,
+    precoMedioKg: 0
   }
 })
 
 // Distribuição por unidade removida conforme solicitado
 
-// Distribuição por tipo de ave
+// Distribuição zerada para desenvolvimento
 const distribuicaoTiposAve = computed(() => {
-  const { lotesFiltrados } = dadosFiltrados.value
-  const tipos = new Map<string, { lotes: number, aves: number }>()
-  
-  lotesFiltrados.forEach(lote => {
-    const tipo = lote.tipo_ave || 'Não especificado'
-    if (!tipos.has(tipo)) {
-      tipos.set(tipo, { lotes: 0, aves: 0 })
-    }
-    const data = tipos.get(tipo)!
-    data.lotes++
-    data.aves += lote.quantidade_aves
-  })
-  
-  return Array.from(tipos.entries()).map(([nome, data]) => ({
-    nome,
-    ...data,
-    percentualAves: metricas.value.totalAves > 0 ? (data.aves / metricas.value.totalAves) * 100 : 0
-  }))
+  return []
 })
 
-// Distribuição por tipo de produto
+// Distribuição zerada para desenvolvimento
 const distribuicaoTiposProduto = computed(() => {
-  const { produtosFiltrados } = dadosFiltrados.value
-  const tipos = new Map<string, { quantidade: number, peso: number, valor: number }>()
-  
-  produtosFiltrados.forEach(produto => {
-    const tipo = produto.tipo
-    if (!tipos.has(tipo)) {
-      tipos.set(tipo, { quantidade: 0, peso: 0, valor: 0 })
-    }
-    const data = tipos.get(tipo)!
-    data.quantidade++
-    data.peso += produto.peso_kg
-    data.valor += produto.peso_kg * produto.preco_kg
-  })
-  
-  return Array.from(tipos.entries()).map(([nome, data]) => ({
-    nome,
-    ...data,
-    percentualValor: metricas.value.valorTotalProdutos > 0 ? (data.valor / metricas.value.valorTotalProdutos) * 100 : 0
-  }))
+  return []
 })
 
-// Lotes recentes (últimos 5)
+// Listas zeradas para desenvolvimento
 const lotesRecentes = computed(() => {
-  const { lotesFiltrados } = dadosFiltrados.value
-  return [...lotesFiltrados]
-    .sort((a, b) => new Date(b.data_abate).getTime() - new Date(a.data_abate).getTime())
-    .slice(0, 5)
+  return []
 })
 
-// Produtos mais valiosos (top 5)
 const produtosMaisValiosos = computed(() => {
-  const { produtosFiltrados } = dadosFiltrados.value
-  return [...produtosFiltrados]
-    .sort((a, b) => (b.peso_kg * b.preco_kg) - (a.peso_kg * a.preco_kg))
-    .slice(0, 5)
+  return []
 })
 
-// Métodos
+// Métodos - dados zerados para desenvolvimento
 const loadData = async () => {
   try {
     loading.value = true
     error.value = ''
     
-    const [lotesResponse, produtosResponse] = await Promise.all([
-      getLotesAbate(),
-      getProdutos()
-    ])
+    // Simular carregamento sem fazer chamadas ao backend
+    await new Promise(resolve => setTimeout(resolve, 500))
     
-    lotes.value = lotesResponse
-    produtos.value = produtosResponse
+    // Zerar todos os dados
+    lotes.value = []
+    produtos.value = []
   } catch (err) {
     error.value = 'Erro ao carregar dados do dashboard'
     console.error('Erro ao carregar dados:', err)
@@ -302,6 +234,17 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- Aviso de Desenvolvimento -->
+    <div class="development-notice">
+      <div class="notice-icon">🚧</div>
+      <div class="notice-content">
+        <h4 class="notice-title">Funcionalidades em Desenvolvimento</h4>
+        <p class="notice-message">
+          Esta página está em desenvolvimento. Todos os dados estão temporariamente zerados enquanto implementamos as funcionalidades completas do sistema.
+        </p>
+      </div>
+    </div>
+
     <!-- Filtros de Data -->
     <section class="filters-section">
       <h3 class="section-title">Filtros por Data</h3>
@@ -430,7 +373,7 @@ onMounted(() => {
               <span class="cost-icon">🏭</span>
               <span class="cost-title">Mão de Obra</span>
             </div>
-            <div class="cost-value">{{ formatCurrency(500.00) }}</div>
+            <div class="cost-value">{{ formatCurrency(0.00) }}</div>
             <div class="cost-description">Custos com pessoal</div>
           </div>
           
@@ -439,7 +382,7 @@ onMounted(() => {
               <span class="cost-icon">💧</span>
               <span class="cost-title">Água</span>
             </div>
-            <div class="cost-value">{{ formatCurrency(300.00) }}</div>
+            <div class="cost-value">{{ formatCurrency(0.00) }}</div>
             <div class="cost-description">Consumo de água</div>
           </div>
           
@@ -448,7 +391,7 @@ onMounted(() => {
               <span class="cost-icon">⚡</span>
               <span class="cost-title">Energia</span>
             </div>
-            <div class="cost-value">{{ formatCurrency(7000.00) }}</div>
+            <div class="cost-value">{{ formatCurrency(0.00) }}</div>
             <div class="cost-description">Energia elétrica</div>
           </div>
           
@@ -457,7 +400,7 @@ onMounted(() => {
               <span class="cost-icon">📦</span>
               <span class="cost-title">Embalagem</span>
             </div>
-            <div class="cost-value">{{ formatCurrency(2000.00) }}</div>
+            <div class="cost-value">{{ formatCurrency(0.00) }}</div>
             <div class="cost-description">Material de embalagem</div>
           </div>
           
@@ -466,7 +409,7 @@ onMounted(() => {
               <span class="cost-icon">🧊</span>
               <span class="cost-title">Gelo</span>
             </div>
-            <div class="cost-value">{{ formatCurrency(500.00) }}</div>
+            <div class="cost-value">{{ formatCurrency(0.00) }}</div>
             <div class="cost-description">Refrigeração</div>
           </div>
           
@@ -475,7 +418,7 @@ onMounted(() => {
               <span class="cost-icon">🔧</span>
               <span class="cost-title">Manutenção</span>
             </div>
-            <div class="cost-value">{{ formatCurrency(300.00) }}</div>
+            <div class="cost-value">{{ formatCurrency(0.00) }}</div>
             <div class="cost-description">Manutenção equipamentos</div>
           </div>
         </div>
@@ -1119,6 +1062,54 @@ onMounted(() => {
   
   .filter-actions {
     justify-content: center;
+  }
+}
+
+/* Aviso de Desenvolvimento */
+.development-notice {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border: 2px solid #F59E0B;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.notice-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.notice-content {
+  flex: 1;
+}
+
+.notice-title {
+  color: #92400E;
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.notice-message {
+  color: #78350F;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .development-notice {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+  
+  .notice-icon {
+    font-size: 1.5rem;
   }
 }
 </style>
