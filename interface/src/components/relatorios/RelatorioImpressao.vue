@@ -130,8 +130,8 @@
           <span class="valor">{{ lucroFrangoFormatted }} ({{ percentualLucroFrango }}%)</span>
         </div>
         <div class="indicador-item">
-          <span class="label">Lucro do dia + Margem:</span>
-          <span class="valor">{{ lucroTotalFormatted }} ({{ margemLucroFormatted }}) - {{ percentualLucroTotal }}%</span>
+          <span class="label">Lucro do dia:</span>
+          <span class="valor">{{ lucroTotalFormatted }} ({{ margemLucroFormatted }})</span>
         </div>
       </div>
     </div>

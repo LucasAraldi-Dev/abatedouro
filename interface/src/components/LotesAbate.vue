@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { getAbatesCompletos, createAbateCompleto, updateAbateCompleto, deleteAbateCompleto, getAbateCompleto } from '../services/api'
+import { getAbatesCompletos, createAbateCompleto, updateAbateCompleto, deleteAbateCompleto, getAbateCompleto, deleteLoteAbate } from '../services/api'
 import BuscaAvancada from './BuscaAvancada.vue'
 import ModalLancamentoAbate from './ModalLancamentoAbate.vue'
 import { exportToCSV, exportToPDF, formatDate, formatCurrency, formatWeight, type ExportColumn } from '../utils/exportUtils'

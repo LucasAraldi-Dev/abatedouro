@@ -2168,10 +2168,23 @@ const imprimirRelatorio = () => {
 
 /* Estilos para impressão do modal */
 @media print {
+  /* Ocultar tudo da página */
+  body * {
+    visibility: hidden;
+  }
+  
+  /* Mostrar apenas o conteúdo do relatório */
+  .modal-impressao,
+  .modal-impressao * {
+    visibility: visible;
+  }
+  
   .modal-impressao {
     position: static;
     background: none;
     padding: 0;
+    width: 100%;
+    height: auto;
   }
   
   .modal-content {
@@ -2180,6 +2193,7 @@ const imprimirRelatorio = () => {
     max-height: none;
     box-shadow: none;
     border-radius: 0;
+    background: white;
   }
   
   .modal-header {
