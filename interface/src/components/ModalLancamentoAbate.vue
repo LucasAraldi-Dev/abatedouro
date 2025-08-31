@@ -341,13 +341,20 @@ watch(() => props.editingLote, (newLote) => {
     // Mapear dados do backend para o formato do frontend
     const mappedData = {
       ...newLote,
+      // Converter data_abate do formato ISO para YYYY-MM-DD
+      data_abate: newLote.data_abate ? new Date(newLote.data_abate).toISOString().split('T')[0] : '',
       // Mapear horários
       hora_inicio: newLote.horarios?.hora_inicio || '',
       hora_termino: newLote.horarios?.hora_termino || '',
       intervalo_minutos: newLote.horarios?.intervalo_minutos || 0,
       horas_trabalhadas: newLote.horarios?.horas_trabalhadas || 0,
-      // Garantir que produtos seja um array
-      produtos: newLote.produtos || [],
+      // Mapear produtos do backend para o formato do frontend
+      produtos: (newLote.produtos || []).map(produto => ({
+        ...produto,
+        quantidade: produto.peso_kg || produto.quantidade || 0,
+        preco_unitario: produto.preco_kg || produto.preco_unitario || 0,
+        total: produto.valor_total || produto.total || 0
+      })),
       // Garantir que despesas_fixas tenha a estrutura correta
       despesas_fixas: {
         funcionarios: newLote.despesas_fixas?.funcionarios || 0,
