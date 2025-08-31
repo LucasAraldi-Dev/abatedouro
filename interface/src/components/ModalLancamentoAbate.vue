@@ -338,7 +338,43 @@ const resetForm = () => {
 // Watch para carregar dados de edição
 watch(() => props.editingLote, (newLote) => {
   if (newLote) {
-    Object.assign(formData.value, newLote)
+    // Mapear dados do backend para o formato do frontend
+    const mappedData = {
+      ...newLote,
+      // Mapear horários
+      hora_inicio: newLote.horarios?.hora_inicio || '',
+      hora_termino: newLote.horarios?.hora_termino || '',
+      intervalo_minutos: newLote.horarios?.intervalo_minutos || 0,
+      horas_trabalhadas: newLote.horarios?.horas_trabalhadas || 0,
+      // Garantir que produtos seja um array
+      produtos: newLote.produtos || [],
+      // Garantir que despesas_fixas tenha a estrutura correta
+      despesas_fixas: {
+        funcionarios: newLote.despesas_fixas?.funcionarios || 0,
+        agua: newLote.despesas_fixas?.agua || 0,
+        energia: newLote.despesas_fixas?.energia || 0,
+        embalagem: newLote.despesas_fixas?.embalagem || 0,
+        refeicao: newLote.despesas_fixas?.refeicao || 0,
+        materiais_limpeza: newLote.despesas_fixas?.materiais_limpeza || 0,
+        gelo: newLote.despesas_fixas?.gelo || 0,
+        horas_extras: newLote.despesas_fixas?.horas_extras || 0,
+        amonia: newLote.despesas_fixas?.amonia || 0,
+        epi: newLote.despesas_fixas?.epi || 0,
+        manutencao: newLote.despesas_fixas?.manutencao || 0,
+        lenha_caldeira: newLote.despesas_fixas?.lenha_caldeira || 0,
+        diaristas: newLote.despesas_fixas?.diaristas || 0,
+        depreciacao: newLote.despesas_fixas?.depreciacao || 0,
+        recisao: newLote.despesas_fixas?.recisao || 0,
+        ferias: newLote.despesas_fixas?.ferias || 0,
+        inss: newLote.despesas_fixas?.inss || 0,
+        frango_morto_plataforma: newLote.despesas_fixas?.frango_morto_plataforma || 0,
+        escaldagem_eviceracao: newLote.despesas_fixas?.escaldagem_eviceracao || 0,
+        pe_graxaria: newLote.despesas_fixas?.pe_graxaria || 0,
+        descarte: newLote.despesas_fixas?.descarte || 0
+      }
+    }
+    
+    Object.assign(formData.value, mappedData)
   }
 }, { immediate: true })
 

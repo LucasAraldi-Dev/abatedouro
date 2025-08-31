@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { getLotesAbate, createLoteAbate, updateLoteAbate, deleteLoteAbate } from '../services/api'
+import { getAbatesCompletos, createAbateCompleto, updateAbateCompleto, deleteAbateCompleto, getAbateCompleto } from '../services/api'
 import BuscaAvancada from './BuscaAvancada.vue'
 import ModalLancamentoAbate from './ModalLancamentoAbate.vue'
 import { exportToCSV, exportToPDF, formatDate, formatCurrency, formatWeight, type ExportColumn } from '../utils/exportUtils'
@@ -227,28 +227,77 @@ const lotesFiltrados = computed(() => {
 // Função para lidar com dados salvos do modal
 const handleSave = async (dadosFormulario: any) => {
   try {
+    // Preparar dados para a API de abates completos
+    const abateData = {
+      data_abate: dadosFormulario.data_abate,
+      quantidade_aves: dadosFormulario.quantidade_aves,
+      valor_kg_vivo: dadosFormulario.valor_kg_vivo,
+      peso_total_kg: dadosFormulario.peso_total_kg,
+      peso_medio_ave: dadosFormulario.peso_medio_ave,
+      valor_total: dadosFormulario.valor_total,
+      unidade: dadosFormulario.unidade,
+      tipo_ave: dadosFormulario.tipo_ave,
+      observacoes: dadosFormulario.observacoes,
+      horarios: {
+        hora_inicio: dadosFormulario.hora_inicio,
+        hora_termino: dadosFormulario.hora_termino,
+        intervalo_minutos: dadosFormulario.intervalo_minutos,
+        horas_trabalhadas: dadosFormulario.horas_trabalhadas
+      },
+      produtos: dadosFormulario.produtos || [],
+      despesas_fixas: {
+        energia: dadosFormulario.despesas_fixas?.energia || 0,
+        agua: dadosFormulario.despesas_fixas?.agua || 0,
+        gas: dadosFormulario.despesas_fixas?.gas || 0,
+        outros: (
+          (dadosFormulario.despesas_fixas?.funcionarios || 0) +
+          (dadosFormulario.despesas_fixas?.embalagem || 0) +
+          (dadosFormulario.despesas_fixas?.refeicao || 0) +
+          (dadosFormulario.despesas_fixas?.materiais_limpeza || 0) +
+          (dadosFormulario.despesas_fixas?.gelo || 0) +
+          (dadosFormulario.despesas_fixas?.horas_extras || 0) +
+          (dadosFormulario.despesas_fixas?.amonia || 0) +
+          (dadosFormulario.despesas_fixas?.epi || 0) +
+          (dadosFormulario.despesas_fixas?.manutencao || 0) +
+          (dadosFormulario.despesas_fixas?.lenha_caldeira || 0) +
+          (dadosFormulario.despesas_fixas?.diaristas || 0) +
+          (dadosFormulario.despesas_fixas?.depreciacao || 0) +
+          (dadosFormulario.despesas_fixas?.recisao || 0) +
+          (dadosFormulario.despesas_fixas?.ferias || 0) +
+          (dadosFormulario.despesas_fixas?.inss || 0) +
+          (dadosFormulario.despesas_fixas?.frango_morto_plataforma || 0) +
+          (dadosFormulario.despesas_fixas?.escaldagem_eviceracao || 0) +
+          (dadosFormulario.despesas_fixas?.pe_graxaria || 0) +
+          (dadosFormulario.despesas_fixas?.descarte || 0)
+        ),
+        total: Object.values(dadosFormulario.despesas_fixas || {}).reduce((sum: number, val: any) => sum + (Number(val) || 0), 0)
+      },
+      peso_inteiro_abatido: dadosFormulario.peso_inteiro_abatido,
+      preco_venda_kg: dadosFormulario.preco_venda_kg
+    }
+
     if (editingLote.value) {
-      await updateLoteAbate(editingLote.value.id, dadosFormulario)
-      showSuccess('Lote atualizado com sucesso!')
+      await updateAbateCompleto(editingLote.value._id, abateData)
+      showSuccess('Abate atualizado com sucesso!')
     } else {
-      await createLoteAbate(dadosFormulario)
-      showSuccess('Lote criado com sucesso!')
+      await createAbateCompleto(abateData)
+      showSuccess('Abate criado com sucesso!')
     }
     closeModal()
     await loadLotes()
   } catch (error) {
-    console.error('Erro ao salvar lote:', error)
-    showError('Erro ao salvar lote')
+    console.error('Erro ao salvar abate:', error)
+    showError('Erro ao salvar abate')
   }
 }
 
 const loadLotes = async () => {
   loading.value = true
   try {
-    const response = await getLotesAbate({ limit: 1000 })
+    const response = await getAbatesCompletos({ limit: 1000 })
     lotes.value = response
   } catch (error) {
-    console.error('Erro ao carregar lotes:', error)
+    console.error('Erro ao carregar abates:', error)
     showError('Erro ao carregar abates')
   } finally {
     loading.value = false
@@ -291,9 +340,16 @@ const exportarLotes = (formato: 'csv' | 'pdf' = 'csv') => {
 
 
 
-const editLote = (lote: LoteAbate) => {
-  editingLote.value = lote
-  showCreateForm.value = true
+const editLote = async (lote: LoteAbate) => {
+  try {
+    // Buscar dados completos do abate para edição
+    const abateCompleto = await getAbateCompleto(lote.id)
+    editingLote.value = abateCompleto
+    showCreateForm.value = true
+  } catch (error) {
+    console.error('Erro ao carregar dados do abate para edição:', error)
+    showError('Erro ao carregar dados do abate')
+  }
 }
 
 const deleteLoteConfirm = async (lote: LoteAbate) => {

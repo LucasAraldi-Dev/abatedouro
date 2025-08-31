@@ -1,8 +1,38 @@
 <template>
   <div class="etapa-container">
     <div class="etapa-header">
-      <h3>Etapa 4: Resumo Final</h3>
-      <p>Revise todos os dados antes de finalizar o lançamento</p>
+      <h3>Resumo Final</h3>
+      <p>Revise os dados antes de finalizar</p>
+    </div>
+
+    <!-- Seção de Gráficos -->
+    <div class="graficos-section">
+      <h4>📊 Análise Visual</h4>
+      <div class="graficos-grid">
+        <!-- Gráfico de Distribuição de Custos -->
+        <div class="grafico-card">
+          <h5>Distribuição de Custos</h5>
+          <canvas ref="custosChart" width="300" height="200"></canvas>
+        </div>
+        
+        <!-- Gráfico de Indicadores de Performance -->
+        <div class="grafico-card">
+          <h5>Indicadores de Performance</h5>
+          <canvas ref="performanceChart" width="300" height="200"></canvas>
+        </div>
+        
+        <!-- Gráfico de Rendimento -->
+        <div class="grafico-card">
+          <h5>Análise de Rendimento</h5>
+          <canvas ref="rendimentoChart" width="300" height="200"></canvas>
+        </div>
+        
+        <!-- Gráfico de Lucro por Categoria -->
+        <div class="grafico-card">
+          <h5>Análise de Lucro</h5>
+          <canvas ref="lucroChart" width="300" height="200"></canvas>
+        </div>
+      </div>
     </div>
 
     <div class="etapa-content">
@@ -147,45 +177,51 @@
         <h4>📊 Indicadores de Performance</h4>
         <div class="indicadores-grid">
           <div class="indicador-item">
-            <div class="indicador-valor">{{ custoKgFormatted }}</div>
-            <div class="indicador-label">Custo por Kg</div>
+            <div class="indicador-valor">{{ mediaValorKgProcessadoFormatted }}</div>
+            <div class="indicador-label">Média Valor do kg (processado)</div>
+            <div class="indicador-percent">{{ percentualMediaValorKg }}%</div>
           </div>
           <div class="indicador-item">
-            <div class="indicador-valor">{{ custoAveFormatted }}</div>
-            <div class="indicador-label">Custo por Ave</div>
+            <div class="indicador-valor">{{ custoKgRealFormatted }}</div>
+            <div class="indicador-label">Custo por kg (real final)</div>
+            <div class="indicador-percent">{{ percentualCustoKgReal }}%</div>
           </div>
           <div class="indicador-item">
-            <div class="indicador-valor">{{ margemLucroFormatted }}</div>
-            <div class="indicador-label">Margem de Lucro</div>
+            <div class="indicador-valor">{{ custoAveRealFormatted }}</div>
+            <div class="indicador-label">Custo por ave</div>
+            <div class="indicador-percent">{{ percentualCustoAve }}%</div>
           </div>
           <div class="indicador-item">
-            <div class="indicador-valor">{{ produtividadeFormatted }}</div>
-            <div class="indicador-label">Aves/Hora</div>
+            <div class="indicador-valor">{{ custoAbateKgFormatted }}</div>
+            <div class="indicador-label">Custos de abate por kg</div>
+            <div class="indicador-percent">{{ percentualCustoAbateKg }}%</div>
+          </div>
+          <div class="indicador-item">
+            <div class="indicador-valor">{{ custoFrangoFormatted }}</div>
+            <div class="indicador-label">Custo por frango</div>
+            <div class="indicador-percent">{{ percentualCustoFrango }}%</div>
+          </div>
+          <div class="indicador-item">
+            <div class="indicador-valor">{{ lucroKgFormatted }}</div>
+            <div class="indicador-label">Lucro por Kg</div>
+            <div class="indicador-percent">{{ percentualLucroKg }}%</div>
+          </div>
+          <div class="indicador-item">
+            <div class="indicador-valor">{{ lucroFrangoFormatted }}</div>
+            <div class="indicador-label">Lucro por frango</div>
+            <div class="indicador-percent">{{ percentualLucroFrango }}%</div>
+          </div>
+          <div class="indicador-item">
+            <div class="indicador-valor">{{ rendimentoPercentual }}%</div>
+            <div class="indicador-label">Rendimento ({{ formatWeight(rendimentoFinal) }})</div>
+            <div class="indicador-percent">{{ percentualRendimento }}%</div>
+          </div>
+          <div class="indicador-item destaque">
+            <div class="indicador-valor">{{ lucroTotalFormatted }}</div>
+            <div class="indicador-label">Lucro do dia (margem {{ margemLucroFormatted }}%)</div>
+            <div class="indicador-percent">{{ percentualLucroTotal }}%</div>
           </div>
         </div>
-      </div>
-
-      <!-- Validação de Peso -->
-      <div class="resumo-section validacao-peso">
-        <h4>⚖️ Controle de Peso</h4>
-        <div class="peso-comparacao">
-          <div class="peso-item">
-            <div class="peso-valor">{{ formatWeight(formData.peso_total_kg) }}</div>
-            <div class="peso-label">Peso Total Vivo</div>
-          </div>
-          <div class="peso-seta">→</div>
-          <div class="peso-item">
-            <div class="peso-valor">{{ formatWeight(pesoTotalProcessado) }}</div>
-            <div class="peso-label">Peso Total Processado</div>
-          </div>
-          <div class="peso-diferenca" :class="{ 'alerta': Math.abs((formData.peso_total_kg || 0) - pesoTotalProcessado) > 0.1 }">
-            <div class="diferenca-valor">{{ formatWeight(Math.abs((formData.peso_total_kg || 0) - pesoTotalProcessado)) }}</div>
-            <div class="diferenca-label">Diferença</div>
-          </div>
-        </div>
-        <button class="btn-validar" @click="validarPeso" type="button">
-          🔍 Verificar Pesos
-        </button>
       </div>
 
       <!-- Observações -->
@@ -195,14 +231,76 @@
           {{ formData.observacoes }}
         </div>
       </div>
+    </div>
 
+    <!-- Botão de Impressão -->
+    <div class="botao-impressao-section">
+      <button 
+        @click="abrirRelatorioImpressao" 
+        class="btn-impressao"
+        type="button"
+      >
+        🖨️ Gerar Relatório para Impressão
+      </button>
+    </div>
 
+    <!-- Modal do Relatório de Impressão -->
+    <div v-if="mostrarRelatorioImpressao" class="modal-impressao">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Relatório de Impressão</h3>
+          <div class="modal-actions">
+            <button @click="imprimirRelatorio" class="btn-imprimir">
+              🖨️ Imprimir
+            </button>
+            <button @click="fecharRelatorioImpressao" class="btn-fechar">
+              ✕ Fechar
+            </button>
+          </div>
+        </div>
+        <div class="modal-body">
+          <RelatorioImpressao 
+            :formData="formData"
+            :pesoTotalProcessado="pesoTotalProcessado"
+            :rendimentoFinal="rendimentoFinal"
+            :rendimentoPercentual="rendimentoPercentual"
+            :valorTotalProdutos="valorTotalProdutos"
+            :totalRecursosHumanos="totalRecursosHumanos"
+            :totalUtilidades="totalUtilidades"
+            :totalMateriais="totalMateriais"
+            :totalOperacionais="totalOperacionais"
+            :totalPerdas="totalPerdas"
+            :receitaBruta="receitaBruta"
+            :custosTotais="custosTotais"
+            :lucroLiquido="lucroLiquido"
+            :mediaValorKgProcessadoFormatted="mediaValorKgProcessadoFormatted"
+            :custoKgRealFormatted="custoKgRealFormatted"
+            :custoAveRealFormatted="custoAveRealFormatted"
+            :custoAbateKgFormatted="custoAbateKgFormatted"
+            :custoFrangoFormatted="custoFrangoFormatted"
+            :lucroKgFormatted="lucroKgFormatted"
+            :lucroFrangoFormatted="lucroFrangoFormatted"
+            :lucroTotalFormatted="lucroTotalFormatted"
+            :margemLucroFormatted="margemLucroFormatted"
+            :percentualMediaValorKg="percentualMediaValorKg"
+            :percentualCustoKgReal="percentualCustoKgReal"
+            :percentualCustoAve="percentualCustoAve"
+            :percentualCustoAbateKg="percentualCustoAbateKg"
+            :percentualCustoFrango="percentualCustoFrango"
+            :percentualLucroKg="percentualLucroKg"
+            :percentualLucroFrango="percentualLucroFrango"
+            :percentualLucroTotal="percentualLucroTotal"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { computed, watch, ref, onMounted, nextTick } from 'vue'
+import Chart from 'chart.js/auto'
+import RelatorioImpressao from '../relatorios/RelatorioImpressao.vue'
 
 // Props
 interface Props {
@@ -216,6 +314,21 @@ const props = defineProps<Props>()
 const emit = defineEmits<{
   'validate': [isValid: boolean]
 }>()
+
+// Refs para os gráficos
+const custosChart = ref<HTMLCanvasElement>()
+const performanceChart = ref<HTMLCanvasElement>()
+const rendimentoChart = ref<HTMLCanvasElement>()
+const lucroChart = ref<HTMLCanvasElement>()
+
+// Instâncias dos gráficos
+let custosChartInstance: Chart | null = null
+let performanceChartInstance: Chart | null = null
+let rendimentoChartInstance: Chart | null = null
+let lucroChartInstance: Chart | null = null
+
+// Estado do modal de impressão
+const mostrarRelatorioImpressao = ref(false)
 
 // Computed values para formatação
 const dataAbateFormatted = computed(() => {
@@ -379,34 +492,115 @@ const receitaBrutaFormatted = computed(() => formatCurrency(receitaBruta.value))
 const custosTotaisFormatted = computed(() => formatCurrency(custosTotais.value))
 const lucroLiquidoFormatted = computed(() => formatCurrency(lucroLiquido.value))
 
-// Indicadores de performance
-const custoKg = computed(() => {
-  // Usar peso dos produtos processados se disponível, senão peso total das aves
-  const pesoProcessado = valorTotalProdutos.value > 0 ? 
-    props.formData.produtos?.reduce((sum: number, produto: any) => sum + (produto.quantidade || 0), 0) || 0 : 0
-  const peso = pesoProcessado > 0 ? pesoProcessado : (props.formData.peso_total_kg || 0)
-  return peso > 0 ? custosTotais.value / peso : 0
+// Cálculos de Rendimento
+const rendimentoFinal = computed(() => {
+  const pesoVivo = props.formData.peso_total_kg || 0
+  const pesoProcessado = pesoTotalProcessado.value
+  return pesoProcessado // O rendimento é o peso processado
 })
 
-const custoAve = computed(() => {
+const rendimentoPercentual = computed(() => {
+  const pesoVivo = props.formData.peso_total_kg || 0
+  return pesoVivo > 0 ? ((rendimentoFinal.value / pesoVivo) * 100).toFixed(1) : '0.0'
+})
+
+// Novos Indicadores de Performance
+const mediaValorKgProcessado = computed(() => {
+  const pesoProcessado = pesoTotalProcessado.value
+  return pesoProcessado > 0 ? valorTotalProdutos.value / pesoProcessado : 0
+})
+
+const custoKgReal = computed(() => {
+  const pesoProcessado = pesoTotalProcessado.value
+  return pesoProcessado > 0 ? custosTotais.value / pesoProcessado : 0
+})
+
+const custoAveReal = computed(() => {
   const quantidade = props.formData.quantidade_aves || 0
   return quantidade > 0 ? custosTotais.value / quantidade : 0
+})
+
+const custoAbateKg = computed(() => {
+  // Custos de abate sem considerar a compra do frango
+  const pesoProcessado = pesoTotalProcessado.value
+  return pesoProcessado > 0 ? totalDespesas.value / pesoProcessado : 0
+})
+
+const custoFrango = computed(() => {
+  const quantidade = props.formData.quantidade_aves || 0
+  return quantidade > 0 ? totalDespesas.value / quantidade : 0
+})
+
+const lucroKg = computed(() => {
+  const pesoProcessado = pesoTotalProcessado.value
+  return pesoProcessado > 0 ? lucroLiquido.value / pesoProcessado : 0
+})
+
+const lucroFrango = computed(() => {
+  const quantidade = props.formData.quantidade_aves || 0
+  return quantidade > 0 ? lucroLiquido.value / quantidade : 0
+})
+
+const lucroTotal = computed(() => {
+  return lucroLiquido.value
 })
 
 const margemLucro = computed(() => {
   return receitaBruta.value > 0 ? (lucroLiquido.value / receitaBruta.value) * 100 : 0
 })
 
-const produtividade = computed(() => {
-  const horas = props.formData.horas_reais || 0
-  const quantidade = props.formData.quantidade_aves || 0
-  return horas > 0 ? quantidade / horas : 0
+// Formatação dos novos indicadores
+const mediaValorKgProcessadoFormatted = computed(() => formatCurrency(mediaValorKgProcessado.value))
+const custoKgRealFormatted = computed(() => formatCurrency(custoKgReal.value))
+const custoAveRealFormatted = computed(() => formatCurrency(custoAveReal.value))
+const custoAbateKgFormatted = computed(() => formatCurrency(custoAbateKg.value))
+const custoFrangoFormatted = computed(() => formatCurrency(custoFrango.value))
+const lucroKgFormatted = computed(() => formatCurrency(lucroKg.value))
+const lucroFrangoFormatted = computed(() => formatCurrency(lucroFrango.value))
+const lucroTotalFormatted = computed(() => formatCurrency(lucroTotal.value))
+const margemLucroFormatted = computed(() => `${margemLucro.value.toFixed(1)}%`)
+
+// Cálculos de percentual de participação
+const totalGeral = computed(() => {
+  return Math.abs(receitaBruta.value) + Math.abs(custosTotais.value)
 })
 
-const custoKgFormatted = computed(() => formatCurrency(custoKg.value))
-const custoAveFormatted = computed(() => formatCurrency(custoAve.value))
-const margemLucroFormatted = computed(() => `${margemLucro.value.toFixed(1)}%`)
-const produtividadeFormatted = computed(() => `${produtividade.value.toFixed(1)}`)
+const percentualMediaValorKg = computed(() => {
+  return totalGeral.value > 0 ? ((Math.abs(mediaValorKgProcessado.value * pesoTotalProcessado.value) / totalGeral.value) * 100).toFixed(1) : '0.0'
+})
+
+const percentualCustoKgReal = computed(() => {
+  return totalGeral.value > 0 ? ((Math.abs(custoKgReal.value * pesoTotalProcessado.value) / totalGeral.value) * 100).toFixed(1) : '0.0'
+})
+
+const percentualCustoAve = computed(() => {
+  return totalGeral.value > 0 ? ((Math.abs(custoAveReal.value * (props.formData.quantidade_aves || 0)) / totalGeral.value) * 100).toFixed(1) : '0.0'
+})
+
+const percentualCustoAbateKg = computed(() => {
+  return totalGeral.value > 0 ? ((Math.abs(custoAbateKg.value * pesoTotalProcessado.value) / totalGeral.value) * 100).toFixed(1) : '0.0'
+})
+
+const percentualCustoFrango = computed(() => {
+  return totalGeral.value > 0 ? ((Math.abs(custoFrango.value * (props.formData.quantidade_aves || 0)) / totalGeral.value) * 100).toFixed(1) : '0.0'
+})
+
+const percentualLucroKg = computed(() => {
+  return totalGeral.value > 0 ? ((Math.abs(lucroKg.value * pesoTotalProcessado.value) / totalGeral.value) * 100).toFixed(1) : '0.0'
+})
+
+const percentualLucroFrango = computed(() => {
+  return totalGeral.value > 0 ? ((Math.abs(lucroFrango.value * (props.formData.quantidade_aves || 0)) / totalGeral.value) * 100).toFixed(1) : '0.0'
+})
+
+const percentualLucroTotal = computed(() => {
+  return totalGeral.value > 0 ? ((Math.abs(lucroTotal.value) / totalGeral.value) * 100).toFixed(1) : '0.0'
+})
+
+const percentualRendimento = computed(() => {
+  const pesoVivo = props.formData.peso_total_kg || 0
+  return pesoVivo > 0 ? ((rendimentoFinal.value / pesoVivo) * 100).toFixed(1) : '0.0'
+})
 
 // Validação simples
 const isValid = computed(() => {
@@ -427,13 +621,261 @@ watch(isValid, (valid) => {
   emit('validate', valid)
 }, { immediate: true })
 
+// Função para criar gráfico de distribuição de custos
+const criarGraficoCustos = () => {
+  if (!custosChart.value) return
+  
+  if (custosChartInstance) {
+    custosChartInstance.destroy()
+  }
+  
+  const ctx = custosChart.value.getContext('2d')
+  if (!ctx) return
+  
+  custosChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Recursos Humanos', 'Utilidades', 'Materiais', 'Operacionais', 'Perdas'],
+      datasets: [{
+        data: [
+          totalRecursosHumanos.value,
+          totalUtilidades.value,
+          totalMateriais.value,
+          totalOperacionais.value,
+          totalPerdas.value
+        ],
+        backgroundColor: [
+          '#3B82F6',
+          '#10B981',
+          '#F59E0B',
+          '#8B5CF6',
+          '#EF4444'
+        ],
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 10,
+            font: {
+              size: 11
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
+// Função para criar gráfico de indicadores de performance
+const criarGraficoPerformance = () => {
+  if (!performanceChart.value) return
+  
+  if (performanceChartInstance) {
+    performanceChartInstance.destroy()
+  }
+  
+  const ctx = performanceChart.value.getContext('2d')
+  if (!ctx) return
+  
+  performanceChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Valor/kg', 'Custo/kg', 'Custo/Ave', 'Lucro/kg', 'Lucro/Ave'],
+      datasets: [{
+        label: 'Valores (R$)',
+        data: [
+          mediaValorKgProcessado.value,
+          custoKgReal.value,
+          custoAveReal.value,
+          lucroKg.value,
+          lucroFrango.value
+        ],
+        backgroundColor: [
+          '#3B82F6',
+          '#EF4444',
+          '#F59E0B',
+          '#10B981',
+          '#8B5CF6'
+        ],
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return 'R$ ' + Number(value).toFixed(2)
+            }
+          }
+        },
+        x: {
+          ticks: {
+            font: {
+              size: 10
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
+// Função para criar gráfico de rendimento
+const criarGraficoRendimento = () => {
+  if (!rendimentoChart.value) return
+  
+  if (rendimentoChartInstance) {
+    rendimentoChartInstance.destroy()
+  }
+  
+  const ctx = rendimentoChart.value.getContext('2d')
+  if (!ctx) return
+  
+  const pesoVivo = props.formData.peso_total_kg || 0
+  const pesoProcessado = pesoTotalProcessado.value
+  const perdas = pesoVivo - pesoProcessado
+  
+  rendimentoChartInstance = new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: ['Peso Processado', 'Perdas/Descarte'],
+      datasets: [{
+        data: [pesoProcessado, perdas],
+        backgroundColor: ['#10B981', '#EF4444'],
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 10,
+            font: {
+              size: 11
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
+// Função para criar gráfico de análise de lucro
+const criarGraficoLucro = () => {
+  if (!lucroChart.value) return
+  
+  if (lucroChartInstance) {
+    lucroChartInstance.destroy()
+  }
+  
+  const ctx = lucroChart.value.getContext('2d')
+  if (!ctx) return
+  
+  lucroChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Receita Bruta', 'Custos Totais', 'Lucro Líquido'],
+      datasets: [{
+        label: 'Valores (R$)',
+        data: [
+          receitaBruta.value,
+          custosTotais.value,
+          lucroLiquido.value
+        ],
+        backgroundColor: [
+          '#3B82F6',
+          '#EF4444',
+          lucroLiquido.value >= 0 ? '#10B981' : '#F59E0B'
+        ],
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return 'R$ ' + Number(value).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
+// Função para atualizar todos os gráficos
+const atualizarGraficos = async () => {
+  await nextTick()
+  criarGraficoCustos()
+  criarGraficoPerformance()
+  criarGraficoRendimento()
+  criarGraficoLucro()
+}
+
+// Lifecycle
+onMounted(() => {
+  atualizarGraficos()
+})
+
 // Validação automática de peso quando dados mudarem
 watch([() => props.formData.peso_total_kg, () => props.formData.produtos], () => {
   // Aguarda um pequeno delay para garantir que todos os dados foram atualizados
   setTimeout(() => {
     validarPeso()
+    atualizarGraficos()
   }, 500)
 }, { deep: true })
+
+// Watch para atualizar gráficos quando despesas mudarem
+watch([() => props.formData.despesas_fixas], () => {
+  setTimeout(() => {
+    atualizarGraficos()
+  }, 300)
+}, { deep: true })
+
+// Função para abrir relatório de impressão
+const abrirRelatorioImpressao = () => {
+  mostrarRelatorioImpressao.value = true
+}
+
+// Função para fechar relatório de impressão
+const fecharRelatorioImpressao = () => {
+  mostrarRelatorioImpressao.value = false
+}
+
+// Função para imprimir
+const imprimirRelatorio = () => {
+  window.print()
+}
 </script>
 
 <style scoped>
@@ -885,6 +1327,63 @@ watch([() => props.formData.peso_total_kg, () => props.formData.produtos], () =>
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
+/* Seção de Gráficos */
+.graficos-section {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  transition: all 0.2s ease;
+}
+
+.graficos-section:hover {
+  border-color: var(--primary-red);
+  box-shadow: var(--shadow-medium);
+}
+
+.graficos-section h4 {
+  color: var(--primary-red);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--primary-red);
+}
+
+.graficos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.grafico-card {
+  background: var(--bg-accent);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.grafico-card:hover {
+  border-color: var(--primary-red);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+}
+
+.grafico-card h5 {
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.grafico-card canvas {
+  width: 100% !important;
+  height: 200px !important;
+}
+
 /* Responsividade */
 @media (max-width: 768px) {
   .etapa-container {
@@ -917,6 +1416,14 @@ watch([() => props.formData.peso_total_kg, () => props.formData.produtos], () =>
   .indicadores-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  .graficos-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .grafico-card canvas {
+    height: 180px !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -934,6 +1441,174 @@ watch([() => props.formData.peso_total_kg, () => props.formData.produtos], () =>
   
   .financeiro-valor {
     font-size: 1.25rem;
+  }
+  
+  .grafico-card {
+    padding: 0.75rem;
+  }
+  
+  .grafico-card canvas {
+    height: 160px !important;
+  }
+}
+
+/* Botão de Impressão */
+.botao-impressao-section {
+  text-align: center;
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+}
+
+.btn-impressao {
+  background: linear-gradient(135deg, var(--primary-red), #b91c1c);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
+}
+
+.btn-impressao:hover {
+  background: linear-gradient(135deg, #b91c1c, #991b1b);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(220, 38, 38, 0.3);
+}
+
+.btn-impressao:active {
+  transform: translateY(0);
+}
+
+/* Modal de Impressão */
+.modal-impressao {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 95%;
+  max-width: 1200px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--primary-red);
+  color: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-imprimir,
+.btn-fechar {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-imprimir {
+  background: #10b981;
+  color: white;
+}
+
+.btn-imprimir:hover {
+  background: #059669;
+}
+
+.btn-fechar {
+  background: #6b7280;
+  color: white;
+}
+
+.btn-fechar:hover {
+  background: #4b5563;
+}
+
+.modal-body {
+  padding: 0;
+  max-height: calc(90vh - 80px);
+  overflow-y: auto;
+}
+
+/* Estilos para impressão do modal */
+@media print {
+  .modal-impressao {
+    position: static;
+    background: none;
+    padding: 0;
+  }
+  
+  .modal-content {
+    width: 100%;
+    max-width: none;
+    max-height: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  
+  .modal-header {
+    display: none;
+  }
+  
+  .modal-body {
+    padding: 0;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
+/* Responsividade do modal */
+@media (max-width: 768px) {
+  .modal-content {
+    width: 98%;
+    max-height: 95vh;
+  }
+  
+  .modal-header {
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .modal-actions {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>
