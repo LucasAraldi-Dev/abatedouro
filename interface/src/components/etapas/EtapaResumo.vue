@@ -273,8 +273,8 @@
           </div>
           <div class="indicador-item destaque">
             <div class="indicador-valor">{{ lucroTotalFormatted }}</div>
-            <div class="indicador-label">Lucro do dia (margem {{ margemLucroFormatted }}%)</div>
-            <div class="indicador-percent">{{ percentualLucroTotal }}%</div>
+            <div class="indicador-label">Lucro do dia</div>
+            <div class="indicador-percent">Margem: {{ margemLucroFormatted }}%</div>
           </div>
         </div>
       </div>
@@ -290,13 +290,8 @@
           </div>
           <div class="indicador-item">
             <div class="indicador-valor">{{ kgHoraFormatted }}</div>
-            <div class="indicador-label">Throughput (kg por hora)</div>
+            <div class="indicador-label">Produção (kg por hora)</div>
             <div class="indicador-desc">Volume processado por hora</div>
-          </div>
-          <div class="indicador-item">
-            <div class="indicador-valor">{{ tempoMedioAveFormatted }}</div>
-            <div class="indicador-label">Tempo médio por ave</div>
-            <div class="indicador-desc">Eficiência individual</div>
           </div>
           <div class="indicador-item">
             <div class="indicador-valor" :class="{ 'eficiencia-boa': eficienciaOperacional >= 100, 'eficiencia-ruim': eficienciaOperacional < 90 }">{{ eficienciaOperacionalFormatted }}</div>

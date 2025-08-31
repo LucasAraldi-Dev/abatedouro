@@ -33,6 +33,7 @@ export interface HorariosAbate {
   hora_termino: string;
   intervalo_minutos: number;
   horas_trabalhadas: number;
+  horas_reais: number;
 }
 
 export interface ProdutoAbate {
@@ -43,11 +44,27 @@ export interface ProdutoAbate {
 }
 
 export interface DespesasFixas {
-  energia: number;
+  funcionarios: number;
   agua: number;
-  gas: number;
-  outros: number;
-  total: number;
+  energia: number;
+  embalagem: number;
+  refeicao: number;
+  materiais_limpeza: number;
+  gelo: number;
+  horas_extras: number;
+  amonia: number;
+  epi: number;
+  manutencao: number;
+  lenha_caldeira: number;
+  diaristas: number;
+  depreciacao: number;
+  recisao: number;
+  ferias: number;
+  inss: number;
+  frango_morto_plataforma: number;
+  escaldagem_eviceracao: number;
+  pe_graxaria: number;
+  descarte: number;
 }
 
 export interface AbateCompleto {

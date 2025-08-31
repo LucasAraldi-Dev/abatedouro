@@ -242,35 +242,32 @@ const handleSave = async (dadosFormulario: any) => {
         hora_inicio: dadosFormulario.hora_inicio,
         hora_termino: dadosFormulario.hora_termino,
         intervalo_minutos: dadosFormulario.intervalo_minutos,
-        horas_trabalhadas: dadosFormulario.horas_trabalhadas
+        horas_trabalhadas: dadosFormulario.horas_trabalhadas,
+        horas_reais: dadosFormulario.horas_reais || dadosFormulario.horas_trabalhadas
       },
       produtos: dadosFormulario.produtos || [],
       despesas_fixas: {
-        energia: dadosFormulario.despesas_fixas?.energia || 0,
+        funcionarios: dadosFormulario.despesas_fixas?.funcionarios || 0,
         agua: dadosFormulario.despesas_fixas?.agua || 0,
-        gas: dadosFormulario.despesas_fixas?.gas || 0,
-        outros: (
-          (dadosFormulario.despesas_fixas?.funcionarios || 0) +
-          (dadosFormulario.despesas_fixas?.embalagem || 0) +
-          (dadosFormulario.despesas_fixas?.refeicao || 0) +
-          (dadosFormulario.despesas_fixas?.materiais_limpeza || 0) +
-          (dadosFormulario.despesas_fixas?.gelo || 0) +
-          (dadosFormulario.despesas_fixas?.horas_extras || 0) +
-          (dadosFormulario.despesas_fixas?.amonia || 0) +
-          (dadosFormulario.despesas_fixas?.epi || 0) +
-          (dadosFormulario.despesas_fixas?.manutencao || 0) +
-          (dadosFormulario.despesas_fixas?.lenha_caldeira || 0) +
-          (dadosFormulario.despesas_fixas?.diaristas || 0) +
-          (dadosFormulario.despesas_fixas?.depreciacao || 0) +
-          (dadosFormulario.despesas_fixas?.recisao || 0) +
-          (dadosFormulario.despesas_fixas?.ferias || 0) +
-          (dadosFormulario.despesas_fixas?.inss || 0) +
-          (dadosFormulario.despesas_fixas?.frango_morto_plataforma || 0) +
-          (dadosFormulario.despesas_fixas?.escaldagem_eviceracao || 0) +
-          (dadosFormulario.despesas_fixas?.pe_graxaria || 0) +
-          (dadosFormulario.despesas_fixas?.descarte || 0)
-        ),
-        total: Object.values(dadosFormulario.despesas_fixas || {}).reduce((sum: number, val: any) => sum + (Number(val) || 0), 0)
+        energia: dadosFormulario.despesas_fixas?.energia || 0,
+        embalagem: dadosFormulario.despesas_fixas?.embalagem || 0,
+        refeicao: dadosFormulario.despesas_fixas?.refeicao || 0,
+        materiais_limpeza: dadosFormulario.despesas_fixas?.materiais_limpeza || 0,
+        gelo: dadosFormulario.despesas_fixas?.gelo || 0,
+        horas_extras: dadosFormulario.despesas_fixas?.horas_extras || 0,
+        amonia: dadosFormulario.despesas_fixas?.amonia || 0,
+        epi: dadosFormulario.despesas_fixas?.epi || 0,
+        manutencao: dadosFormulario.despesas_fixas?.manutencao || 0,
+        lenha_caldeira: dadosFormulario.despesas_fixas?.lenha_caldeira || 0,
+        diaristas: dadosFormulario.despesas_fixas?.diaristas || 0,
+        depreciacao: dadosFormulario.despesas_fixas?.depreciacao || 0,
+        recisao: dadosFormulario.despesas_fixas?.recisao || 0,
+        ferias: dadosFormulario.despesas_fixas?.ferias || 0,
+        inss: dadosFormulario.despesas_fixas?.inss || 0,
+        frango_morto_plataforma: dadosFormulario.despesas_fixas?.frango_morto_plataforma || 0,
+        escaldagem_eviceracao: dadosFormulario.despesas_fixas?.escaldagem_eviceracao || 0,
+        pe_graxaria: dadosFormulario.despesas_fixas?.pe_graxaria || 0,
+        descarte: dadosFormulario.despesas_fixas?.descarte || 0
       },
       peso_inteiro_abatido: dadosFormulario.peso_inteiro_abatido,
       preco_venda_kg: dadosFormulario.preco_venda_kg
