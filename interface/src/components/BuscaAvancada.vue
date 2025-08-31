@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick, onUnmounted } from 'vue'
 
 interface FiltroOpcao {
   value: string
@@ -41,18 +41,43 @@ const termoBusca = ref('')
 const filtros = ref<Record<string, any>>({})
 const ordenacao = ref({ campo: '', direcao: 'asc' as 'asc' | 'desc' })
 
+// Debounce timer para evitar atualizações excessivas
+let debounceTimer: NodeJS.Timeout | null = null
+
+// Função para emitir atualizações com debounce
+const emitirAtualizacao = (novoTermo?: string) => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+  }
+  
+  debounceTimer = setTimeout(() => {
+    const termo = novoTermo !== undefined ? novoTermo : termoBusca.value
+    emit('update:modelValue', { ...filtros.value, termo })
+  }, 300) // 300ms de delay
+}
+
 // Inicializar filtros com valores do modelValue
 watch(() => props.modelValue, (newValue) => {
-  filtros.value = { ...newValue }
+  // Evitar loop infinito verificando se realmente mudou
+  const currentValue = { ...filtros.value, termo: termoBusca.value }
+  const hasChanged = JSON.stringify(currentValue) !== JSON.stringify(newValue)
+  
+  if (hasChanged) {
+    filtros.value = { ...newValue }
+    if (newValue.termo !== undefined) {
+      termoBusca.value = newValue.termo
+    }
+  }
 }, { immediate: true })
 
-// Emitir mudanças nos filtros
-watch(filtros, (newFiltros) => {
-  emit('update:modelValue', { ...newFiltros, termo: termoBusca.value })
+// Emitir mudanças nos filtros com debounce
+watch(filtros, () => {
+  emitirAtualizacao()
 }, { deep: true })
 
+// Emitir mudanças no termo de busca com debounce
 watch(termoBusca, (newTermo) => {
-  emit('update:modelValue', { ...filtros.value, termo: newTermo })
+  emitirAtualizacao(newTermo)
 })
 
 // Campos básicos (sempre visíveis)
@@ -118,6 +143,14 @@ const filtrosAtivos = computed(() => {
   })
   
   return count
+})
+
+// Limpeza do timer quando o componente for desmontado
+onUnmounted(() => {
+  if (debounceTimer) {
+    clearTimeout(debounceTimer)
+    debounceTimer = null
+  }
 })
 </script>
 

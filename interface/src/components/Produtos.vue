@@ -74,11 +74,21 @@ const formErrors = ref<Record<string, string>>({})
 
 // Computed
 const produtosFiltrados = computed(() => {
+  // Se não há filtros ativos, retorna todos os produtos
+  const temFiltros = filtrosBusca.value.termo || 
+                     filtrosBusca.value.tipo || 
+                     filtrosBusca.value.unidade_origem || 
+                     filtrosBusca.value.preco_kg
+  
+  if (!temFiltros) {
+    return produtos.value
+  }
+  
   let resultado = [...produtos.value]
   
   // Filtro por termo de busca
-  if (filtrosBusca.value.termo) {
-    const termo = filtrosBusca.value.termo.toLowerCase()
+  if (filtrosBusca.value.termo && filtrosBusca.value.termo.trim()) {
+    const termo = filtrosBusca.value.termo.toLowerCase().trim()
     resultado = resultado.filter(produto => 
       produto.nome.toLowerCase().includes(termo) ||
       produto.tipo.toLowerCase().includes(termo) ||
