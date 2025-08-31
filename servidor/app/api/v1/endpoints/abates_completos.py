@@ -25,6 +25,8 @@ async def create_abate_completo(
     
     crud = get_abate_completo_crud(db)
     try:
+        print(f"DEBUG: Dados recebidos para criação: {abate_data.model_dump()}")
+        print("INFO: Tentando criar abate completo...")
         abate = await crud.create(abate_data)
         return {
             "id": str(abate.id),
@@ -45,8 +47,12 @@ async def create_abate_completo(
             "created_at": abate.created_at,
             "updated_at": abate.updated_at
         }
+    except ValueError as ve:
+        print(f"ERROR: Erro de validação: {str(ve)}")
+        raise HTTPException(status_code=422, detail=f"Erro de validação: {str(ve)}")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erro ao criar abate: {str(e)}")
+        print(f"ERROR: Erro interno: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Erro interno do servidor: {str(e)}")
 
 
 @router.get("/", response_model=List[dict])
