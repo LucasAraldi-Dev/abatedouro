@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
-from ....core.database import get_db
+from ....core.db import get_db
 from ....models.abate_completo import (
     AbateCompleto,
     AbateCompletoCreate,

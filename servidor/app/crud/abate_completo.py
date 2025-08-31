@@ -8,7 +8,7 @@ from ..models.abate_completo import (
     AbateCompletoUpdate,
     AbateCompletoInDB
 )
-from ..core.database import get_collection
+from ..core.db import get_collection
 
 
 class AbateCompletoCRUD:

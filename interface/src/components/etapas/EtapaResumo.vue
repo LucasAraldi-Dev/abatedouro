@@ -87,6 +87,61 @@
         </div>
       </div>
 
+      <!-- Alertas e Notificações -->
+      <div v-if="alertasCriticos.length > 0" class="resumo-section alertas-section">
+        <h4>🚨 Alertas e Notificações</h4>
+        <div class="alertas-resumo">
+          <div class="alertas-contador">
+            <div class="contador-item" :class="`status-${resumoAlertas.status}`">
+              <div class="contador-numero">{{ resumoAlertas.total }}</div>
+              <div class="contador-label">{{ resumoAlertas.total === 1 ? 'Alerta' : 'Alertas' }}</div>
+            </div>
+            <div class="contadores-detalhes">
+              <div v-if="resumoAlertas.criticos > 0" class="contador-detalhe critico">
+                <span class="contador-icone">🚨</span>
+                <span>{{ resumoAlertas.criticos }} Crítico{{ resumoAlertas.criticos > 1 ? 's' : '' }}</span>
+              </div>
+              <div v-if="resumoAlertas.atencao > 0" class="contador-detalhe atencao">
+                <span class="contador-icone">⚠️</span>
+                <span>{{ resumoAlertas.atencao }} Atenção</span>
+              </div>
+              <div v-if="resumoAlertas.info > 0" class="contador-detalhe info">
+                <span class="contador-icone">ℹ️</span>
+                <span>{{ resumoAlertas.info }} Info</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="alertas-lista">
+          <div 
+            v-for="(alerta, index) in alertasCriticos" 
+            :key="index"
+            class="alerta-item" 
+            :class="`alerta-${alerta.tipo}`"
+          >
+            <div class="alerta-icone">{{ alerta.icone }}</div>
+            <div class="alerta-conteudo">
+              <div class="alerta-titulo">{{ alerta.titulo }}</div>
+              <div class="alerta-mensagem">{{ alerta.mensagem }}</div>
+            </div>
+            <div class="alerta-valor">{{ alerta.valor }}</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Status OK -->
+      <div v-else class="resumo-section status-ok-section">
+        <h4>✅ Status Operacional</h4>
+        <div class="status-ok">
+          <div class="status-icone">🎯</div>
+          <div class="status-mensagem">
+            <div class="status-titulo">Operação Normal</div>
+            <div class="status-descricao">Todos os indicadores estão dentro dos parâmetros esperados</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Produtos -->
       <div class="resumo-section">
         <h4>📦 Produtos Processados</h4>
@@ -224,7 +279,223 @@
         </div>
       </div>
 
-      <!-- Observações -->
+      <!-- Eficiência Operacional -->
+      <div class="resumo-section">
+        <h4>⚡ Eficiência Operacional</h4>
+        <div class="indicadores-grid">
+          <div class="indicador-item">
+            <div class="indicador-valor">{{ avesHoraFormatted }}</div>
+            <div class="indicador-label">Produtividade (aves por hora)</div>
+            <div class="indicador-desc">Velocidade de processamento</div>
+          </div>
+          <div class="indicador-item">
+            <div class="indicador-valor">{{ kgHoraFormatted }}</div>
+            <div class="indicador-label">Throughput (kg por hora)</div>
+            <div class="indicador-desc">Volume processado por hora</div>
+          </div>
+          <div class="indicador-item">
+            <div class="indicador-valor">{{ tempoMedioAveFormatted }}</div>
+            <div class="indicador-label">Tempo médio por ave</div>
+            <div class="indicador-desc">Eficiência individual</div>
+          </div>
+          <div class="indicador-item">
+            <div class="indicador-valor" :class="{ 'eficiencia-boa': eficienciaOperacional >= 100, 'eficiencia-ruim': eficienciaOperacional < 90 }">{{ eficienciaOperacionalFormatted }}</div>
+            <div class="indicador-label">Eficiência de tempo</div>
+            <div class="indicador-desc">Tempo real vs planejado</div>
+          </div>
+        </div>
+       </div>
+
+       <!-- Análise de Perdas -->
+       <div class="resumo-section">
+         <h4>📉 Análise de Perdas e Aproveitamento</h4>
+         <div class="perdas-grid">
+           <div class="perda-resumo">
+             <div class="perda-principal">
+               <div class="perda-valor">{{ pesoTotalPerdasFormatted }}</div>
+               <div class="perda-label">Total de Perdas</div>
+               <div class="perda-percent" :class="{ 'perda-alta': percentualPerdaTotal > 15, 'perda-media': percentualPerdaTotal > 10 && percentualPerdaTotal <= 15 }">{{ percentualPerdaTotalFormatted }}</div>
+             </div>
+             <div class="perda-valor-monetario">
+               <div class="valor-perdas">{{ valorPerdasFormatted }}</div>
+               <div class="valor-perdas-label">Valor das Perdas</div>
+             </div>
+           </div>
+           
+           <div class="perdas-detalhadas">
+             <h5>📊 Perdas por Categoria</h5>
+             <div class="categoria-perdas">
+               <div class="perda-item">
+                 <span class="perda-categoria">💀 Mortos na Plataforma:</span>
+                 <span class="perda-peso">{{ formatWeight(perdasPorCategoria.mortos_plataforma.peso_estimado) }}</span>
+                 <span class="perda-valor-cat">{{ formatCurrency(perdasPorCategoria.mortos_plataforma.valor) }}</span>
+               </div>
+               <div class="perda-item">
+                 <span class="perda-categoria">🔥 Escaldagem/Evisceração:</span>
+                 <span class="perda-peso">{{ formatWeight(perdasPorCategoria.escaldagem_eviceracao.peso_estimado) }}</span>
+                 <span class="perda-valor-cat">{{ formatCurrency(perdasPorCategoria.escaldagem_eviceracao.valor) }}</span>
+               </div>
+               <div class="perda-item">
+                 <span class="perda-categoria">🦶 Pé/Graxaria:</span>
+                 <span class="perda-peso">{{ formatWeight(perdasPorCategoria.pe_graxaria.peso_estimado) }}</span>
+                 <span class="perda-valor-cat">{{ formatCurrency(perdasPorCategoria.pe_graxaria.valor) }}</span>
+               </div>
+               <div class="perda-item">
+                 <span class="perda-categoria">🗑️ Descarte:</span>
+                 <span class="perda-peso">{{ formatWeight(perdasPorCategoria.descarte.peso_estimado) }}</span>
+                 <span class="perda-valor-cat">{{ formatCurrency(perdasPorCategoria.descarte.valor) }}</span>
+               </div>
+             </div>
+           </div>
+           
+           <div class="eficiencia-aproveitamento">
+             <div class="aproveitamento-valor" :class="{ 'aproveitamento-bom': eficienciaAproveitamento >= 85, 'aproveitamento-ruim': eficienciaAproveitamento < 75 }">{{ eficienciaAproveitamentoFormatted }}</div>
+             <div class="aproveitamento-label">Taxa de Aproveitamento</div>
+             <div class="aproveitamento-desc">Peso processado / Peso vivo</div>
+           </div>
+         </div>
+       </div>
+
+       <!-- Qualidade dos Produtos -->
+       <div class="resumo-section">
+         <h4>🎯 Qualidade e Distribuição dos Produtos</h4>
+         <div class="qualidade-grid">
+           <div class="qualidade-resumo">
+             <div class="qualidade-principal">
+               <div class="qualidade-valor">{{ pesoMedioGeralFormatted }}</div>
+               <div class="qualidade-label">Peso Médio por Ave</div>
+               <div class="qualidade-diversificacao">{{ diversificacaoProdutosFormatted }}</div>
+               <div class="qualidade-diversificacao-label">Índice de Diversificação</div>
+             </div>
+           </div>
+           
+           <div class="produtos-detalhados">
+             <h5>📊 Análise por Produto</h5>
+             <div class="produtos-lista">
+               <div v-for="produto in analiseProdutos" :key="produto.nome" class="produto-item">
+                 <div class="produto-nome">{{ produto.nome }}</div>
+                 <div class="produto-stats">
+                   <span class="produto-quantidade">{{ formatWeight(produto.quantidade) }}</span>
+                   <span class="produto-participacao">({{ produto.participacao.toFixed(1) }}%)</span>
+                   <span class="produto-valor-kg">{{ formatCurrency(produto.valorKg) }}/kg</span>
+                 </div>
+               </div>
+             </div>
+           </div>
+           
+           <div class="produtos-destaque">
+             <div v-if="produtoMaisValioso" class="destaque-item">
+               <div class="destaque-titulo">💰 Mais Valioso</div>
+               <div class="destaque-produto">{{ produtoMaisValioso.nome }}</div>
+               <div class="destaque-valor">{{ formatCurrency(produtoMaisValioso.valorKg) }}/kg</div>
+             </div>
+             <div v-if="produtoMaiorVolume" class="destaque-item">
+               <div class="destaque-titulo">📦 Maior Volume</div>
+               <div class="destaque-produto">{{ produtoMaiorVolume.nome }}</div>
+               <div class="destaque-valor">{{ formatWeight(produtoMaiorVolume.quantidade) }}</div>
+             </div>
+           </div>
+         </div>
+       </div>
+
+       <!-- Comparativos e Metas -->
+       <div class="resumo-section">
+         <h4>📊 Performance vs Metas</h4>
+         <div class="performance-overview">
+           <div class="score-geral">
+             <div class="score-valor" :class="{
+               'score-excelente': resumoPerformance.scoreGeral >= 85,
+               'score-bom': resumoPerformance.scoreGeral >= 70 && resumoPerformance.scoreGeral < 85,
+               'score-regular': resumoPerformance.scoreGeral >= 50 && resumoPerformance.scoreGeral < 70,
+               'score-ruim': resumoPerformance.scoreGeral < 50
+             }">{{ resumoPerformance.scoreGeral.toFixed(0) }}%</div>
+             <div class="score-label">Score Geral</div>
+             <div class="score-classificacao">{{ resumoPerformance.classificacao }}</div>
+           </div>
+           
+           <div class="indicadores-resumo">
+             <div class="indicador-count acima">{{ resumoPerformance.acima }} Acima da Meta</div>
+             <div class="indicador-count proximo">{{ resumoPerformance.proximo }} Próximo da Meta</div>
+             <div class="indicador-count abaixo">{{ resumoPerformance.abaixo }} Abaixo da Meta</div>
+           </div>
+         </div>
+         
+         <div class="comparativos-grid">
+           <div class="comparativo-item" :class="`status-${comparativoRendimento.status}`">
+             <div class="comparativo-titulo">🎯 Rendimento</div>
+             <div class="comparativo-valores">
+               <span class="valor-atual">{{ comparativoRendimento.atual.toFixed(1) }}%</span>
+               <span class="vs">vs</span>
+               <span class="valor-meta">{{ comparativoRendimento.meta }}%</span>
+             </div>
+             <div class="comparativo-diferenca" :class="comparativoRendimento.diferenca >= 0 ? 'positiva' : 'negativa'">
+               {{ comparativoRendimento.diferenca >= 0 ? '+' : '' }}{{ comparativoRendimento.diferenca.toFixed(1) }}%
+             </div>
+           </div>
+           
+           <div class="comparativo-item" :class="`status-${comparativoCustoKg.status}`">
+             <div class="comparativo-titulo">💰 Custo por Kg</div>
+             <div class="comparativo-valores">
+               <span class="valor-atual">{{ formatCurrency(comparativoCustoKg.atual) }}</span>
+               <span class="vs">vs</span>
+               <span class="valor-meta">{{ formatCurrency(comparativoCustoKg.meta) }}</span>
+             </div>
+             <div class="comparativo-diferenca" :class="comparativoCustoKg.diferenca >= 0 ? 'positiva' : 'negativa'">
+               {{ comparativoCustoKg.diferenca >= 0 ? '+' : '' }}{{ formatCurrency(Math.abs(comparativoCustoKg.diferenca)) }}
+             </div>
+           </div>
+           
+           <div class="comparativo-item" :class="`status-${comparativoMargemLucro.status}`">
+             <div class="comparativo-titulo">📈 Margem de Lucro</div>
+             <div class="comparativo-valores">
+               <span class="valor-atual">{{ comparativoMargemLucro.atual.toFixed(1) }}%</span>
+               <span class="vs">vs</span>
+               <span class="valor-meta">{{ comparativoMargemLucro.meta }}%</span>
+             </div>
+             <div class="comparativo-diferenca" :class="comparativoMargemLucro.diferenca >= 0 ? 'positiva' : 'negativa'">
+               {{ comparativoMargemLucro.diferenca >= 0 ? '+' : '' }}{{ comparativoMargemLucro.diferenca.toFixed(1) }}%
+             </div>
+           </div>
+           
+           <div class="comparativo-item" :class="`status-${comparativoAvesHora.status}`">
+             <div class="comparativo-titulo">⚡ Aves/Hora</div>
+             <div class="comparativo-valores">
+               <span class="valor-atual">{{ comparativoAvesHora.atual.toFixed(0) }}</span>
+               <span class="vs">vs</span>
+               <span class="valor-meta">{{ comparativoAvesHora.meta }}</span>
+             </div>
+             <div class="comparativo-diferenca" :class="comparativoAvesHora.diferenca >= 0 ? 'positiva' : 'negativa'">
+               {{ comparativoAvesHora.diferenca >= 0 ? '+' : '' }}{{ comparativoAvesHora.diferenca.toFixed(0) }}
+             </div>
+           </div>
+           
+           <div class="comparativo-item" :class="`status-${comparativoPerdas.status}`">
+             <div class="comparativo-titulo">📉 Perdas</div>
+             <div class="comparativo-valores">
+               <span class="valor-atual">{{ comparativoPerdas.atual.toFixed(1) }}%</span>
+               <span class="vs">vs</span>
+               <span class="valor-meta">{{ comparativoPerdas.meta }}%</span>
+             </div>
+             <div class="comparativo-diferenca" :class="comparativoPerdas.diferenca >= 0 ? 'positiva' : 'negativa'">
+               {{ comparativoPerdas.diferenca >= 0 ? '+' : '' }}{{ comparativoPerdas.diferenca.toFixed(1) }}%
+             </div>
+           </div>
+           
+           <div class="comparativo-item" :class="`status-${comparativoEficiencia.status}`">
+             <div class="comparativo-titulo">🔧 Eficiência</div>
+             <div class="comparativo-valores">
+               <span class="valor-atual">{{ comparativoEficiencia.atual.toFixed(1) }}%</span>
+               <span class="vs">vs</span>
+               <span class="valor-meta">{{ comparativoEficiencia.meta }}%</span>
+             </div>
+             <div class="comparativo-diferenca" :class="comparativoEficiencia.diferenca >= 0 ? 'positiva' : 'negativa'">
+               {{ comparativoEficiencia.diferenca >= 0 ? '+' : '' }}{{ comparativoEficiencia.diferenca.toFixed(1) }}%
+             </div>
+           </div>
+         </div>
+       </div>
+
+       <!-- Observações -->
       <div v-if="formData.observacoes" class="resumo-section">
         <h4>📝 Observações</h4>
         <div class="observacoes-content">
@@ -496,12 +767,11 @@ const lucroLiquidoFormatted = computed(() => formatCurrency(lucroLiquido.value))
 const rendimentoFinal = computed(() => {
   const pesoVivo = props.formData.peso_total_kg || 0
   const pesoProcessado = pesoTotalProcessado.value
-  return pesoProcessado // O rendimento é o peso processado
+  return pesoVivo > 0 ? (pesoProcessado / pesoVivo) * 100 : 0 // Rendimento em percentual
 })
 
 const rendimentoPercentual = computed(() => {
-  const pesoVivo = props.formData.peso_total_kg || 0
-  return pesoVivo > 0 ? ((rendimentoFinal.value / pesoVivo) * 100).toFixed(1) : '0.0'
+  return rendimentoFinal.value.toFixed(1)
 })
 
 // Novos Indicadores de Performance
@@ -549,6 +819,316 @@ const margemLucro = computed(() => {
   return receitaBruta.value > 0 ? (lucroLiquido.value / receitaBruta.value) * 100 : 0
 })
 
+// Indicadores de Eficiência Operacional
+const avesHora = computed(() => {
+  const horas = props.formData.horas_reais || 0
+  const quantidade = props.formData.quantidade_aves || 0
+  return horas > 0 ? quantidade / horas : 0
+})
+
+const kgHora = computed(() => {
+  const horas = props.formData.horas_reais || 0
+  return horas > 0 ? pesoTotalProcessado.value / horas : 0
+})
+
+const tempoMedioAve = computed(() => {
+  const horas = props.formData.horas_reais || 0
+  const quantidade = props.formData.quantidade_aves || 0
+  return quantidade > 0 ? (horas * 60) / quantidade : 0 // em minutos
+})
+
+const eficienciaOperacional = computed(() => {
+  const horasReais = props.formData.horas_reais || 0
+  const horasPlanejadas = props.formData.horas_trabalhadas || 0
+  return horasPlanejadas > 0 ? (horasReais / horasPlanejadas) * 100 : 0
+})
+
+// Análise de Perdas Detalhada
+const pesoTotalPerdas = computed(() => {
+  const pesoVivo = props.formData.peso_total_kg || 0
+  const pesoProcessado = pesoTotalProcessado.value
+  return pesoVivo - pesoProcessado
+})
+
+const percentualPerdaTotal = computed(() => {
+  const pesoVivo = props.formData.peso_total_kg || 0
+  return pesoVivo > 0 ? (pesoTotalPerdas.value / pesoVivo) * 100 : 0
+})
+
+const valorPerdas = computed(() => {
+  const valorKgVivo = props.formData.valor_kg_vivo || 0
+  return pesoTotalPerdas.value * valorKgVivo
+})
+
+const perdasPorCategoria = computed(() => {
+  const despesas = props.formData.despesas_fixas || {}
+  const valorKgVivo = props.formData.valor_kg_vivo || 0
+  
+  return {
+    mortos_plataforma: {
+      valor: toNumber(despesas.frango_morto_plataforma),
+      peso_estimado: valorKgVivo > 0 ? toNumber(despesas.frango_morto_plataforma) / valorKgVivo : 0
+    },
+    escaldagem_eviceracao: {
+      valor: toNumber(despesas.escaldagem_eviceracao),
+      peso_estimado: valorKgVivo > 0 ? toNumber(despesas.escaldagem_eviceracao) / valorKgVivo : 0
+    },
+    pe_graxaria: {
+      valor: toNumber(despesas.pe_graxaria),
+      peso_estimado: valorKgVivo > 0 ? toNumber(despesas.pe_graxaria) / valorKgVivo : 0
+    },
+    descarte: {
+      valor: toNumber(despesas.descarte),
+      peso_estimado: valorKgVivo > 0 ? toNumber(despesas.descarte) / valorKgVivo : 0
+    }
+  }
+})
+
+const eficienciaAproveitamento = computed(() => {
+  const pesoVivo = props.formData.peso_total_kg || 0
+  return pesoVivo > 0 ? (pesoTotalProcessado.value / pesoVivo) * 100 : 0
+})
+
+// Análise de Qualidade dos Produtos
+const analiseProdutos = computed(() => {
+  if (!props.formData.produtos || props.formData.produtos.length === 0) return []
+  
+  return props.formData.produtos.map(produto => {
+    const pesoMedio = produto.quantidade > 0 ? produto.quantidade / (props.formData.quantidade_aves || 1) : 0
+    const valorKg = produto.quantidade > 0 ? produto.total / produto.quantidade : 0
+    const participacao = pesoTotalProcessado.value > 0 ? (produto.quantidade / pesoTotalProcessado.value) * 100 : 0
+    
+    return {
+      nome: produto.nome,
+      quantidade: produto.quantidade,
+      total: produto.total,
+      pesoMedio,
+      valorKg,
+      participacao
+    }
+  })
+})
+
+const produtoMaisValioso = computed(() => {
+  if (analiseProdutos.value.length === 0) return null
+  return analiseProdutos.value.reduce((max, produto) => 
+    produto.valorKg > max.valorKg ? produto : max
+  )
+})
+
+const produtoMaiorVolume = computed(() => {
+  if (analiseProdutos.value.length === 0) return null
+  return analiseProdutos.value.reduce((max, produto) => 
+    produto.quantidade > max.quantidade ? produto : max
+  )
+})
+
+const diversificacaoProdutos = computed(() => {
+  const produtos = analiseProdutos.value
+  if (produtos.length === 0) return 0
+  
+  // Índice de diversificação baseado na distribuição de participação
+  const participacoes = produtos.map(p => p.participacao / 100)
+  const herfindahl = participacoes.reduce((sum, p) => sum + (p * p), 0)
+  return (1 - herfindahl) * 100 // Quanto maior, mais diversificado
+})
+
+const pesoMedioGeral = computed(() => {
+  const quantidade = props.formData.quantidade_aves || 0
+  return quantidade > 0 ? pesoTotalProcessado.value / quantidade : 0
+})
+
+// Comparativos e Metas de Performance
+const metasPerformance = {
+  rendimentoMeta: 85, // % mínimo esperado
+  custoKgMeta: 8.50, // R$ máximo por kg
+  margemLucroMeta: 15, // % mínimo de margem
+  avesHoraMeta: 120, // aves por hora mínimo
+  perdaMaxima: 12, // % máximo de perdas
+  eficienciaOperacionalMeta: 85 // % mínimo
+}
+
+const comparativoRendimento = computed(() => {
+  const atual = rendimentoFinal.value
+  const meta = metasPerformance.rendimentoMeta
+  const diferenca = atual - meta
+  const status = atual >= meta ? 'acima' : atual >= meta * 0.9 ? 'proximo' : 'abaixo'
+  return { atual, meta, diferenca, status }
+})
+
+const comparativoCustoKg = computed(() => {
+  const atual = custoKgReal.value
+  const meta = metasPerformance.custoKgMeta
+  const diferenca = meta - atual // Invertido porque menor é melhor
+  const status = atual <= meta ? 'acima' : atual <= meta * 1.1 ? 'proximo' : 'abaixo'
+  return { atual, meta, diferenca, status }
+})
+
+const comparativoMargemLucro = computed(() => {
+  const atual = margemLucro.value
+  const meta = metasPerformance.margemLucroMeta
+  const diferenca = atual - meta
+  const status = atual >= meta ? 'acima' : atual >= meta * 0.8 ? 'proximo' : 'abaixo'
+  return { atual, meta, diferenca, status }
+})
+
+const comparativoAvesHora = computed(() => {
+  const atual = avesHora.value
+  const meta = metasPerformance.avesHoraMeta
+  const diferenca = atual - meta
+  const status = atual >= meta ? 'acima' : atual >= meta * 0.9 ? 'proximo' : 'abaixo'
+  return { atual, meta, diferenca, status }
+})
+
+const comparativoPerdas = computed(() => {
+  const atual = percentualPerdaTotal.value
+  const meta = metasPerformance.perdaMaxima
+  const diferenca = meta - atual // Invertido porque menor é melhor
+  const status = atual <= meta ? 'acima' : atual <= meta * 1.2 ? 'proximo' : 'abaixo'
+  return { atual, meta, diferenca, status }
+})
+
+const comparativoEficiencia = computed(() => {
+  const atual = eficienciaOperacional.value
+  const meta = metasPerformance.eficienciaOperacionalMeta
+  const diferenca = atual - meta
+  const status = atual >= meta ? 'acima' : atual >= meta * 0.9 ? 'proximo' : 'abaixo'
+  return { atual, meta, diferenca, status }
+})
+
+const resumoPerformance = computed(() => {
+  const indicadores = [
+    comparativoRendimento.value,
+    comparativoCustoKg.value,
+    comparativoMargemLucro.value,
+    comparativoAvesHora.value,
+    comparativoPerdas.value,
+    comparativoEficiencia.value
+  ]
+  
+  const acima = indicadores.filter(i => i.status === 'acima').length
+  const proximo = indicadores.filter(i => i.status === 'proximo').length
+  const abaixo = indicadores.filter(i => i.status === 'abaixo').length
+  
+  const scoreGeral = (acima * 100 + proximo * 70) / indicadores.length
+  
+  return {
+    acima,
+    proximo,
+    abaixo,
+    total: indicadores.length,
+    scoreGeral,
+    classificacao: scoreGeral >= 85 ? 'Excelente' : scoreGeral >= 70 ? 'Bom' : scoreGeral >= 50 ? 'Regular' : 'Precisa Melhorar'
+  }
+})
+
+// Sistema de Alertas Visuais
+const alertasCriticos = computed(() => {
+  const alertas = []
+  
+  // Alerta de rendimento muito baixo
+  if (rendimentoFinal.value < 70) {
+    alertas.push({
+      tipo: 'critico',
+      icone: '🚨',
+      titulo: 'Rendimento Crítico',
+      mensagem: `Rendimento de ${rendimentoFinal.value.toFixed(1)}% está muito abaixo do esperado (>75%)`,
+      valor: `${rendimentoFinal.value.toFixed(1)}%`,
+      categoria: 'rendimento'
+    })
+  }
+  
+  // Alerta de perdas excessivas
+  if (percentualPerdaTotal.value > 15) {
+    alertas.push({
+      tipo: 'critico',
+      icone: '⚠️',
+      titulo: 'Perdas Excessivas',
+      mensagem: `Perdas de ${percentualPerdaTotal.value.toFixed(1)}% excedem o limite aceitável (<12%)`,
+      valor: `${percentualPerdaTotal.value.toFixed(1)}%`,
+      categoria: 'perdas'
+    })
+  }
+  
+  // Alerta de margem de lucro baixa
+  if (margemLucro.value < 5) {
+    alertas.push({
+      tipo: margemLucro.value < 0 ? 'critico' : 'atencao',
+      icone: margemLucro.value < 0 ? '💸' : '📉',
+      titulo: margemLucro.value < 0 ? 'Operação com Prejuízo' : 'Margem Baixa',
+      mensagem: `Margem de ${margemLucro.value.toFixed(1)}% ${margemLucro.value < 0 ? 'indica prejuízo' : 'está abaixo do recomendado (>10%)'}`,
+      valor: `${margemLucro.value.toFixed(1)}%`,
+      categoria: 'financeiro'
+    })
+  }
+  
+  // Alerta de custo por kg alto
+  if (custoKgReal.value > 10) {
+    alertas.push({
+      tipo: 'atencao',
+      icone: '💰',
+      titulo: 'Custo Elevado',
+      mensagem: `Custo de ${formatCurrency(custoKgReal.value)}/kg está acima do recomendado (<R$ 8,50)`,
+      valor: formatCurrency(custoKgReal.value),
+      categoria: 'custos'
+    })
+  }
+  
+  // Alerta de eficiência operacional baixa
+  if (eficienciaOperacional.value < 70) {
+    alertas.push({
+      tipo: 'atencao',
+      icone: '⚡',
+      titulo: 'Eficiência Baixa',
+      mensagem: `Eficiência de ${eficienciaOperacional.value.toFixed(1)}% está abaixo do esperado (>85%)`,
+      valor: `${eficienciaOperacional.value.toFixed(1)}%`,
+      categoria: 'operacional'
+    })
+  }
+  
+  // Alerta de peso médio muito baixo
+  if (pesoMedioGeral.value < 1.8) {
+    alertas.push({
+      tipo: 'info',
+      icone: '📏',
+      titulo: 'Peso Médio Baixo',
+      mensagem: `Peso médio de ${formatWeight(pesoMedioGeral.value)} por ave está abaixo da média (>2,0kg)`,
+      valor: formatWeight(pesoMedioGeral.value),
+      categoria: 'qualidade'
+    })
+  }
+  
+  return alertas.sort((a, b) => {
+    const prioridade = { 'critico': 3, 'atencao': 2, 'info': 1 }
+    return prioridade[b.tipo] - prioridade[a.tipo]
+  })
+})
+
+const alertasPorCategoria = computed(() => {
+  const categorias = {}
+  alertasCriticos.value.forEach(alerta => {
+    if (!categorias[alerta.categoria]) {
+      categorias[alerta.categoria] = []
+    }
+    categorias[alerta.categoria].push(alerta)
+  })
+  return categorias
+})
+
+const resumoAlertas = computed(() => {
+  const criticos = alertasCriticos.value.filter(a => a.tipo === 'critico').length
+  const atencao = alertasCriticos.value.filter(a => a.tipo === 'atencao').length
+  const info = alertasCriticos.value.filter(a => a.tipo === 'info').length
+  
+  return {
+    total: alertasCriticos.value.length,
+    criticos,
+    atencao,
+    info,
+    status: criticos > 0 ? 'critico' : atencao > 0 ? 'atencao' : info > 0 ? 'info' : 'ok'
+  }
+})
+
 // Formatação dos novos indicadores
 const mediaValorKgProcessadoFormatted = computed(() => formatCurrency(mediaValorKgProcessado.value))
 const custoKgRealFormatted = computed(() => formatCurrency(custoKgReal.value))
@@ -559,6 +1139,22 @@ const lucroKgFormatted = computed(() => formatCurrency(lucroKg.value))
 const lucroFrangoFormatted = computed(() => formatCurrency(lucroFrango.value))
 const lucroTotalFormatted = computed(() => formatCurrency(lucroTotal.value))
 const margemLucroFormatted = computed(() => `${margemLucro.value.toFixed(1)}%`)
+
+// Formatação dos indicadores de eficiência
+const avesHoraFormatted = computed(() => `${avesHora.value.toFixed(1)} aves/h`)
+const kgHoraFormatted = computed(() => `${kgHora.value.toFixed(1)} kg/h`)
+const tempoMedioAveFormatted = computed(() => `${tempoMedioAve.value.toFixed(1)} min/ave`)
+const eficienciaOperacionalFormatted = computed(() => `${eficienciaOperacional.value.toFixed(1)}%`)
+
+// Formatação dos indicadores de perdas
+const pesoTotalPerdasFormatted = computed(() => formatWeight(pesoTotalPerdas.value))
+const percentualPerdaTotalFormatted = computed(() => `${percentualPerdaTotal.value.toFixed(1)}%`)
+const valorPerdasFormatted = computed(() => formatCurrency(valorPerdas.value))
+const eficienciaAproveitamentoFormatted = computed(() => `${eficienciaAproveitamento.value.toFixed(1)}%`)
+
+// Formatação dos indicadores de qualidade
+const diversificacaoProdutosFormatted = computed(() => `${diversificacaoProdutos.value.toFixed(1)}%`)
+const pesoMedioGeralFormatted = computed(() => formatWeight(pesoMedioGeral.value))
 
 // Cálculos de percentual de participação
 const totalGeral = computed(() => {
@@ -598,8 +1194,7 @@ const percentualLucroTotal = computed(() => {
 })
 
 const percentualRendimento = computed(() => {
-  const pesoVivo = props.formData.peso_total_kg || 0
-  return pesoVivo > 0 ? ((rendimentoFinal.value / pesoVivo) * 100).toFixed(1) : '0.0'
+  return rendimentoFinal.value.toFixed(1)
 })
 
 // Validação simples
@@ -1609,6 +2204,577 @@ const imprimirRelatorio = () => {
   .modal-actions {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* Seção de Qualidade dos Produtos */
+.qualidade-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.qualidade-resumo {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 1px solid #0ea5e9;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.qualidade-principal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.qualidade-valor {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0369a1;
+}
+
+.qualidade-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+}
+
+.qualidade-diversificacao {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0c4a6e;
+}
+
+.qualidade-diversificacao-label {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.produtos-detalhados {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.produtos-detalhados h5 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.produtos-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.produto-item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.produto-item:hover {
+  border-color: var(--primary-red);
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+}
+
+.produto-nome {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
+}
+
+.produto-stats {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.produto-quantidade {
+  color: #059669;
+  font-weight: 500;
+}
+
+.produto-participacao {
+  color: #0369a1;
+  font-weight: 500;
+}
+
+.produto-valor-kg {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.produtos-destaque {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.destaque-item {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+}
+
+.destaque-titulo {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #92400e;
+  margin-bottom: 0.5rem;
+}
+
+.destaque-produto {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #451a03;
+  margin-bottom: 0.25rem;
+}
+
+.destaque-valor {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #b45309;
+}
+
+@media (max-width: 768px) {
+  .qualidade-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .produto-stats {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+/* Seção de Performance vs Metas */
+.performance-overview {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+}
+
+.score-geral {
+  text-align: center;
+  padding: 1rem;
+}
+
+.score-valor {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+}
+
+.score-excelente {
+  color: #059669;
+}
+
+.score-bom {
+  color: #0369a1;
+}
+
+.score-regular {
+  color: #d97706;
+}
+
+.score-ruim {
+  color: #dc2626;
+}
+
+.score-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+
+.score-classificacao {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.indicadores-resumo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.indicador-count {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.indicador-count.acima {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.indicador-count.proximo {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.indicador-count.abaixo {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.comparativos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.comparativo-item {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-light);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.comparativo-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.status-acima {
+  border-color: #10b981;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+}
+
+.status-proximo {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+}
+
+.status-abaixo {
+  border-color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+}
+
+.comparativo-titulo {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+}
+
+.comparativo-valores {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.valor-atual {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.vs {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.valor-meta {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.comparativo-diferenca {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.comparativo-diferenca.positiva {
+  color: #059669;
+}
+
+.comparativo-diferenca.negativa {
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .performance-overview {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .comparativos-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .score-valor {
+    font-size: 2rem;
+  }
+}
+
+/* Alertas e Notificações */
+.alertas-section {
+  background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+  border-left: 4px solid #e53e3e;
+  border-radius: 8px;
+  animation: pulse-border 2s infinite;
+}
+
+.status-ok-section {
+  background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+  border-left: 4px solid #38a169;
+}
+
+@keyframes pulse-border {
+  0%, 100% { border-left-color: #e53e3e; }
+  50% { border-left-color: #fc8181; }
+}
+
+.alertas-resumo {
+  margin-bottom: 20px;
+}
+
+.alertas-contador {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.contador-item {
+  text-align: center;
+  padding: 15px;
+  border-radius: 12px;
+  min-width: 100px;
+}
+
+.contador-item.status-critico {
+  background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+  border: 2px solid #e53e3e;
+}
+
+.contador-item.status-atencao {
+  background: linear-gradient(135deg, #fefcbf 0%, #faf089 100%);
+  border: 2px solid #d69e2e;
+}
+
+.contador-item.status-info {
+  background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
+  border: 2px solid #3182ce;
+}
+
+.contador-numero {
+  font-size: 2.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.contador-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 5px;
+}
+
+.contadores-detalhes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.contador-detalhe {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.contador-detalhe.critico {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.contador-detalhe.atencao {
+  background: #fefcbf;
+  color: #744210;
+}
+
+.contador-detalhe.info {
+  background: #bee3f8;
+  color: #2a4365;
+}
+
+.contador-icone {
+  font-size: 1.1rem;
+}
+
+.alertas-lista {
+  display: grid;
+  gap: 12px;
+}
+
+.alerta-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 15px;
+  align-items: center;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-left: 4px solid;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.alerta-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.alerta-item.alerta-critico {
+  border-left-color: #e53e3e;
+  background: linear-gradient(135deg, #fff 0%, #fed7d7 100%);
+}
+
+.alerta-item.alerta-atencao {
+  border-left-color: #d69e2e;
+  background: linear-gradient(135deg, #fff 0%, #fefcbf 100%);
+}
+
+.alerta-item.alerta-info {
+  border-left-color: #3182ce;
+  background: linear-gradient(135deg, #fff 0%, #bee3f8 100%);
+}
+
+.alerta-icone {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.8);
+}
+
+.alerta-conteudo {
+  flex: 1;
+}
+
+.alerta-titulo {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 4px;
+  color: #2d3748;
+}
+
+.alerta-mensagem {
+  font-size: 0.9rem;
+  color: #4a5568;
+  line-height: 1.4;
+}
+
+.alerta-valor {
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 6px;
+  text-align: center;
+  min-width: 80px;
+}
+
+.status-ok {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.status-icone {
+  font-size: 3rem;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+}
+
+.status-mensagem {
+  flex: 1;
+}
+
+.status-titulo {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #22543d;
+  margin-bottom: 8px;
+}
+
+.status-descricao {
+  font-size: 1rem;
+  color: #2f855a;
+  line-height: 1.5;
+}
+
+/* Media Queries para Alertas */
+@media (max-width: 768px) {
+  .alertas-contador {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .contadores-detalhes {
+    justify-content: center;
+  }
+  
+  .alerta-item {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 10px;
+  }
+  
+  .status-ok {
+    flex-direction: column;
+    text-align: center;
   }
 }
 </style>

@@ -15,3 +15,7 @@ async def get_db() -> Optional[AsyncIOMotorDatabase]:
     if client:
         return client[settings.MONGODB_DBNAME]
     return None
+
+def get_collection(db: AsyncIOMotorDatabase, collection_name: str):
+    """Retorna uma coleção do MongoDB"""
+    return db[collection_name]
