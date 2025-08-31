@@ -55,8 +55,8 @@
           <tr v-for="produto in formData.produtos" :key="produto.id">
             <td>{{ produto.nome }}</td>
             <td>{{ (produto.quantidade || 0).toFixed(2) }}</td>
-            <td>{{ formatCurrency(produto.preco_kg || 0) }}</td>
-            <td>{{ formatCurrency((produto.quantidade || 0) * (produto.preco_kg || 0)) }}</td>
+            <td>{{ formatCurrency(produto.preco_unitario || 0) }}</td>
+            <td>{{ formatCurrency((produto.quantidade || 0) * (produto.preco_unitario || 0)) }}</td>
             <td>{{ calcularPercentualProduto(produto) }}%</td>
           </tr>
         </tbody>
@@ -380,7 +380,7 @@ const dataHoraGeracao = computed(() => {
 
 // Calcular percentual de cada produto
 const calcularPercentualProduto = (produto: any): string => {
-  const totalProduto = (produto.quantidade || 0) * (produto.preco_kg || 0)
+  const totalProduto = produto.total || 0
   return props.valorTotalProdutos > 0 ? ((totalProduto / props.valorTotalProdutos) * 100).toFixed(1) : '0.0'
 }
 </script>

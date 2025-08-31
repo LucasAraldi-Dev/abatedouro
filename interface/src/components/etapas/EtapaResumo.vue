@@ -274,7 +274,7 @@
           <div class="indicador-item destaque">
             <div class="indicador-valor">{{ lucroTotalFormatted }}</div>
             <div class="indicador-label">Lucro do dia</div>
-            <div class="indicador-percent">Margem: {{ margemLucroFormatted }}%</div>
+            <div class="indicador-percent">Margem: {{ margemLucroFormatted }}</div>
           </div>
         </div>
       </div>
