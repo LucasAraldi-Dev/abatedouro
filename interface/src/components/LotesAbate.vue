@@ -255,7 +255,15 @@ const handleSave = async (dadosFormulario: any) => {
         horas_trabalhadas: dadosFormulario.horas_trabalhadas,
         horas_reais: dadosFormulario.horas_reais || dadosFormulario.horas_trabalhadas
       },
-      produtos: dadosFormulario.produtos || [],
+      produtos: (dadosFormulario.produtos || []).map(produto => ({
+        produto_id: produto._id || produto.produto_id,
+        nome: produto.nome,
+        tipo: produto.tipo,
+        peso_kg: produto.quantidade || produto.peso_kg || 0,
+        preco_kg: produto.preco_unitario || produto.preco_kg || 0,
+        valor_total: produto.total || produto.valor_total || 0,
+        percentual: produto.percentual || 0
+      })),
       despesas_fixas: {
         funcionarios: dadosFormulario.despesas_fixas?.funcionarios || 0,
         agua: dadosFormulario.despesas_fixas?.agua || 0,
