@@ -561,6 +561,16 @@
             :percentualLucroKg="percentualLucroKg"
             :percentualLucroFrango="percentualLucroFrango"
             :percentualLucroTotal="percentualLucroTotal"
+            :pesoTotalPerdasFormatted="pesoTotalPerdasFormatted"
+            :percentualPerdaTotalFormatted="percentualPerdaTotalFormatted"
+            :valorPerdasFormatted="valorPerdasFormatted"
+            :perdasPorCategoria="perdasPorCategoria"
+            :eficienciaAproveitamentoFormatted="eficienciaAproveitamentoFormatted"
+            :analiseProdutos="analiseProdutos"
+            :produtoMaisValioso="produtoMaisValioso"
+            :produtoMaiorVolume="produtoMaiorVolume"
+            :diversificacaoProdutosFormatted="diversificacaoProdutosFormatted"
+            :pesoMedioGeralFormatted="pesoMedioGeralFormatted"
           />
         </div>
       </div>
@@ -2221,6 +2231,8 @@ const imprimirRelatorio = () => {
   border-radius: 12px;
   padding: 1.5rem;
   text-align: center;
+  height: fit-content;
+  align-self: start;
 }
 
 .qualidade-principal {
@@ -2316,6 +2328,8 @@ const imprimirRelatorio = () => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  height: fit-content;
+  align-self: start;
 }
 
 .destaque-item {
@@ -2346,7 +2360,183 @@ const imprimirRelatorio = () => {
   color: #b45309;
 }
 
+/* Seção de Análise de Perdas */
+.perdas-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.perda-resumo {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 1px solid #ef4444;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.perda-principal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.perda-valor {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.perda-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.perda-percent {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #ef4444;
+}
+
+.perda-percent.perda-alta {
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.perda-percent.perda-media {
+  color: #d97706;
+  background: #fef3c7;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.perda-valor-monetario {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.valor-perdas {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #dc2626;
+  margin-bottom: 0.25rem;
+}
+
+.valor-perdas-label {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.perdas-detalhadas {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.perdas-detalhadas h5 {
+  margin: 0 0 1rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.categoria-perdas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.perda-item {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 0.75rem;
+  align-items: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.perda-item:hover {
+  border-color: var(--primary-red);
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+}
+
+.perda-categoria {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.perda-peso {
+  color: #dc2626;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.perda-valor-cat {
+  color: #dc2626;
+  font-weight: 700;
+  text-align: right;
+  font-size: 0.875rem;
+}
+
+.eficiencia-aproveitamento {
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+  border: 1px solid #0ea5e9;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.aproveitamento-valor {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0369a1;
+  margin-bottom: 0.5rem;
+}
+
+.aproveitamento-valor.aproveitamento-bom {
+  color: #059669;
+}
+
+.aproveitamento-valor.aproveitamento-ruim {
+  color: #dc2626;
+}
+
+.aproveitamento-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+}
+
+.aproveitamento-desc {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
 @media (max-width: 768px) {
+  .perdas-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .perda-item {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
   .qualidade-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
