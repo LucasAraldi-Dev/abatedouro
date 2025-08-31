@@ -227,9 +227,16 @@ const lotesFiltrados = computed(() => {
 // Função para lidar com dados salvos do modal
 const handleSave = async (dadosFormulario: any) => {
   try {
+    console.log('=== DEBUG: Dados recebidos do formulário ===', dadosFormulario)
+    
     // Preparar dados para a API de abates completos
     // Converter data para formato datetime ISO
     const dataAbateISO = dadosFormulario.data_abate ? new Date(dadosFormulario.data_abate + 'T08:00:00').toISOString() : null
+    
+    console.log('=== DEBUG: Data convertida ===', {
+      original: dadosFormulario.data_abate,
+      convertida: dataAbateISO
+    })
     
     const abateData = {
       data_abate: dataAbateISO,
@@ -276,17 +283,48 @@ const handleSave = async (dadosFormulario: any) => {
       preco_venda_kg: dadosFormulario.preco_venda_kg
     }
 
+    console.log('=== DEBUG: Dados finais para envio ===', abateData)
+    
+    // Validar campos obrigatórios
+    const camposObrigatorios = {
+      data_abate: abateData.data_abate,
+      quantidade_aves: abateData.quantidade_aves,
+      valor_kg_vivo: abateData.valor_kg_vivo,
+      peso_total_kg: abateData.peso_total_kg,
+      unidade: abateData.unidade,
+      'horarios.hora_inicio': abateData.horarios?.hora_inicio,
+      'horarios.hora_termino': abateData.horarios?.hora_termino
+    }
+    
+    console.log('=== DEBUG: Validação campos obrigatórios ===', camposObrigatorios)
+    
+    // Verificar se algum campo obrigatório está vazio
+    for (const [campo, valor] of Object.entries(camposObrigatorios)) {
+      if (valor === null || valor === undefined || valor === '') {
+        console.error(`ERRO: Campo obrigatório '${campo}' está vazio:`, valor)
+      }
+    }
+
     if (editingLote.value) {
-      await updateAbateCompleto(editingLote.value._id, abateData)
+      console.log('=== DEBUG: Atualizando lote ===', editingLote.value._id)
+      const response = await updateAbateCompleto(editingLote.value._id, abateData)
+      console.log('=== DEBUG: Resposta da API (update) ===', response)
       showSuccess('Abate atualizado com sucesso!')
     } else {
-      await createAbateCompleto(abateData)
+      console.log('=== DEBUG: Criando novo lote ===')
+      const response = await createAbateCompleto(abateData)
+      console.log('=== DEBUG: Resposta da API (create) ===', response)
       showSuccess('Abate criado com sucesso!')
     }
     closeModal()
     await loadLotes()
   } catch (error) {
-    console.error('Erro ao salvar abate:', error)
+    console.error('=== DEBUG: Erro completo ao salvar lote ===', error)
+    console.error('=== DEBUG: Tipo do erro ===', typeof error)
+    console.error('=== DEBUG: Propriedades do erro ===', Object.keys(error))
+    if (error.response) {
+      console.error('=== DEBUG: Response do erro ===', error.response)
+    }
     showError('Erro ao salvar abate')
   }
 }
