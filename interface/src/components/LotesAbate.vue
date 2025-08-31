@@ -228,8 +228,11 @@ const lotesFiltrados = computed(() => {
 const handleSave = async (dadosFormulario: any) => {
   try {
     // Preparar dados para a API de abates completos
+    // Converter data para formato datetime ISO
+    const dataAbateISO = dadosFormulario.data_abate ? new Date(dadosFormulario.data_abate + 'T08:00:00').toISOString() : null
+    
     const abateData = {
-      data_abate: dadosFormulario.data_abate,
+      data_abate: dataAbateISO,
       quantidade_aves: dadosFormulario.quantidade_aves,
       valor_kg_vivo: dadosFormulario.valor_kg_vivo,
       peso_total_kg: dadosFormulario.peso_total_kg,
