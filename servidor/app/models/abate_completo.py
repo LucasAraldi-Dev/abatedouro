@@ -89,6 +89,34 @@ class AbateCompletoBase(BaseModel):
     # Dados financeiros adicionais
     peso_inteiro_abatido: float = Field(default=0, ge=0, description="Peso inteiro abatido")
     preco_venda_kg: float = Field(default=0, ge=0, description="Preço de venda por kg")
+    
+    # Indicadores de Performance Calculados
+    # Métricas principais
+    receita_bruta: Optional[float] = Field(default=None, ge=0, description="Receita bruta total")
+    custos_totais: Optional[float] = Field(default=None, ge=0, description="Custos totais")
+    lucro_liquido: Optional[float] = Field(default=None, description="Lucro líquido")
+    rendimento_final: Optional[float] = Field(default=None, ge=0, le=100, description="Rendimento final em %")
+    
+    # Indicadores por unidade
+    media_valor_kg: Optional[float] = Field(default=None, ge=0, description="Média valor por kg processado")
+    custo_kg: Optional[float] = Field(default=None, ge=0, description="Custo por kg")
+    custo_ave: Optional[float] = Field(default=None, ge=0, description="Custo por ave")
+    custo_abate_kg: Optional[float] = Field(default=None, ge=0, description="Custo de abate por kg")
+    custo_frango: Optional[float] = Field(default=None, ge=0, description="Custo por frango")
+    lucro_kg: Optional[float] = Field(default=None, description="Lucro por kg")
+    lucro_frango: Optional[float] = Field(default=None, description="Lucro por frango")
+    lucro_total: Optional[float] = Field(default=None, description="Lucro total do dia")
+    
+    # Percentuais dos indicadores
+    percentual_media_valor_kg: Optional[float] = Field(default=None, ge=0, le=100, description="% Média valor/kg")
+    percentual_custo_kg: Optional[float] = Field(default=None, ge=0, le=100, description="% Custo/kg")
+    percentual_custo_ave: Optional[float] = Field(default=None, ge=0, le=100, description="% Custo por ave")
+    percentual_custo_abate_kg: Optional[float] = Field(default=None, ge=0, le=100, description="% Custo abate/kg")
+    percentual_custo_frango: Optional[float] = Field(default=None, ge=0, le=100, description="% Custo por frango")
+    percentual_lucro_kg: Optional[float] = Field(default=None, description="% Lucro/kg")
+    percentual_lucro_frango: Optional[float] = Field(default=None, description="% Lucro por frango")
+    percentual_lucro_total: Optional[float] = Field(default=None, description="% Lucro total")
+    percentual_rendimento: Optional[float] = Field(default=None, ge=0, le=100, description="% Rendimento")
 
     class Config:
         json_encoders = {ObjectId: str}
@@ -152,6 +180,29 @@ class AbateCompletoUpdate(BaseModel):
     despesas_fixas: Optional[DespesasFixas] = None
     peso_inteiro_abatido: Optional[float] = Field(None, ge=0)
     preco_venda_kg: Optional[float] = Field(None, ge=0)
+    
+    # Indicadores de Performance Calculados (opcionais para update)
+    receita_bruta: Optional[float] = Field(None, ge=0)
+    custos_totais: Optional[float] = Field(None, ge=0)
+    lucro_liquido: Optional[float] = None
+    rendimento_final: Optional[float] = Field(None, ge=0, le=100)
+    media_valor_kg: Optional[float] = Field(None, ge=0)
+    custo_kg: Optional[float] = Field(None, ge=0)
+    custo_ave: Optional[float] = Field(None, ge=0)
+    custo_abate_kg: Optional[float] = Field(None, ge=0)
+    custo_frango: Optional[float] = Field(None, ge=0)
+    lucro_kg: Optional[float] = None
+    lucro_frango: Optional[float] = None
+    lucro_total: Optional[float] = None
+    percentual_media_valor_kg: Optional[float] = Field(None, ge=0, le=100)
+    percentual_custo_kg: Optional[float] = Field(None, ge=0, le=100)
+    percentual_custo_ave: Optional[float] = Field(None, ge=0, le=100)
+    percentual_custo_abate_kg: Optional[float] = Field(None, ge=0, le=100)
+    percentual_custo_frango: Optional[float] = Field(None, ge=0, le=100)
+    percentual_lucro_kg: Optional[float] = None
+    percentual_lucro_frango: Optional[float] = None
+    percentual_lucro_total: Optional[float] = None
+    percentual_rendimento: Optional[float] = Field(None, ge=0, le=100)
 
 
 class AbateCompletoInDB(AbateCompletoBase):

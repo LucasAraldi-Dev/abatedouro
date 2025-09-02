@@ -230,51 +230,68 @@
       <!-- Indicadores de Performance -->
       <div class="resumo-section">
         <h4>📊 Indicadores de Performance</h4>
-        <div class="indicadores-grid">
-          <div class="indicador-item">
-            <div class="indicador-valor">{{ mediaValorKgProcessadoFormatted }}</div>
-            <div class="indicador-label">Média Valor do kg (processado)</div>
-            <div class="indicador-percent">{{ percentualMediaValorKg }}%</div>
+        
+        <!-- Grupo: Receita e Rendimento -->
+        <div class="indicadores-categoria">
+          <h5>💰 Receita e Rendimento</h5>
+          <div class="indicadores-grid-dupla">
+            <div class="indicador-item">
+              <div class="indicador-valor">{{ mediaValorKgProcessadoFormatted }}</div>
+              <div class="indicador-label">Média Valor do kg (processado)</div>
+            </div>
+            <div class="indicador-item">
+              <div class="indicador-valor">{{ rendimentoPercentual }}%</div>
+              <div class="indicador-label">Rendimento ({{ formatWeight(pesoTotalProcessado) }})</div>
+            </div>
           </div>
-          <div class="indicador-item">
-            <div class="indicador-valor">{{ custoKgRealFormatted }}</div>
-            <div class="indicador-label">Custo por kg (real final)</div>
-            <div class="indicador-percent">{{ percentualCustoKgReal }}%</div>
+        </div>
+
+        <!-- Grupo: Custos -->
+        <div class="indicadores-categoria">
+          <h5>📊 Análise de Custos</h5>
+          <div class="indicadores-grid-dupla">
+            <div class="indicador-item">
+              <div class="indicador-valor">{{ custoKgRealFormatted }}</div>
+              <div class="indicador-label">Custo por kg (real final)</div>
+            </div>
+            <div class="indicador-item">
+              <div class="indicador-valor">{{ custoAveRealFormatted }}</div>
+              <div class="indicador-label">Custo por ave</div>
+            </div>
           </div>
-          <div class="indicador-item">
-            <div class="indicador-valor">{{ custoAveRealFormatted }}</div>
-            <div class="indicador-label">Custo por ave</div>
-            <div class="indicador-percent">{{ percentualCustoAve }}%</div>
+          <div class="indicadores-grid-dupla">
+            <div class="indicador-item">
+              <div class="indicador-valor">{{ custoAbateKgFormatted }}</div>
+              <div class="indicador-label">Custos de abate por kg</div>
+              <div class="indicador-percent">{{ percentualCustoAbateKg }}%</div>
+            </div>
+            <div class="indicador-item">
+              <div class="indicador-valor">{{ custoFrangoFormatted }}</div>
+              <div class="indicador-label">Custo por frango</div>
+              <div class="indicador-percent">{{ percentualCustoFrango }}%</div>
+            </div>
           </div>
-          <div class="indicador-item">
-            <div class="indicador-valor">{{ custoAbateKgFormatted }}</div>
-            <div class="indicador-label">Custos de abate por kg</div>
-            <div class="indicador-percent">{{ percentualCustoAbateKg }}%</div>
+        </div>
+
+        <!-- Grupo: Lucros -->
+        <div class="indicadores-categoria">
+          <h5>📈 Análise de Lucros</h5>
+          <div class="indicadores-grid-dupla">
+            <div class="indicador-item">
+              <div class="indicador-valor">{{ lucroKgFormatted }}</div>
+              <div class="indicador-label">Lucro por Kg</div>
+              <div class="indicador-percent">{{ percentualLucroKg }}%</div>
+            </div>
+            <div class="indicador-item">
+              <div class="indicador-valor">{{ lucroFrangoFormatted }}</div>
+              <div class="indicador-label">Lucro por frango</div>
+              <div class="indicador-percent">{{ percentualLucroFrango }}%</div>
+            </div>
           </div>
-          <div class="indicador-item">
-            <div class="indicador-valor">{{ custoFrangoFormatted }}</div>
-            <div class="indicador-label">Custo por frango</div>
-            <div class="indicador-percent">{{ percentualCustoFrango }}%</div>
-          </div>
-          <div class="indicador-item">
-            <div class="indicador-valor">{{ lucroKgFormatted }}</div>
-            <div class="indicador-label">Lucro por Kg</div>
-            <div class="indicador-percent">{{ percentualLucroKg }}%</div>
-          </div>
-          <div class="indicador-item">
-            <div class="indicador-valor">{{ lucroFrangoFormatted }}</div>
-            <div class="indicador-label">Lucro por frango</div>
-            <div class="indicador-percent">{{ percentualLucroFrango }}%</div>
-          </div>
-          <div class="indicador-item">
-            <div class="indicador-valor">{{ rendimentoPercentual }}%</div>
-            <div class="indicador-label">Rendimento ({{ formatWeight(rendimentoFinal) }})</div>
-            <div class="indicador-percent">{{ percentualRendimento }}%</div>
-          </div>
-          <div class="indicador-item destaque">
+          <div class="indicador-item-destaque">
             <div class="indicador-valor">{{ lucroTotalFormatted }}</div>
             <div class="indicador-label">Lucro do dia</div>
-            <div class="indicador-percent">Margem: {{ margemLucroFormatted }}</div>
+            <div class="indicador-margem">Margem: {{ margemLucroFormatted }}</div>
           </div>
         </div>
       </div>
@@ -577,6 +594,7 @@
 import { computed, watch, ref, onMounted, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import RelatorioImpressao from '../relatorios/RelatorioImpressao.vue'
+import { exportToPDF, type ExportColumn } from '../../utils/exportUtils'
 
 // Props
 interface Props {
@@ -1161,41 +1179,45 @@ const eficienciaAproveitamentoFormatted = computed(() => `${eficienciaAproveitam
 const diversificacaoProdutosFormatted = computed(() => `${diversificacaoProdutos.value.toFixed(1)}%`)
 const pesoMedioGeralFormatted = computed(() => formatWeight(pesoMedioGeral.value))
 
-// Cálculos de percentual de participação
-const totalGeral = computed(() => {
-  return Math.abs(receitaBruta.value) + Math.abs(custosTotais.value)
-})
-
+// Cálculos de percentual de participação corrigidos
 const percentualMediaValorKg = computed(() => {
-  return totalGeral.value > 0 ? ((Math.abs(mediaValorKgProcessado.value * pesoTotalProcessado.value) / totalGeral.value) * 100).toFixed(1) : '0.0'
+  // Percentual da receita que representa o valor médio por kg
+  return receitaBruta.value > 0 ? ((mediaValorKgProcessado.value * pesoTotalProcessado.value / receitaBruta.value) * 100).toFixed(1) : '0.0'
 })
 
 const percentualCustoKgReal = computed(() => {
-  return totalGeral.value > 0 ? ((Math.abs(custoKgReal.value * pesoTotalProcessado.value) / totalGeral.value) * 100).toFixed(1) : '0.0'
+  // Percentual dos custos totais que representa o custo por kg
+  return custosTotais.value > 0 ? ((custoKgReal.value * pesoTotalProcessado.value / custosTotais.value) * 100).toFixed(1) : '0.0'
 })
 
 const percentualCustoAve = computed(() => {
-  return totalGeral.value > 0 ? ((Math.abs(custoAveReal.value * (props.formData.quantidade_aves || 0)) / totalGeral.value) * 100).toFixed(1) : '0.0'
+  // Percentual dos custos totais que representa o custo por ave
+  return custosTotais.value > 0 ? ((custoAveReal.value * (props.formData.quantidade_aves || 0) / custosTotais.value) * 100).toFixed(1) : '0.0'
 })
 
 const percentualCustoAbateKg = computed(() => {
-  return totalGeral.value > 0 ? ((Math.abs(custoAbateKg.value * pesoTotalProcessado.value) / totalGeral.value) * 100).toFixed(1) : '0.0'
+  // Percentual dos custos totais que representa apenas os custos de abate por kg
+  return custosTotais.value > 0 ? ((custoAbateKg.value * pesoTotalProcessado.value / custosTotais.value) * 100).toFixed(1) : '0.0'
 })
 
 const percentualCustoFrango = computed(() => {
-  return totalGeral.value > 0 ? ((Math.abs(custoFrango.value * (props.formData.quantidade_aves || 0)) / totalGeral.value) * 100).toFixed(1) : '0.0'
+  // Percentual dos custos totais que representa o custo de abate por frango
+  return custosTotais.value > 0 ? ((custoFrango.value * (props.formData.quantidade_aves || 0) / custosTotais.value) * 100).toFixed(1) : '0.0'
 })
 
 const percentualLucroKg = computed(() => {
-  return totalGeral.value > 0 ? ((Math.abs(lucroKg.value * pesoTotalProcessado.value) / totalGeral.value) * 100).toFixed(1) : '0.0'
+  // Percentual da receita que representa o lucro por kg
+  return receitaBruta.value > 0 ? ((lucroKg.value * pesoTotalProcessado.value / receitaBruta.value) * 100).toFixed(1) : '0.0'
 })
 
 const percentualLucroFrango = computed(() => {
-  return totalGeral.value > 0 ? ((Math.abs(lucroFrango.value * (props.formData.quantidade_aves || 0)) / totalGeral.value) * 100).toFixed(1) : '0.0'
+  // Percentual da receita que representa o lucro por frango
+  return receitaBruta.value > 0 ? ((lucroFrango.value * (props.formData.quantidade_aves || 0) / receitaBruta.value) * 100).toFixed(1) : '0.0'
 })
 
 const percentualLucroTotal = computed(() => {
-  return totalGeral.value > 0 ? ((Math.abs(lucroTotal.value) / totalGeral.value) * 100).toFixed(1) : '0.0'
+  // Margem de lucro - percentual da receita que representa o lucro
+  return receitaBruta.value > 0 ? ((lucroTotal.value / receitaBruta.value) * 100).toFixed(1) : '0.0'
 })
 
 const percentualRendimento = computed(() => {
@@ -1220,6 +1242,62 @@ const showPrejuizoAlert = () => {
 watch(isValid, (valid) => {
   emit('validate', valid)
 }, { immediate: true })
+
+// Atualizar formData com indicadores calculados
+watch(
+  [
+    receitaBruta,
+    custosTotais,
+    lucroLiquido,
+    rendimentoFinal,
+    mediaValorKgProcessado,
+    custoKgReal,
+    custoAveReal,
+    custoAbateKg,
+    custoFrango,
+    lucroKg,
+    lucroFrango,
+    lucroTotal,
+    percentualMediaValorKg,
+    percentualCustoKgReal,
+    percentualCustoAve,
+    percentualCustoAbateKg,
+    percentualCustoFrango,
+    percentualLucroKg,
+    percentualLucroFrango,
+    percentualLucroTotal
+  ],
+  () => {
+    // Atualizar formData com os indicadores calculados
+    Object.assign(props.formData, {
+      receita_bruta: receitaBruta.value,
+      custos_totais: custosTotais.value,
+      lucro_liquido: lucroLiquido.value,
+      rendimento_final: rendimentoFinal.value,
+      media_valor_kg: mediaValorKgProcessado.value,
+      custo_kg: custoKgReal.value,
+      custo_ave: custoAveReal.value,
+      custo_abate_kg: custoAbateKg.value,
+      custo_frango: custoFrango.value,
+      lucro_kg: lucroKg.value,
+      lucro_frango: lucroFrango.value,
+      lucro_total: lucroTotal.value,
+      percentual_receita_bruta: parseFloat(percentualMediaValorKg.value),
+       percentual_custos_totais: parseFloat(percentualCustoKgReal.value),
+       percentual_lucro_liquido: parseFloat(percentualLucroTotal.value),
+      percentual_rendimento_final: rendimentoFinal.value,
+      percentual_media_valor_kg: parseFloat(percentualMediaValorKg.value),
+       percentual_custo_kg: parseFloat(percentualCustoKgReal.value),
+       percentual_custo_ave: parseFloat(percentualCustoAve.value),
+      percentual_custo_abate_kg: parseFloat(percentualCustoAbateKg.value),
+      percentual_custo_frango: parseFloat(percentualCustoFrango.value),
+      percentual_lucro_kg: parseFloat(percentualLucroKg.value),
+      percentual_lucro_frango: parseFloat(percentualLucroFrango.value),
+      percentual_lucro_total: parseFloat(percentualLucroTotal.value)
+    })
+  },
+  { immediate: true, deep: true }
+)
 
 // Função para criar gráfico de distribuição de custos
 const criarGraficoCustos = () => {
@@ -1474,8 +1552,691 @@ const fecharRelatorioImpressao = () => {
 
 // Função para imprimir
 const imprimirRelatorio = () => {
-  window.print()
+  // Capturar o HTML do modal de relatório
+  const modalElement = document.querySelector('.modal-impressao')
+  if (!modalElement) {
+    alert('Modal de relatório não encontrado. Abra o relatório primeiro.')
+    return
+  }
+
+  // Aguardar um momento para garantir que o componente Vue foi renderizado
+  setTimeout(() => {
+    // Criar uma nova janela para impressão
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      alert('Não foi possível abrir a janela de impressão. Verifique se o bloqueador de pop-ups está desabilitado.')
+      return
+    }
+
+    // Obter o HTML renderizado do modal (incluindo conteúdo do componente Vue)
+    const modalHTML = modalElement.outerHTML
+
+  // Criar o documento HTML completo para impressão com todos os estilos do componente
+  const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Relatório de Abate - ${new Date().toLocaleDateString('pt-BR')}</title>
+      <style>
+        @media print {
+          @page {
+            margin: 0.8cm;
+            size: A4;
+          }
+          body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+          
+          /* Evitar quebras de página desnecessárias */
+          .secao-dados,
+          .secao-produtos {
+            page-break-inside: avoid;
+            page-break-after: avoid;
+          }
+          
+          .secao-despesas,
+          .secao-indicadores {
+            page-break-inside: avoid;
+            page-break-before: avoid;
+          }
+          
+          .secao-perdas,
+          .secao-qualidade {
+            page-break-inside: avoid;
+          }
+          
+          .secao-financeiro {
+            page-break-inside: avoid;
+            page-break-before: avoid;
+          }
+          
+          /* Forçar conteúdo principal na primeira página */
+          .header-impressao + .secao-dados + .secao-produtos {
+            page-break-after: avoid;
+          }
+        }
+        
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 15px;
+          color: #333;
+          background: white;
+          font-size: 11px;
+          line-height: 1.3;
+        }
+        
+        .modal-content {
+          background: white;
+          width: 100%;
+          margin: 0;
+          padding: 0;
+        }
+        
+        .modal-actions {
+          display: none !important;
+        }
+        
+        /* Estilos do componente RelatorioImpressao */
+        .relatorio-container {
+          max-width: 100%;
+          margin: 0;
+          padding: 0;
+          font-family: Arial, sans-serif;
+          color: #333;
+          background: white;
+        }
+        
+        .header-impressao {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 3px solid #dc2626;
+          padding-bottom: 10px;
+          margin-bottom: 15px;
+        }
+        
+        .logo {
+          height: 60px;
+          width: auto;
+        }
+        
+        .titulo-section {
+          text-align: center;
+          flex: 1;
+        }
+        
+        .titulo-section h1 {
+          font-size: 24px;
+          font-weight: bold;
+          color: #dc2626;
+          margin: 0;
+        }
+        
+        .titulo-section h2 {
+          font-size: 16px;
+          color: #666;
+          margin: 5px 0 0 0;
+        }
+        
+        .data-section {
+          text-align: right;
+          font-size: 14px;
+        }
+        
+        .data-section p {
+          margin: 2px 0;
+        }
+        
+        .secao-dados,
+        .secao-produtos,
+        .secao-despesas,
+        .secao-indicadores,
+        .secao-perdas,
+        .secao-qualidade,
+        .secao-financeiro {
+          margin-bottom: 15px;
+          page-break-inside: avoid;
+        }
+        
+        /* Otimização de espaço para primeira página */
+        .secao-dados {
+          margin-bottom: 10px;
+        }
+        
+        .secao-produtos {
+          margin-bottom: 12px;
+        }
+        
+        .secao-dados h3,
+        .secao-produtos h3,
+        .secao-despesas h3,
+        .secao-indicadores h3,
+        .secao-perdas h3,
+        .secao-qualidade h3,
+        .secao-financeiro h3 {
+          font-size: 16px;
+          color: #dc2626;
+          border-bottom: 2px solid #dc2626;
+          padding-bottom: 5px;
+          margin-bottom: 15px;
+        }
+        
+        .dados-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+        }
+        
+        .dado-item {
+          display: flex;
+          justify-content: space-between;
+          padding: 8px;
+          border: 1px solid #e5e7eb;
+          border-radius: 4px;
+        }
+        
+        .dado-item .label {
+          font-weight: 600;
+        }
+        
+        .dado-item .valor {
+          font-weight: bold;
+          color: #dc2626;
+        }
+        
+        .tabela-produtos {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 10px;
+        }
+        
+        .tabela-produtos th,
+        .tabela-produtos td {
+          border: 1px solid #d1d5db;
+          padding: 4px 6px;
+          text-align: left;
+          line-height: 1.2;
+        }
+        
+        .tabela-produtos th {
+          background-color: #f3f4f6;
+          font-weight: 600;
+          font-size: 10px;
+        }
+        
+        .tabela-produtos td {
+          font-size: 9px;
+        }
+        
+        .tabela-produtos .total-row {
+          background-color: #fef2f2;
+          font-weight: bold;
+        }
+        
+        .despesas-grid {
+          display: grid;
+          grid-template-columns: repeat(5, 1fr);
+          gap: 10px;
+        }
+        
+        .categoria-despesa {
+          text-align: center;
+          padding: 10px;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          background-color: #f9fafb;
+        }
+        
+        .categoria-despesa h4 {
+          font-size: 12px;
+          margin: 0 0 5px 0;
+          color: #374151;
+        }
+        
+        .categoria-despesa p {
+          font-weight: bold;
+          color: #dc2626;
+          margin: 0;
+          font-size: 14px;
+        }
+        
+        .indicadores-categoria {
+          margin-bottom: 20px;
+          border: 1px solid #e5e7eb;
+          border-radius: 6px;
+          padding: 12px;
+          background: #fafafa;
+        }
+        
+        .indicadores-categoria h4 {
+          font-size: 12px;
+          font-weight: bold;
+          color: #374151;
+          margin: 0 0 10px 0;
+          padding-bottom: 5px;
+          border-bottom: 1px solid #d1d5db;
+        }
+        
+        .indicadores-dupla {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-bottom: 8px;
+        }
+        
+        .indicadores-dupla:last-child {
+          margin-bottom: 0;
+        }
+        
+        .indicadores-categoria .indicador-item {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          padding: 8px;
+          border: 1px solid #d1d5db;
+          border-radius: 4px;
+          background: white;
+          font-size: 10px;
+        }
+        
+        .valor-destaque {
+          font-size: 14px;
+          font-weight: bold;
+          color: #059669;
+          margin-bottom: 2px;
+        }
+        
+        .indicadores-categoria .label {
+          font-size: 10px;
+          color: #6b7280;
+          margin-bottom: 2px;
+        }
+        
+        .percentual {
+          font-size: 10px;
+          font-weight: 600;
+          color: #0369a1;
+        }
+        
+        .indicador-destaque {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          padding: 12px;
+          border: 2px solid #059669;
+          border-radius: 6px;
+          background: #f0fdf4;
+          margin-top: 8px;
+        }
+        
+        .valor-principal {
+          font-size: 16px;
+          font-weight: bold;
+          color: #059669;
+          margin-bottom: 3px;
+        }
+        
+        .margem {
+          font-size: 10px;
+          font-weight: 600;
+          color: #059669;
+          margin-top: 2px;
+        }
+        
+        .financeiro-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 15px;
+        }
+        
+        .financeiro-item {
+          text-align: center;
+          padding: 15px;
+          border-radius: 8px;
+          border: 2px solid;
+        }
+        
+        .financeiro-item.receita {
+          border-color: #3b82f6;
+          background-color: #eff6ff;
+        }
+        
+        .financeiro-item.custo {
+          border-color: #f59e0b;
+          background-color: #fffbeb;
+        }
+        
+        .financeiro-item.lucro {
+          border-color: #10b981;
+          background-color: #ecfdf5;
+        }
+        
+        .financeiro-item.prejuizo {
+          border-color: #ef4444;
+          background-color: #fef2f2;
+        }
+        
+        .financeiro-item .label {
+          display: block;
+          font-weight: 600;
+          margin-bottom: 5px;
+          font-size: 14px;
+        }
+        
+        .financeiro-item .valor {
+          display: block;
+          font-weight: bold;
+          font-size: 18px;
+        }
+        
+        .perdas-impressao-grid {
+          display: grid;
+          grid-template-columns: 1fr 2fr 1fr;
+          gap: 15px;
+          margin-top: 10px;
+        }
+        
+        .perdas-resumo-impressao {
+          background: #fef2f2 !important;
+          border: 1px solid #fecaca !important;
+          border-radius: 8px !important;
+          padding: 15px !important;
+          text-align: center !important;
+        }
+        
+        .perda-principal-impressao {
+          margin-bottom: 15px !important;
+        }
+        
+        .perda-valor-impressao {
+          font-size: 18px !important;
+          font-weight: bold !important;
+          color: #dc2626 !important;
+          margin-bottom: 5px !important;
+        }
+        
+        .perda-label-impressao {
+          font-size: 12px !important;
+          color: #374151 !important;
+          margin-bottom: 5px !important;
+        }
+        
+        .perda-percent-impressao {
+          font-size: 14px !important;
+          font-weight: 600 !important;
+          color: #dc2626 !important;
+        }
+        
+        .perda-valor-monetario-impressao {
+          border-top: 1px solid #fecaca !important;
+          padding-top: 10px !important;
+        }
+        
+        .valor-perdas-impressao {
+          font-size: 16px !important;
+          font-weight: bold !important;
+          color: #dc2626 !important;
+          margin-bottom: 3px !important;
+        }
+        
+        .valor-perdas-label-impressao {
+          font-size: 11px !important;
+          color: #6b7280 !important;
+        }
+        
+        .perdas-detalhadas-impressao h4 {
+          font-size: 14px !important;
+          color: #374151 !important;
+          margin: 0 0 10px 0 !important;
+          border-bottom: 1px solid #e5e7eb !important;
+          padding-bottom: 5px !important;
+        }
+        
+        .categoria-perdas-impressao {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 8px !important;
+        }
+        
+        .perda-item-impressao {
+          display: flex !important;
+          justify-content: space-between !important;
+          align-items: center !important;
+          padding: 6px 10px !important;
+          background: #f9fafb !important;
+          border: 1px solid #e5e7eb !important;
+          border-radius: 4px !important;
+          font-size: 11px !important;
+        }
+        
+        .perda-categoria-impressao {
+          font-weight: 600 !important;
+          color: #374151 !important;
+        }
+        
+        .perda-dados-impressao {
+          font-weight: 500 !important;
+          color: #dc2626 !important;
+        }
+        
+        .eficiencia-aproveitamento-impressao {
+          background: #ecfdf5 !important;
+          border: 1px solid #bbf7d0 !important;
+          border-radius: 8px !important;
+          padding: 15px !important;
+          text-align: center !important;
+        }
+        
+        .aproveitamento-valor-impressao {
+          font-size: 20px !important;
+          font-weight: bold !important;
+          color: #059669 !important;
+          margin-bottom: 5px !important;
+        }
+        
+        .aproveitamento-label-impressao {
+          font-size: 12px !important;
+          color: #374151 !important;
+          font-weight: 600 !important;
+          margin-bottom: 3px !important;
+        }
+        
+        .aproveitamento-desc-impressao {
+          font-size: 10px !important;
+          color: #6b7280 !important;
+        }
+        
+        /* Seção de Qualidade */
+        .qualidade-impressao-grid {
+          display: grid !important;
+          grid-template-columns: 1fr 2fr 1fr !important;
+          gap: 15px !important;
+          margin-top: 10px !important;
+        }
+        
+        .qualidade-resumo-impressao {
+          background: #eff6ff !important;
+          border: 1px solid #bfdbfe !important;
+          border-radius: 8px !important;
+          padding: 15px !important;
+          text-align: center !important;
+        }
+        
+        .qualidade-principal-impressao {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 8px !important;
+        }
+        
+        .qualidade-valor-impressao {
+          font-size: 18px !important;
+          font-weight: bold !important;
+          color: #1d4ed8 !important;
+        }
+        
+        .qualidade-label-impressao {
+          font-size: 12px !important;
+          color: #374151 !important;
+          font-weight: 600 !important;
+        }
+        
+        .qualidade-diversificacao-impressao {
+          font-size: 16px !important;
+          font-weight: bold !important;
+          color: #059669 !important;
+          margin-top: 10px !important;
+        }
+        
+        .qualidade-diversificacao-label-impressao {
+          font-size: 11px !important;
+          color: #6b7280 !important;
+        }
+        
+        .produtos-detalhados-impressao h4 {
+          font-size: 14px !important;
+          color: #374151 !important;
+          margin: 0 0 10px 0 !important;
+          border-bottom: 1px solid #e5e7eb !important;
+          padding-bottom: 5px !important;
+        }
+        
+        .produtos-lista-impressao {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 6px !important;
+        }
+        
+        .produto-item-impressao {
+          background: #f9fafb !important;
+          border: 1px solid #e5e7eb !important;
+          border-radius: 4px !important;
+          padding: 8px !important;
+        }
+        
+        .produto-nome-impressao {
+          font-weight: 600 !important;
+          color: #374151 !important;
+          font-size: 11px !important;
+          margin-bottom: 3px !important;
+        }
+        
+        .produto-stats-impressao {
+          display: flex !important;
+          gap: 8px !important;
+          font-size: 10px !important;
+        }
+        
+        .produto-quantidade-impressao {
+          color: #059669 !important;
+          font-weight: 500 !important;
+        }
+        
+        .produto-participacao-impressao {
+          color: #0369a1 !important;
+          font-weight: 500 !important;
+        }
+        
+        .produto-valor-kg-impressao {
+          color: #dc2626 !important;
+          font-weight: 600 !important;
+        }
+        
+        .produtos-destaque-impressao {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 10px !important;
+        }
+        
+        .destaque-item-impressao {
+          background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+          border: 1px solid #f59e0b !important;
+          border-radius: 8px !important;
+          padding: 12px !important;
+          text-align: center !important;
+        }
+        
+        .destaque-titulo-impressao {
+          font-size: 10px !important;
+          font-weight: 600 !important;
+          color: #92400e !important;
+          margin-bottom: 5px !important;
+        }
+        
+        .destaque-produto-impressao {
+          font-size: 12px !important;
+          font-weight: 600 !important;
+          color: #451a03 !important;
+          margin-bottom: 3px !important;
+        }
+        
+        .destaque-valor-impressao {
+          font-size: 11px !important;
+          font-weight: 700 !important;
+          color: #b45309 !important;
+        }
+        
+        .footer-impressao {
+          margin-top: 40px;
+          border-top: 2px solid #dc2626;
+          padding-top: 20px;
+        }
+        
+        .footer-info {
+          text-align: center;
+          margin-bottom: 30px;
+        }
+        
+        .footer-info p {
+          margin: 5px 0;
+          font-size: 12px;
+        }
+        
+        .footer-assinatura {
+          display: flex;
+          justify-content: space-around;
+          margin-top: 40px;
+        }
+        
+        .linha-assinatura {
+          text-align: center;
+        }
+        
+        .linha-assinatura p:first-child {
+          margin-bottom: 5px;
+          font-size: 14px;
+        }
+        
+        .linha-assinatura p:last-child {
+          font-size: 12px;
+          color: #666;
+          margin: 0;
+        }
+      </style>
+    </head>
+    <body>
+      ${modalHTML}
+    </body>
+    </html>
+  `
+
+    // Escrever o conteúdo na nova janela
+    printWindow.document.write(htmlContent)
+    printWindow.document.close()
+    
+    // Aguardar carregamento e imprimir
+    printWindow.onload = () => {
+      setTimeout(() => {
+        printWindow.print()
+        // Não fechar automaticamente para permitir que o usuário veja o resultado
+      }, 500)
+    }
+  }, 300) // Aguardar 300ms para o componente Vue renderizar
 }
+
+
 </script>
 
 <style scoped>
@@ -1737,6 +2498,32 @@ const imprimirRelatorio = () => {
   gap: 1rem;
 }
 
+.indicadores-categoria {
+  margin-bottom: 2rem;
+}
+
+.indicadores-categoria h5 {
+  color: var(--primary-red);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--border-light);
+}
+
+.indicadores-grid-dupla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+  .indicadores-grid-dupla {
+    grid-template-columns: 1fr;
+  }
+}
+
 .indicador-item {
   text-align: center;
   padding: 1rem;
@@ -1751,6 +2538,21 @@ const imprimirRelatorio = () => {
   transform: translateY(-2px);
 }
 
+.indicador-item-destaque {
+  text-align: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+  border: 2px solid #38a169;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(56, 161, 105, 0.15);
+}
+
+.indicador-item-destaque:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(56, 161, 105, 0.25);
+}
+
 .indicador-valor {
   font-size: 1.25rem;
   font-weight: 700;
@@ -1758,9 +2560,28 @@ const imprimirRelatorio = () => {
   margin-bottom: 0.5rem;
 }
 
+.indicador-item-destaque .indicador-valor {
+  font-size: 1.5rem;
+  color: #2f855a;
+}
+
 .indicador-label {
   font-size: 0.875rem;
   color: var(--text-muted);
+  font-weight: 500;
+}
+
+.indicador-margem {
+  font-size: 0.9rem;
+  color: #2f855a;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.indicador-percent {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
   font-weight: 500;
 }
 
@@ -2168,23 +2989,10 @@ const imprimirRelatorio = () => {
 
 /* Estilos para impressão do modal */
 @media print {
-  /* Ocultar tudo da página */
-  body * {
-    visibility: hidden;
-  }
-  
-  /* Mostrar apenas o conteúdo do relatório */
-  .modal-impressao,
-  .modal-impressao * {
-    visibility: visible;
-  }
-  
   .modal-impressao {
     position: static;
     background: none;
     padding: 0;
-    width: 100%;
-    height: auto;
   }
   
   .modal-content {
@@ -2193,7 +3001,6 @@ const imprimirRelatorio = () => {
     max-height: none;
     box-shadow: none;
     border-radius: 0;
-    background: white;
   }
   
   .modal-header {
@@ -2974,6 +3781,56 @@ const imprimirRelatorio = () => {
   .status-ok {
     flex-direction: column;
     text-align: center;
+  }
+}
+
+/* Estilos para impressão - ocultar tudo exceto o modal de relatório */
+@media print {
+  /* Ocultar tudo por padrão */
+  body.printing-modal * {
+    visibility: hidden !important;
+  }
+  
+  /* Mostrar apenas o modal de impressão ativo */
+  body.printing-modal .modal-impressao.printing-active,
+  body.printing-modal .modal-impressao.printing-active * {
+    visibility: visible !important;
+  }
+  
+  /* Estilos específicos para o modal de impressão */
+  body.printing-modal .modal-impressao.printing-active {
+    position: static !important;
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  body.printing-modal .modal-impressao.printing-active .modal-content {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  body.printing-modal .modal-impressao.printing-active .modal-header {
+    border-bottom: 1px solid #ddd !important;
+    padding-bottom: 10px !important;
+  }
+  
+  /* Ocultar botões de ação na impressão */
+  body.printing-modal .modal-impressao.printing-active .modal-actions {
+    display: none !important;
+  }
+  
+  /* Garantir que o conteúdo do relatório seja visível */
+  body.printing-modal .modal-impressao.printing-active .modal-body {
+    padding: 0 !important;
+    margin: 0 !important;
   }
 }
 </style>

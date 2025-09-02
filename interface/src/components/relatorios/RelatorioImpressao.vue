@@ -100,38 +100,69 @@
     <!-- Indicadores de Performance -->
     <div class="secao-indicadores">
       <h3>📊 Indicadores de Performance</h3>
-      <div class="indicadores-grid">
-        <div class="indicador-item">
-          <span class="label">Média Valor/kg (processado):</span>
-          <span class="valor">{{ mediaValorKgProcessadoFormatted }} ({{ percentualMediaValorKg }}%)</span>
+      
+      <!-- Grupo: Receita e Rendimento -->
+      <div class="indicadores-categoria">
+        <h4>💰 Receita e Rendimento</h4>
+        <div class="indicadores-dupla">
+          <div class="indicador-item">
+            <span class="valor-destaque">{{ mediaValorKgProcessadoFormatted }}</span>
+            <span class="label">Média Valor do kg (processado)</span>
+            <span class="percentual">{{ percentualMediaValorKg }}%</span>
+          </div>
+          <div class="indicador-item">
+            <span class="valor-destaque">{{ rendimentoPercentual }}%</span>
+            <span class="label">Rendimento ({{ formatWeight(pesoTotalProcessado) }})</span>
+          </div>
         </div>
-        <div class="indicador-item">
-          <span class="label">Custo/kg (real final):</span>
-          <span class="valor">{{ custoKgRealFormatted }} ({{ percentualCustoKgReal }}%)</span>
+      </div>
+
+      <!-- Grupo: Análise de Custos -->
+      <div class="indicadores-categoria">
+        <h4>📊 Análise de Custos</h4>
+        <div class="indicadores-dupla">
+          <div class="indicador-item">
+            <span class="valor-destaque">{{ custoKgRealFormatted }}</span>
+            <span class="label">Custo por kg (real final)</span>
+          </div>
+          <div class="indicador-item">
+            <span class="valor-destaque">{{ custoAveRealFormatted }}</span>
+            <span class="label">Custo por ave</span>
+          </div>
         </div>
-        <div class="indicador-item">
-          <span class="label">Custo por ave:</span>
-          <span class="valor">{{ custoAveRealFormatted }} ({{ percentualCustoAve }}%)</span>
+        <div class="indicadores-dupla">
+          <div class="indicador-item">
+            <span class="valor-destaque">{{ custoAbateKgFormatted }}</span>
+            <span class="label">Custos de abate por kg</span>
+            <span class="percentual">{{ percentualCustoAbateKg }}%</span>
+          </div>
+          <div class="indicador-item">
+            <span class="valor-destaque">{{ custoFrangoFormatted }}</span>
+            <span class="label">Custo por frango</span>
+            <span class="percentual">{{ percentualCustoFrango }}%</span>
+          </div>
         </div>
-        <div class="indicador-item">
-          <span class="label">Custos de abate/kg:</span>
-          <span class="valor">{{ custoAbateKgFormatted }} ({{ percentualCustoAbateKg }}%)</span>
+      </div>
+
+      <!-- Grupo: Análise de Lucros -->
+      <div class="indicadores-categoria">
+        <h4>📈 Análise de Lucros</h4>
+        <div class="indicadores-dupla">
+          <div class="indicador-item">
+            <span class="valor-destaque">{{ lucroKgFormatted }}</span>
+            <span class="label">Lucro por Kg</span>
+            <span class="percentual">{{ percentualLucroKg }}%</span>
+          </div>
+          <div class="indicador-item">
+            <span class="valor-destaque">{{ lucroFrangoFormatted }}</span>
+            <span class="label">Lucro por frango</span>
+            <span class="percentual">{{ percentualLucroFrango }}%</span>
+          </div>
         </div>
-        <div class="indicador-item">
-          <span class="label">Custo por frango:</span>
-          <span class="valor">{{ custoFrangoFormatted }} ({{ percentualCustoFrango }}%)</span>
-        </div>
-        <div class="indicador-item">
-          <span class="label">Lucro/kg:</span>
-          <span class="valor">{{ lucroKgFormatted }} ({{ percentualLucroKg }}%)</span>
-        </div>
-        <div class="indicador-item">
-          <span class="label">Lucro por frango:</span>
-          <span class="valor">{{ lucroFrangoFormatted }} ({{ percentualLucroFrango }}%)</span>
-        </div>
-        <div class="indicador-item">
-          <span class="label">Lucro do dia:</span>
-          <span class="valor">{{ lucroTotalFormatted }} ({{ margemLucroFormatted }})</span>
+        <div class="indicador-destaque">
+          <span class="valor-principal">{{ lucroTotalFormatted }}</span>
+          <span class="label">Lucro do dia</span>
+          <span class="margem">Margem: {{ margemLucroFormatted }}</span>
         </div>
       </div>
     </div>
@@ -192,20 +223,6 @@
             <div class="qualidade-label-impressao">Peso Médio por Ave</div>
             <div class="qualidade-diversificacao-impressao">{{ diversificacaoProdutosFormatted }}</div>
             <div class="qualidade-diversificacao-label-impressao">Índice de Diversificação</div>
-          </div>
-        </div>
-        
-        <div class="produtos-detalhados-impressao">
-          <h4>📊 Análise por Produto</h4>
-          <div class="produtos-lista-impressao">
-            <div v-for="produto in analiseProdutos" :key="produto.nome" class="produto-item-impressao">
-              <div class="produto-nome-impressao">{{ produto.nome }}</div>
-              <div class="produto-stats-impressao">
-                <span class="produto-quantidade-impressao">{{ formatWeight(produto.quantidade) }}</span>
-                <span class="produto-participacao-impressao">({{ produto.participacao.toFixed(1) }}%)</span>
-                <span class="produto-valor-kg-impressao">{{ formatCurrency(produto.valorKg) }}/kg</span>
-              </div>
-            </div>
           </div>
         </div>
         
@@ -364,7 +381,7 @@ const formatWeight = (value: number): string => {
 // Data formatada
 const dataAbateFormatted = computed(() => {
   if (!props.formData.data_abate) return new Date().toLocaleDateString('pt-BR')
-  return new Date(props.formData.data_abate).toLocaleDateString('pt-BR')
+  return new Date(props.formData.data_abate + 'T00:00:00').toLocaleDateString('pt-BR')
 })
 
 // Valores formatados
@@ -583,6 +600,90 @@ const calcularPercentualProduto = (produto: any): string => {
 .indicador-item .valor {
   font-weight: bold;
   color: #059669;
+}
+
+/* Novos estilos para indicadores categorizados */
+.indicadores-categoria {
+  margin-bottom: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px;
+  background: #fafafa;
+}
+
+.indicadores-categoria h4 {
+  font-size: 12px;
+  font-weight: bold;
+  color: #374151;
+  margin: 0 0 10px 0;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.indicadores-dupla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.indicadores-dupla:last-child {
+  margin-bottom: 0;
+}
+
+.indicadores-categoria .indicador-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  font-size: 10px;
+}
+
+.valor-destaque {
+  font-size: 14px;
+  font-weight: bold;
+  color: #059669;
+  margin-bottom: 2px;
+}
+
+.indicadores-categoria .label {
+  font-size: 10px;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+.percentual {
+  font-size: 10px;
+  font-weight: 600;
+  color: #0369a1;
+}
+
+.indicador-destaque {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px;
+  border: 2px solid #059669;
+  border-radius: 6px;
+  background: #f0fdf4;
+  margin-top: 8px;
+}
+
+.valor-principal {
+  font-size: 16px;
+  font-weight: bold;
+  color: #059669;
+  margin-bottom: 3px;
+}
+
+.margem {
+  font-size: 10px;
+  font-weight: 600;
+  color: #059669;
+  margin-top: 2px;
 }
 
 /* Financeiro */

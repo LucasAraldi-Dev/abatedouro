@@ -232,7 +232,33 @@ const formData = ref({
   
   // Dados financeiros
   peso_inteiro_abatido: 0,
-  preco_venda_kg: 0
+  preco_venda_kg: 0,
+  
+  // Indicadores de performance (calculados no EtapaResumo)
+  receita_bruta: 0,
+  custos_totais: 0,
+  lucro_liquido: 0,
+  rendimento_final: 0,
+  media_valor_kg: 0,
+  custo_kg: 0,
+  custo_ave: 0,
+  custo_abate_kg: 0,
+  custo_frango: 0,
+  lucro_kg: 0,
+  lucro_frango: 0,
+  lucro_total: 0,
+  percentual_receita_bruta: 0,
+  percentual_custos_totais: 0,
+  percentual_lucro_liquido: 0,
+  percentual_rendimento_final: 0,
+  percentual_media_valor_kg: 0,
+  percentual_custo_kg: 0,
+  percentual_custo_ave: 0,
+  percentual_custo_abate_kg: 0,
+  percentual_custo_frango: 0,
+  percentual_lucro_kg: 0,
+  percentual_lucro_frango: 0,
+  percentual_lucro_total: 0
 })
 
 // Funções de navegação

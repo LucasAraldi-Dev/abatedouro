@@ -288,7 +288,33 @@ const handleSave = async (dadosFormulario: any) => {
         descarte: dadosFormulario.despesas_fixas?.descarte || 0
       },
       peso_inteiro_abatido: dadosFormulario.peso_inteiro_abatido,
-      preco_venda_kg: dadosFormulario.preco_venda_kg
+      preco_venda_kg: dadosFormulario.preco_venda_kg,
+      
+      // Indicadores de performance calculados
+      receita_bruta: dadosFormulario.receita_bruta || 0,
+      custos_totais: dadosFormulario.custos_totais || 0,
+      lucro_liquido: dadosFormulario.lucro_liquido || 0,
+      rendimento_final: dadosFormulario.rendimento_final || 0,
+      media_valor_kg: dadosFormulario.media_valor_kg || 0,
+      custo_kg: dadosFormulario.custo_kg || 0,
+      custo_ave: dadosFormulario.custo_ave || 0,
+      custo_abate_kg: dadosFormulario.custo_abate_kg || 0,
+      custo_frango: dadosFormulario.custo_frango || 0,
+      lucro_kg: dadosFormulario.lucro_kg || 0,
+      lucro_frango: dadosFormulario.lucro_frango || 0,
+      lucro_total: dadosFormulario.lucro_total || 0,
+      percentual_receita_bruta: dadosFormulario.percentual_receita_bruta || 0,
+      percentual_custos_totais: dadosFormulario.percentual_custos_totais || 0,
+      percentual_lucro_liquido: dadosFormulario.percentual_lucro_liquido || 0,
+      percentual_rendimento_final: dadosFormulario.percentual_rendimento_final || 0,
+      percentual_media_valor_kg: dadosFormulario.percentual_media_valor_kg || 0,
+      percentual_custo_kg: dadosFormulario.percentual_custo_kg || 0,
+      percentual_custo_ave: dadosFormulario.percentual_custo_ave || 0,
+      percentual_custo_abate_kg: dadosFormulario.percentual_custo_abate_kg || 0,
+      percentual_custo_frango: dadosFormulario.percentual_custo_frango || 0,
+      percentual_lucro_kg: dadosFormulario.percentual_lucro_kg || 0,
+      percentual_lucro_frango: dadosFormulario.percentual_lucro_frango || 0,
+      percentual_lucro_total: dadosFormulario.percentual_lucro_total || 0
     }
 
     console.log('=== DEBUG: Dados finais para envio ===', abateData)
