@@ -910,7 +910,7 @@ const tempoMedioAve = computed(() => {
 })
 
 const eficienciaOperacional = computed(() => {
-  const metaAvesHora = 1400 // Meta de 1400 aves por hora
+  const metaAvesHora = 1800 // Meta de 1800 aves por hora
   const avesReaisPorHora = avesHora.value // Aves reais por hora calculadas
   return metaAvesHora > 0 ? (avesReaisPorHora / metaAvesHora) * 100 : 0
 })
@@ -1065,7 +1065,7 @@ const metasPerformance = {
   rendimentoMeta: 85, // % mínimo esperado
   custoKgMeta: 8.50, // R$ máximo por kg
   margemLucroMeta: 15, // % mínimo de margem
-  avesHoraMeta: 1400, // aves por hora mínimo
+  avesHoraMeta: 1800, // aves por hora mínimo
   perdaMaxima: 12, // % máximo de perdas
   eficienciaOperacionalMeta: 85 // % mínimo
 }

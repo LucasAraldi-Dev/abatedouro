@@ -228,6 +228,13 @@ const lotesFiltrados = computed(() => {
 const handleSave = async (dadosFormulario: any) => {
   try {
     console.log('=== DEBUG: Dados recebidos do formulário ===', dadosFormulario)
+    console.log('=== DEBUG: Indicadores de Performance no FormData ===', {
+      receita_bruta: dadosFormulario.receita_bruta,
+      custos_totais: dadosFormulario.custos_totais,
+      lucro_liquido: dadosFormulario.lucro_liquido,
+      rendimento_final: dadosFormulario.rendimento_final,
+      percentual_rendimento: dadosFormulario.percentual_rendimento
+    })
     
     // Preparar dados para a API de abates completos
     // Converter data para formato datetime ISO
@@ -314,7 +321,30 @@ const handleSave = async (dadosFormulario: any) => {
       percentual_custo_frango: dadosFormulario.percentual_custo_frango || 0,
       percentual_lucro_kg: dadosFormulario.percentual_lucro_kg || 0,
       percentual_lucro_frango: dadosFormulario.percentual_lucro_frango || 0,
-      percentual_lucro_total: dadosFormulario.percentual_lucro_total || 0
+      percentual_lucro_total: dadosFormulario.percentual_lucro_total || 0,
+      
+      // Indicadores de Eficiência Operacional
+      aves_hora: dadosFormulario.aves_hora || 0,
+      kg_hora: dadosFormulario.kg_hora || 0,
+      tempo_medio_ave: dadosFormulario.tempo_medio_ave || 0,
+      eficiencia_operacional: dadosFormulario.eficiencia_operacional || 0,
+      
+      // Análise de Perdas
+      peso_total_perdas: dadosFormulario.peso_total_perdas || 0,
+      percentual_perda_total: dadosFormulario.percentual_perda_total || 0,
+      valor_perdas: dadosFormulario.valor_perdas || 0,
+      eficiencia_aproveitamento: dadosFormulario.eficiencia_aproveitamento || 0,
+      
+      // Indicadores de Qualidade
+      diversificacao_produtos: dadosFormulario.diversificacao_produtos || 0,
+      peso_medio_geral: dadosFormulario.peso_medio_geral || 0,
+      
+      // Performance Score e Classificação
+      score_performance: dadosFormulario.score_performance || 0,
+      classificacao_performance: dadosFormulario.classificacao_performance || '',
+      
+      // Percentual de rendimento
+      percentual_rendimento: dadosFormulario.percentual_rendimento || 0
     }
 
     console.log('=== DEBUG: Dados finais para envio ===', abateData)

@@ -355,6 +355,12 @@ export async function getAbatesCompletos(params?: {
   if (params?.data_fim) searchParams.append('data_fim', params.data_fim);
   
   const response = await fetch(`${API_BASE}/abates-completos/?${searchParams}`);
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ detail: 'Erro desconhecido' }));
+    throw new Error(`Erro ao buscar abates: ${response.status} - ${errorData.detail || response.statusText}`);
+  }
+  
   return response.json();
 }
 
@@ -366,11 +372,23 @@ export async function createAbateCompleto(abateData: AbateCompletoCreate) {
     },
     body: JSON.stringify(abateData),
   });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ detail: 'Erro desconhecido' }));
+    throw new Error(`Erro ao criar abate: ${response.status} - ${errorData.detail || response.statusText}`);
+  }
+  
   return response.json();
 }
 
 export async function getAbateCompleto(id: string) {
   const response = await fetch(`${API_BASE}/abates-completos/${id}`);
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ detail: 'Erro desconhecido' }));
+    throw new Error(`Erro ao buscar abate: ${response.status} - ${errorData.detail || response.statusText}`);
+  }
+  
   return response.json();
 }
 
@@ -382,6 +400,12 @@ export async function updateAbateCompleto(id: string, abateData: AbateCompletoUp
     },
     body: JSON.stringify(abateData),
   });
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ detail: 'Erro desconhecido' }));
+    throw new Error(`Erro ao atualizar abate: ${response.status} - ${errorData.detail || response.statusText}`);
+  }
+  
   return response.json();
 }
 
