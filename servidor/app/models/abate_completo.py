@@ -107,7 +107,30 @@ class AbateCompletoBase(BaseModel):
     lucro_frango: Optional[float] = Field(default=None, description="Lucro por frango")
     lucro_total: Optional[float] = Field(default=None, description="Lucro total do dia")
     
+    # Indicadores de Eficiência Operacional
+    aves_hora: Optional[float] = Field(default=None, ge=0, description="Aves processadas por hora")
+    kg_hora: Optional[float] = Field(default=None, ge=0, description="Kg processados por hora")
+    tempo_medio_ave: Optional[float] = Field(default=None, ge=0, description="Tempo médio por ave em minutos")
+    eficiencia_operacional: Optional[float] = Field(default=None, ge=0, le=200, description="Eficiência operacional em %")
+    
+    # Análise de Perdas
+    peso_total_perdas: Optional[float] = Field(default=None, ge=0, description="Peso total de perdas em kg")
+    percentual_perda_total: Optional[float] = Field(default=None, ge=0, le=100, description="Percentual total de perdas")
+    valor_perdas: Optional[float] = Field(default=None, ge=0, description="Valor monetário das perdas")
+    eficiencia_aproveitamento: Optional[float] = Field(default=None, ge=0, le=100, description="Eficiência de aproveitamento em %")
+    
+    # Indicadores de Qualidade
+    diversificacao_produtos: Optional[float] = Field(default=None, ge=0, le=100, description="Diversificação de produtos em %")
+    peso_medio_geral: Optional[float] = Field(default=None, ge=0, description="Peso médio geral processado")
+    
+    # Performance Score e Classificação
+    score_performance: Optional[float] = Field(default=None, ge=0, le=100, description="Score geral de performance")
+    classificacao_performance: Optional[str] = Field(default=None, description="Classificação da performance")
+    
     # Percentuais dos indicadores
+    percentual_receita_bruta: Optional[float] = Field(default=None, ge=0, le=100, description="% Receita bruta")
+    percentual_custos_totais: Optional[float] = Field(default=None, ge=0, le=100, description="% Custos totais")
+    percentual_lucro_liquido: Optional[float] = Field(default=None, description="% Lucro líquido")
     percentual_media_valor_kg: Optional[float] = Field(default=None, ge=0, le=100, description="% Média valor/kg")
     percentual_custo_kg: Optional[float] = Field(default=None, ge=0, le=100, description="% Custo/kg")
     percentual_custo_ave: Optional[float] = Field(default=None, ge=0, le=100, description="% Custo por ave")
@@ -194,6 +217,31 @@ class AbateCompletoUpdate(BaseModel):
     lucro_kg: Optional[float] = None
     lucro_frango: Optional[float] = None
     lucro_total: Optional[float] = None
+    
+    # Indicadores de Eficiência Operacional
+    aves_hora: Optional[float] = Field(None, ge=0)
+    kg_hora: Optional[float] = Field(None, ge=0)
+    tempo_medio_ave: Optional[float] = Field(None, ge=0)
+    eficiencia_operacional: Optional[float] = Field(None, ge=0, le=200)
+    
+    # Análise de Perdas
+    peso_total_perdas: Optional[float] = Field(None, ge=0)
+    percentual_perda_total: Optional[float] = Field(None, ge=0, le=100)
+    valor_perdas: Optional[float] = Field(None, ge=0)
+    eficiencia_aproveitamento: Optional[float] = Field(None, ge=0, le=100)
+    
+    # Indicadores de Qualidade
+    diversificacao_produtos: Optional[float] = Field(None, ge=0, le=100)
+    peso_medio_geral: Optional[float] = Field(None, ge=0)
+    
+    # Performance Score e Classificação
+    score_performance: Optional[float] = Field(None, ge=0, le=100)
+    classificacao_performance: Optional[str] = None
+    
+    # Percentuais dos indicadores
+    percentual_receita_bruta: Optional[float] = Field(None, ge=0, le=100)
+    percentual_custos_totais: Optional[float] = Field(None, ge=0, le=100)
+    percentual_lucro_liquido: Optional[float] = None
     percentual_media_valor_kg: Optional[float] = Field(None, ge=0, le=100)
     percentual_custo_kg: Optional[float] = Field(None, ge=0, le=100)
     percentual_custo_ave: Optional[float] = Field(None, ge=0, le=100)

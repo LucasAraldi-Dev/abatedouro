@@ -83,6 +83,52 @@ export interface AbateCompleto {
   despesas_fixas: DespesasFixas;
   peso_inteiro_abatido: number;
   preco_venda_kg: number;
+  
+  // Indicadores de Performance Calculados
+  receita_bruta?: number;
+  custos_totais?: number;
+  lucro_liquido?: number;
+  rendimento_final?: number;
+  media_valor_kg?: number;
+  custo_kg?: number;
+  custo_ave?: number;
+  custo_abate_kg?: number;
+  custo_frango?: number;
+  lucro_kg?: number;
+  lucro_frango?: number;
+  lucro_total?: number;
+  
+  // Indicadores de Eficiência Operacional
+  aves_hora?: number;
+  kg_hora?: number;
+  tempo_medio_ave?: number;
+  eficiencia_operacional?: number;
+  
+  // Análise de Perdas
+  peso_total_perdas?: number;
+  percentual_perda_total?: number;
+  valor_perdas?: number;
+  eficiencia_aproveitamento?: number;
+  
+  // Indicadores de Qualidade
+  diversificacao_produtos?: number;
+  peso_medio_geral?: number;
+  
+  // Performance Score e Classificação
+  score_performance?: number;
+  classificacao_performance?: string;
+  
+  // Percentuais dos indicadores
+  percentual_media_valor_kg?: number;
+  percentual_custo_kg?: number;
+  percentual_custo_ave?: number;
+  percentual_custo_abate_kg?: number;
+  percentual_custo_frango?: number;
+  percentual_lucro_kg?: number;
+  percentual_lucro_frango?: number;
+  percentual_lucro_total?: number;
+  percentual_rendimento?: number;
+  
   created_at: string;
   updated_at?: string;
 }
@@ -102,6 +148,51 @@ export interface AbateCompletoCreate {
   despesas_fixas: DespesasFixas;
   peso_inteiro_abatido: number;
   preco_venda_kg: number;
+  
+  // Indicadores de Performance Calculados (opcionais)
+  receita_bruta?: number;
+  custos_totais?: number;
+  lucro_liquido?: number;
+  rendimento_final?: number;
+  media_valor_kg?: number;
+  custo_kg?: number;
+  custo_ave?: number;
+  custo_abate_kg?: number;
+  custo_frango?: number;
+  lucro_kg?: number;
+  lucro_frango?: number;
+  lucro_total?: number;
+  
+  // Indicadores de Eficiência Operacional
+  aves_hora?: number;
+  kg_hora?: number;
+  tempo_medio_ave?: number;
+  eficiencia_operacional?: number;
+  
+  // Análise de Perdas
+  peso_total_perdas?: number;
+  percentual_perda_total?: number;
+  valor_perdas?: number;
+  eficiencia_aproveitamento?: number;
+  
+  // Indicadores de Qualidade
+  diversificacao_produtos?: number;
+  peso_medio_geral?: number;
+  
+  // Performance Score e Classificação
+  score_performance?: number;
+  classificacao_performance?: string;
+  
+  // Percentuais dos indicadores
+  percentual_media_valor_kg?: number;
+  percentual_custo_kg?: number;
+  percentual_custo_ave?: number;
+  percentual_custo_abate_kg?: number;
+  percentual_custo_frango?: number;
+  percentual_lucro_kg?: number;
+  percentual_lucro_frango?: number;
+  percentual_lucro_total?: number;
+  percentual_rendimento?: number;
 }
 
 export interface AbateCompletoUpdate {
@@ -119,6 +210,51 @@ export interface AbateCompletoUpdate {
   despesas_fixas?: DespesasFixas;
   peso_inteiro_abatido?: number;
   preco_venda_kg?: number;
+  
+  // Indicadores de Performance Calculados (opcionais)
+  receita_bruta?: number;
+  custos_totais?: number;
+  lucro_liquido?: number;
+  rendimento_final?: number;
+  media_valor_kg?: number;
+  custo_kg?: number;
+  custo_ave?: number;
+  custo_abate_kg?: number;
+  custo_frango?: number;
+  lucro_kg?: number;
+  lucro_frango?: number;
+  lucro_total?: number;
+  
+  // Indicadores de Eficiência Operacional
+  aves_hora?: number;
+  kg_hora?: number;
+  tempo_medio_ave?: number;
+  eficiencia_operacional?: number;
+  
+  // Análise de Perdas
+  peso_total_perdas?: number;
+  percentual_perda_total?: number;
+  valor_perdas?: number;
+  eficiencia_aproveitamento?: number;
+  
+  // Indicadores de Qualidade
+  diversificacao_produtos?: number;
+  peso_medio_geral?: number;
+  
+  // Performance Score e Classificação
+  score_performance?: number;
+  classificacao_performance?: string;
+  
+  // Percentuais dos indicadores
+  percentual_media_valor_kg?: number;
+  percentual_custo_kg?: number;
+  percentual_custo_ave?: number;
+  percentual_custo_abate_kg?: number;
+  percentual_custo_frango?: number;
+  percentual_lucro_kg?: number;
+  percentual_lucro_frango?: number;
+  percentual_lucro_total?: number;
+  percentual_rendimento?: number;
 }
 
 // Health endpoint

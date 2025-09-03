@@ -312,8 +312,7 @@
           </div>
           <div class="indicador-item">
             <div class="indicador-valor" :class="{ 'eficiencia-boa': eficienciaOperacional >= 100, 'eficiencia-ruim': eficienciaOperacional < 90 }">{{ eficienciaOperacionalFormatted }}</div>
-            <div class="indicador-label">Eficiência de tempo</div>
-            <div class="indicador-desc">Tempo real vs planejado</div>
+            <div class="indicador-label">Eficiência operacional</div>
           </div>
         </div>
        </div>
@@ -502,6 +501,56 @@
              </div>
              <div class="comparativo-diferenca" :class="comparativoEficiencia.diferenca >= 0 ? 'positiva' : 'negativa'">
                {{ comparativoEficiencia.diferenca >= 0 ? '+' : '' }}{{ comparativoEficiencia.diferenca.toFixed(1) }}%
+             </div>
+           </div>
+         </div>
+       </div>
+
+       <!-- Cortes vs Inteiro -->
+       <div class="resumo-section">
+         <h4>🥩 Cortes vs Inteiro</h4>
+         <div class="cortes-inteiro-grid">
+           <div class="categoria-item">
+             <div class="categoria-titulo">🍗 Cortes</div>
+             <div class="categoria-stats">
+               <div class="stat-item">
+                 <div class="stat-valor">{{ formatWeight(comparativoCortesInteiro.cortes.peso) }}</div>
+                 <div class="stat-label">Peso Total</div>
+               </div>
+               <div class="stat-item">
+                 <div class="stat-valor">{{ formatCurrency(comparativoCortesInteiro.cortes.valor) }}</div>
+                 <div class="stat-label">Valor Total</div>
+               </div>
+               <div class="stat-item">
+                 <div class="stat-valor">{{ comparativoCortesInteiro.cortes.percentualPeso.toFixed(1) }}%</div>
+                 <div class="stat-label">% do Peso</div>
+               </div>
+               <div class="stat-item">
+                 <div class="stat-valor">{{ comparativoCortesInteiro.cortes.percentualValor.toFixed(1) }}%</div>
+                 <div class="stat-label">% do Valor</div>
+               </div>
+             </div>
+           </div>
+           
+           <div class="categoria-item">
+             <div class="categoria-titulo">🐔 Inteiro</div>
+             <div class="categoria-stats">
+               <div class="stat-item">
+                 <div class="stat-valor">{{ formatWeight(comparativoCortesInteiro.inteiro.peso) }}</div>
+                 <div class="stat-label">Peso Total</div>
+               </div>
+               <div class="stat-item">
+                 <div class="stat-valor">{{ formatCurrency(comparativoCortesInteiro.inteiro.valor) }}</div>
+                 <div class="stat-label">Valor Total</div>
+               </div>
+               <div class="stat-item">
+                 <div class="stat-valor">{{ comparativoCortesInteiro.inteiro.percentualPeso.toFixed(1) }}%</div>
+                 <div class="stat-label">% do Peso</div>
+               </div>
+               <div class="stat-item">
+                 <div class="stat-valor">{{ comparativoCortesInteiro.inteiro.percentualValor.toFixed(1) }}%</div>
+                 <div class="stat-label">% do Valor</div>
+               </div>
              </div>
            </div>
          </div>
@@ -861,9 +910,9 @@ const tempoMedioAve = computed(() => {
 })
 
 const eficienciaOperacional = computed(() => {
-  const horasReais = props.formData.horas_reais || 0
-  const horasPlanejadas = props.formData.horas_trabalhadas || 0
-  return horasPlanejadas > 0 ? (horasReais / horasPlanejadas) * 100 : 0
+  const metaAvesHora = 1400 // Meta de 1400 aves por hora
+  const avesReaisPorHora = avesHora.value // Aves reais por hora calculadas
+  return metaAvesHora > 0 ? (avesReaisPorHora / metaAvesHora) * 100 : 0
 })
 
 // Análise de Perdas Detalhada
@@ -946,6 +995,56 @@ const produtoMaiorVolume = computed(() => {
   )
 })
 
+// Análise Cortes vs Inteiro
+const categorizacaoProdutos = computed(() => {
+  if (!props.formData.produtos || props.formData.produtos.length === 0) {
+    return {
+      inteiro: { peso: 0, valor: 0, produtos: [] },
+      cortes: { peso: 0, valor: 0, produtos: [] }
+    }
+  }
+
+  const tiposInteiro = ['Carcaça', 'Congelado', 'Resfriado']
+  const inteiro = { peso: 0, valor: 0, produtos: [] }
+  const cortes = { peso: 0, valor: 0, produtos: [] }
+
+  props.formData.produtos.forEach(produto => {
+    const categoria = tiposInteiro.includes(produto.tipo) ? inteiro : cortes
+    categoria.peso += produto.quantidade || 0
+    categoria.valor += produto.total || 0
+    categoria.produtos.push(produto)
+  })
+
+  return { inteiro, cortes }
+})
+
+const comparativoCortesInteiro = computed(() => {
+  const { inteiro, cortes } = categorizacaoProdutos.value
+  const pesoTotal = inteiro.peso + cortes.peso
+  const valorTotal = inteiro.valor + cortes.valor
+
+  return {
+    inteiro: {
+      peso: inteiro.peso,
+      valor: inteiro.valor,
+      percentualPeso: pesoTotal > 0 ? (inteiro.peso / pesoTotal) * 100 : 0,
+      percentualValor: valorTotal > 0 ? (inteiro.valor / valorTotal) * 100 : 0,
+      produtos: inteiro.produtos.length
+    },
+    cortes: {
+      peso: cortes.peso,
+      valor: cortes.valor,
+      percentualPeso: pesoTotal > 0 ? (cortes.peso / pesoTotal) * 100 : 0,
+      percentualValor: valorTotal > 0 ? (cortes.valor / valorTotal) * 100 : 0,
+      produtos: cortes.produtos.length
+    },
+    total: {
+      peso: pesoTotal,
+      valor: valorTotal
+    }
+  }
+})
+
 const diversificacaoProdutos = computed(() => {
   const produtos = analiseProdutos.value
   if (produtos.length === 0) return 0
@@ -966,7 +1065,7 @@ const metasPerformance = {
   rendimentoMeta: 85, // % mínimo esperado
   custoKgMeta: 8.50, // R$ máximo por kg
   margemLucroMeta: 15, // % mínimo de margem
-  avesHoraMeta: 120, // aves por hora mínimo
+  avesHoraMeta: 1400, // aves por hora mínimo
   perdaMaxima: 12, // % máximo de perdas
   eficienciaOperacionalMeta: 85 // % mínimo
 }
@@ -1265,7 +1364,22 @@ watch(
     percentualCustoFrango,
     percentualLucroKg,
     percentualLucroFrango,
-    percentualLucroTotal
+    percentualLucroTotal,
+    // Novos indicadores de eficiência operacional
+    avesHora,
+    kgHora,
+    tempoMedioAve,
+    eficienciaOperacional,
+    // Indicadores de perdas
+    pesoTotalPerdas,
+    percentualPerdaTotal,
+    valorPerdas,
+    eficienciaAproveitamento,
+    // Indicadores de qualidade
+    diversificacaoProdutos,
+    pesoMedioGeral,
+    // Indicadores de performance
+    resumoPerformance
   ],
   () => {
     // Atualizar formData com os indicadores calculados
@@ -1283,17 +1397,37 @@ watch(
       lucro_frango: lucroFrango.value,
       lucro_total: lucroTotal.value,
       percentual_receita_bruta: parseFloat(percentualMediaValorKg.value),
-       percentual_custos_totais: parseFloat(percentualCustoKgReal.value),
-       percentual_lucro_liquido: parseFloat(percentualLucroTotal.value),
+      percentual_custos_totais: parseFloat(percentualCustoKgReal.value),
+      percentual_lucro_liquido: parseFloat(percentualLucroTotal.value),
       percentual_rendimento_final: rendimentoFinal.value,
       percentual_media_valor_kg: parseFloat(percentualMediaValorKg.value),
-       percentual_custo_kg: parseFloat(percentualCustoKgReal.value),
-       percentual_custo_ave: parseFloat(percentualCustoAve.value),
+      percentual_custo_kg: parseFloat(percentualCustoKgReal.value),
+      percentual_custo_ave: parseFloat(percentualCustoAve.value),
       percentual_custo_abate_kg: parseFloat(percentualCustoAbateKg.value),
       percentual_custo_frango: parseFloat(percentualCustoFrango.value),
       percentual_lucro_kg: parseFloat(percentualLucroKg.value),
       percentual_lucro_frango: parseFloat(percentualLucroFrango.value),
-      percentual_lucro_total: parseFloat(percentualLucroTotal.value)
+      percentual_lucro_total: parseFloat(percentualLucroTotal.value),
+      // Novos indicadores de eficiência operacional
+      aves_hora: avesHora.value,
+      kg_hora: kgHora.value,
+      tempo_medio_ave: tempoMedioAve.value,
+      eficiencia_operacional: eficienciaOperacional.value,
+      // Indicadores de perdas
+      peso_total_perdas: pesoTotalPerdas.value,
+      percentual_perda_total: percentualPerdaTotal.value,
+      valor_perdas: valorPerdas.value,
+      eficiencia_aproveitamento: eficienciaAproveitamento.value,
+      // Indicadores de qualidade
+      diversificacao_produtos: diversificacaoProdutos.value,
+      peso_medio_geral: pesoMedioGeral.value,
+      // Indicadores de performance
+      score_performance: resumoPerformance.value.scoreGeral,
+      classificacao_performance: resumoPerformance.value.classificacao,
+      // Campos adicionais que estavam faltando
+      peso_inteiro_abatido: pesoTotalProcessado.value,
+      preco_venda_kg: mediaValorKgProcessado.value,
+      percentual_rendimento: rendimentoFinal.value
     })
   },
   { immediate: true, deep: true }
@@ -3761,6 +3895,65 @@ const imprimirRelatorio = () => {
   line-height: 1.5;
 }
 
+/* Estilos para Cortes vs Inteiro */
+.cortes-inteiro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.categoria-item {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.categoria-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.categoria-titulo {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 15px;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.categoria-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 10px;
+  background: #f7fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-valor {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #718096;
+  font-weight: 500;
+}
+
 /* Media Queries para Alertas */
 @media (max-width: 768px) {
   .alertas-contador {
@@ -3781,6 +3974,16 @@ const imprimirRelatorio = () => {
   .status-ok {
     flex-direction: column;
     text-align: center;
+  }
+  
+  .cortes-inteiro-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .categoria-stats {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 }
 

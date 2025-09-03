@@ -107,7 +107,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { getAbatesCompletos, createAbateCompleto, updateAbateCompleto, deleteAbateCompleto, getAbateCompleto, deleteLoteAbate } from '../services/api'
+import { getAbatesCompletos, createAbateCompleto, updateAbateCompleto, deleteAbateCompleto, getAbateCompleto } from '../services/api'
 import BuscaAvancada from './BuscaAvancada.vue'
 import ModalLancamentoAbate from './ModalLancamentoAbate.vue'
 import { exportToCSV, exportToPDF, formatDate, formatCurrency, formatWeight, type ExportColumn } from '../utils/exportUtils'
@@ -343,14 +343,12 @@ const handleSave = async (dadosFormulario: any) => {
       console.log('=== DEBUG: Atualizando lote ===', editingLote.value._id)
       const response = await updateAbateCompleto(editingLote.value._id, abateData)
       console.log('=== DEBUG: Resposta da API (update) ===', response)
-      showSuccess('Abate atualizado com sucesso!')
     } else {
       console.log('=== DEBUG: Criando novo lote ===')
       const response = await createAbateCompleto(abateData)
       console.log('=== DEBUG: Resposta da API (create) ===', response)
-      showSuccess('Abate criado com sucesso!')
     }
-    closeModal()
+    // Não fechar o modal aqui - deixar o modal de sucesso gerenciar
     await loadLotes()
   } catch (error) {
     console.error('=== DEBUG: Erro completo ao salvar lote ===', error)
@@ -427,7 +425,7 @@ const editLote = async (lote: LoteAbate) => {
 const deleteLoteConfirm = async (lote: LoteAbate) => {
   if (confirm(`Tem certeza que deseja excluir o lote de ${lote.quantidade_aves} aves?`)) {
     try {
-      await deleteLoteAbate(lote.id)
+      await deleteAbateCompleto(lote.id)
       await loadLotes()
       showSuccess('Lote excluído com sucesso!')
     } catch (error) {

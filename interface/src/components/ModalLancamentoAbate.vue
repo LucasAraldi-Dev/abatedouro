@@ -127,6 +127,21 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal de Sucesso -->
+  <ModalSucessoAbate
+    :is-visible="showSuccessModal"
+    :type="successType"
+    :lote-info="{
+      numero_lote: formData.numero_lote || `Lote ${new Date().toLocaleDateString('pt-BR')}`,
+      data_abate: formData.data_abate,
+      quantidade_aves: formData.quantidade_aves,
+      peso_total: formData.peso_total_kg
+    }"
+    @close="handleSuccessModalClose"
+    @view-lote="handleViewLote"
+    @create-new="handleCreateNew"
+  />
 </template>
 
 <script setup lang="ts">
@@ -135,6 +150,7 @@ import EtapaDadosBasicos from './etapas/EtapaDadosBasicos.vue'
 import EtapaProdutos from './etapas/EtapaProdutos.vue'
 import EtapaDespesas from './etapas/EtapaDespesas.vue'
 import EtapaResumo from './etapas/EtapaResumo.vue'
+import ModalSucessoAbate from './modals/ModalSucessoAbate.vue'
 
 // Props
 interface Props {
@@ -159,6 +175,8 @@ const currentStep = ref(1)
 const canProceed = ref(false)
 const isLoading = ref(false)
 const showKeyboardHelp = ref(false)
+const showSuccessModal = ref(false)
+const successType = ref<'create' | 'edit'>('create')
 const isEditing = computed(() => !!props.editingLote)
 
 // Configuração das etapas
@@ -247,6 +265,28 @@ const formData = ref({
   lucro_kg: 0,
   lucro_frango: 0,
   lucro_total: 0,
+  
+  // Indicadores de Eficiência Operacional
+  aves_hora: 0,
+  kg_hora: 0,
+  tempo_medio_ave: 0,
+  eficiencia_operacional: 0,
+  
+  // Análise de Perdas
+  peso_total_perdas: 0,
+  percentual_perda_total: 0,
+  valor_perdas: 0,
+  eficiencia_aproveitamento: 0,
+  
+  // Indicadores de Qualidade
+  diversificacao_produtos: 0,
+  peso_medio_geral: 0,
+  
+  // Performance Score e Classificação
+  score_performance: 0,
+  classificacao_performance: '',
+  
+  // Percentuais dos indicadores
   percentual_receita_bruta: 0,
   percentual_custos_totais: 0,
   percentual_lucro_liquido: 0,
@@ -258,7 +298,8 @@ const formData = ref({
   percentual_custo_frango: 0,
   percentual_lucro_kg: 0,
   percentual_lucro_frango: 0,
-  percentual_lucro_total: 0
+  percentual_lucro_total: 0,
+  percentual_rendimento: 0
 })
 
 // Funções de navegação
@@ -293,11 +334,15 @@ const saveAbate = async () => {
     
     if (isEditing.value) {
       emit('update', { ...formData.value, _id: props.editingLote._id })
+      successType.value = 'edit'
     } else {
       emit('save', formData.value)
+      successType.value = 'create'
     }
     
-    closeModal()
+    // Mostrar modal de sucesso
+    showSuccessModal.value = true
+    
   } catch (error) {
     console.error('Erro ao salvar abate:', error)
   } finally {
@@ -476,6 +521,27 @@ watch(() => props.isVisible, (visible) => {
     cleanup()
   }
 })
+
+// Funções do modal de sucesso
+const handleSuccessModalClose = () => {
+  showSuccessModal.value = false
+  closeModal()
+}
+
+const handleViewLote = () => {
+  showSuccessModal.value = false
+  closeModal()
+  // Aqui poderia navegar para a visualização do lote
+}
+
+const handleCreateNew = () => {
+  showSuccessModal.value = false
+  // Resetar o formulário para criar um novo lote
+  resetForm()
+  currentStep.value = 1
+  canProceed.value = false
+  // Manter o modal principal aberto para novo lançamento
+}
 </script>
 
 <style scoped>
