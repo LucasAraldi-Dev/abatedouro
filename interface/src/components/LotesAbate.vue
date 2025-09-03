@@ -101,6 +101,7 @@
       :editing-lote="editingLote"
       @close="closeModal"
       @save="handleSave"
+      @update="handleSave"
     />
   </div>
 </template>
@@ -370,8 +371,38 @@ const handleSave = async (dadosFormulario: any) => {
     }
 
     if (editingLote.value) {
-      console.log('=== DEBUG: Atualizando lote ===', editingLote.value._id)
-      const response = await updateAbateCompleto(editingLote.value._id, abateData)
+      console.log('=== DEBUG: Atualizando lote ===', editingLote.value.id)
+      console.log('=== DEBUG: DADOS ORIGINAIS (antes da edição) ===', {
+        aves_hora: editingLote.value.aves_hora,
+        kg_hora: editingLote.value.kg_hora,
+        tempo_medio_ave: editingLote.value.tempo_medio_ave,
+        eficiencia_operacional: editingLote.value.eficiencia_operacional,
+        peso_total_perdas: editingLote.value.peso_total_perdas,
+        percentual_perda_total: editingLote.value.percentual_perda_total,
+        valor_perdas: editingLote.value.valor_perdas,
+        eficiencia_aproveitamento: editingLote.value.eficiencia_aproveitamento,
+        diversificacao_produtos: editingLote.value.diversificacao_produtos,
+        peso_medio_geral: editingLote.value.peso_medio_geral,
+        score_performance: editingLote.value.score_performance,
+        classificacao_performance: editingLote.value.classificacao_performance,
+        percentual_rendimento: editingLote.value.percentual_rendimento
+      })
+      console.log('=== DEBUG: DADOS ENVIADOS (payload) ===', {
+        aves_hora: abateData.aves_hora,
+        kg_hora: abateData.kg_hora,
+        tempo_medio_ave: abateData.tempo_medio_ave,
+        eficiencia_operacional: abateData.eficiencia_operacional,
+        peso_total_perdas: abateData.peso_total_perdas,
+        percentual_perda_total: abateData.percentual_perda_total,
+        valor_perdas: abateData.valor_perdas,
+        eficiencia_aproveitamento: abateData.eficiencia_aproveitamento,
+        diversificacao_produtos: abateData.diversificacao_produtos,
+        peso_medio_geral: abateData.peso_medio_geral,
+        score_performance: abateData.score_performance,
+        classificacao_performance: abateData.classificacao_performance,
+        percentual_rendimento: abateData.percentual_rendimento
+      })
+      const response = await updateAbateCompleto(editingLote.value.id, abateData)
       console.log('=== DEBUG: Resposta da API (update) ===', response)
     } else {
       console.log('=== DEBUG: Criando novo lote ===')

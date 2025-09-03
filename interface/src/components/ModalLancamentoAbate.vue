@@ -333,7 +333,10 @@ const saveAbate = async () => {
     isLoading.value = true
     
     if (isEditing.value) {
-      emit('update', { ...formData.value, _id: props.editingLote._id })
+      console.log('=== DEBUG: Modal - editingLote completo ===', props.editingLote)
+      console.log('=== DEBUG: Modal - editingLote._id ===', props.editingLote._id)
+      console.log('=== DEBUG: Modal - editingLote.id ===', props.editingLote.id)
+      emit('update', { ...formData.value, _id: props.editingLote.id })
       successType.value = 'edit'
     } else {
       emit('save', formData.value)
