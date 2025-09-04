@@ -1272,19 +1272,38 @@ onMounted(() => {
       <div class="recent-lists-grid">
         <!-- Lotes Recentes -->
         <section class="recent-section">
-          <h3 class="section-title">Lotes Recentes</h3>
-          <div class="recent-list">
+          <div class="section-header">
+            <h3 class="section-title">Lotes Recentes</h3>
+            <div class="total-items">{{ lotesRecentes.length }} lotes</div>
+          </div>
+          <div class="recent-list-expanded">
             <div v-if="lotesRecentes.length === 0" class="no-data">
               Nenhum lote encontrado
             </div>
-            <div v-for="lote in lotesRecentes" :key="lote.id" class="recent-item">
-              <div class="recent-main">
-                <div class="recent-title">{{ formatDate(lote.data_abate) }}</div>
-                <div class="recent-subtitle">{{ lote.unidade }}</div>
+            <div v-for="lote in lotesRecentes" :key="lote.id" class="lote-card">
+              <div class="lote-header">
+                <div class="lote-date-main">{{ formatDate(lote.data_abate) }}</div>
+                <div class="lote-status-badge">{{ lote.unidade }}</div>
               </div>
-              <div class="recent-details">
-                <span class="recent-value">{{ formatNumber(lote.quantidade_aves) }} aves</span>
-                <span class="recent-value">{{ formatWeight(lote.peso_total_kg) }}</span>
+              <div class="lote-content">
+                <div class="lote-metrics-grid">
+                  <div class="metric-item">
+                    <span class="metric-label">Aves</span>
+                    <span class="metric-value">{{ formatNumber(lote.quantidade_aves) }}</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Peso Total</span>
+                    <span class="metric-value">{{ formatWeight(lote.peso_total_kg) }}</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Rendimento</span>
+                    <span class="metric-value">{{ formatWeight(lote.peso_total_kg / lote.quantidade_aves) }}/ave</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Valor Total</span>
+                    <span class="metric-value primary">{{ formatCurrency(lote.produtos?.reduce((sum, p) => sum + p.valor_total, 0) || 0) }}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1292,19 +1311,43 @@ onMounted(() => {
 
         <!-- Produtos Mais Valiosos -->
         <section class="recent-section">
-          <h3 class="section-title">Produtos Mais Valiosos</h3>
-          <div class="recent-list">
+          <div class="section-header">
+            <h3 class="section-title">Produtos Mais Valiosos</h3>
+            <div class="total-items">{{ produtosMaisValiosos.length }} produtos</div>
+          </div>
+          <div class="recent-list-expanded">
             <div v-if="produtosMaisValiosos.length === 0" class="no-data">
               Nenhum produto encontrado
             </div>
-            <div v-for="produto in produtosMaisValiosos" :key="produto._id" class="recent-item">
-              <div class="recent-main">
-                <div class="recent-title">{{ produto.nome }}</div>
-                <div class="recent-subtitle">{{ produto.tipo }} - {{ produto.unidade_origem }}</div>
+            <div v-for="(produto, index) in produtosMaisValiosos" :key="produto._id" class="produto-card">
+              <div class="produto-header">
+                <div class="produto-nome-main">{{ produto.nome }}</div>
+                <div class="produto-rank-badge">#{{ index + 1 }}</div>
               </div>
-              <div class="recent-details">
-                <span class="recent-value">{{ formatWeight(produto.peso_kg) }}</span>
-                <span class="recent-value primary">{{ formatCurrency(produto.valorTotal) }}</span>
+              <div class="produto-content">
+                <div class="produto-metrics-grid">
+                  <div class="metric-item">
+                    <span class="metric-label">Peso Total</span>
+                    <span class="metric-value">{{ formatWeight(produto.peso_kg) }}</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Preço/kg</span>
+                    <span class="metric-value">{{ formatCurrency(produto.preco_kg) }}</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">Valor Total</span>
+                    <span class="metric-value primary">{{ formatCurrency(produto.valorTotal) }}</span>
+                  </div>
+                  <div class="metric-item">
+                    <span class="metric-label">% do Total</span>
+                    <span class="metric-value">{{ ((produto.valorTotal / produtosMaisValiosos.reduce((sum, p) => sum + p.valorTotal, 0)) * 100).toFixed(1) }}%</span>
+                  </div>
+                </div>
+                <div class="produto-progress">
+                  <div class="progress-bar">
+                    <div class="progress-fill" :style="{ width: ((produto.valorTotal / produtosMaisValiosos[0]?.valorTotal) * 100) + '%' }"></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1991,6 +2034,12 @@ onMounted(() => {
   gap: 0.75rem;
 }
 
+.recent-list-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .recent-item {
   background: var(--bg-primary);
   border-radius: 8px;
@@ -2002,7 +2051,16 @@ onMounted(() => {
   transition: all 0.3s ease;
 }
 
-.recent-item:hover {
+.recent-item-compact {
+  background: var(--bg-primary);
+  border-radius: 6px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-light);
+  transition: all 0.2s ease;
+}
+
+.recent-item:hover,
+.recent-item-compact:hover {
   background: var(--bg-accent);
 }
 
@@ -2038,6 +2096,213 @@ onMounted(() => {
   color: var(--primary-red);
   font-weight: 700;
   font-size: 0.875rem;
+}
+
+/* Estilos para Listas Expandidas */
+.recent-list-expanded {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Estilos para Lotes Recentes Expandidos */
+.lote-card {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+.lote-card:hover {
+  background: var(--bg-accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+.lote-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.lote-date-main {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.lote-status-badge {
+  background: var(--primary-red);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.lote-content {
+  margin-top: 0.75rem;
+}
+
+.lote-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+}
+
+/* Estilos para Produtos Mais Valiosos Expandidos */
+.produto-card {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-light);
+  transition: all 0.3s ease;
+}
+
+.produto-card:hover {
+  background: var(--bg-accent);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-medium);
+}
+
+.produto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.produto-nome-main {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.produto-rank-badge {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 24px;
+  text-align: center;
+}
+
+.produto-content {
+  margin-top: 0.75rem;
+}
+
+.produto-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.produto-progress {
+  margin-top: 0.75rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--border-light);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Estilos para Métricas */
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metric-value {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.metric-value.primary {
+  color: var(--primary-red);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+/* Estilos Compactos Legados (mantidos para compatibilidade) */
+.lote-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lote-date {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.lote-metrics {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.lote-aves,
+.lote-peso {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.produto-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.produto-nome {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.produto-metrics {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.produto-peso {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.produto-valor {
+  font-size: 0.875rem;
+  color: var(--primary-red);
+  font-weight: 700;
 }
 
 /* Botões */
