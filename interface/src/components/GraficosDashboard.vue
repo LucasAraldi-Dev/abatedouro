@@ -11,11 +11,11 @@
         </div>
       </div>
       
-      <!-- Gráfico de Custo por Kg -->
+      <!-- Gráfico de Lucro por Kg -->
       <div class="grafico-card">
-        <h4 class="grafico-titulo">💸 Custo por Kg</h4>
+        <h4 class="grafico-titulo">💰 Lucro por Kg</h4>
         <div class="grafico-container">
-          <canvas ref="custoPorKgChart" class="grafico-canvas"></canvas>
+          <canvas ref="lucroPorKgChart" class="grafico-canvas"></canvas>
         </div>
       </div>
       
@@ -27,6 +27,14 @@
         </div>
       </div>
       
+      <!-- Gráfico de Custo por Kg -->
+      <div class="grafico-card">
+        <h4 class="grafico-titulo">💸 Custo por Kg</h4>
+        <div class="grafico-container">
+          <canvas ref="custoPorKgChart" class="grafico-canvas"></canvas>
+        </div>
+      </div>
+      
       <!-- Gráfico de Rendimento -->
       <div class="grafico-card">
         <h4 class="grafico-titulo">📈 Rendimento Diário</h4>
@@ -35,19 +43,19 @@
         </div>
       </div>
       
+      <!-- Gráfico Comparativo de Preços -->
+      <div class="grafico-card">
+        <h4 class="grafico-titulo">💲 Preço Frango Vivo vs Abatido</h4>
+        <div class="grafico-container">
+          <canvas ref="comparativoPrecosChart" class="grafico-canvas"></canvas>
+        </div>
+      </div>
+      
       <!-- Gráfico de Eficiência Operacional -->
       <div class="grafico-card">
         <h4 class="grafico-titulo">⚡ Eficiência Operacional</h4>
         <div class="grafico-container">
           <canvas ref="eficienciaChart" class="grafico-canvas"></canvas>
-        </div>
-      </div>
-      
-      <!-- Gráfico Comparativo de Preços -->
-      <div class="grafico-card">
-        <h4 class="grafico-titulo">💲 Comparativo: Preço Frango Vivo vs Abatido</h4>
-        <div class="grafico-container">
-          <canvas ref="comparativoPrecosChart" class="grafico-canvas"></canvas>
         </div>
       </div>
     </div>
@@ -74,6 +82,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Refs para os canvas
 const lucroTotalChart = ref<HTMLCanvasElement | null>(null)
+const lucroPorKgChart = ref<HTMLCanvasElement | null>(null)
 const custoPorKgChart = ref<HTMLCanvasElement | null>(null)
 const lucroPorAveChart = ref<HTMLCanvasElement | null>(null)
 const rendimentoChart = ref<HTMLCanvasElement | null>(null)
@@ -82,6 +91,7 @@ const comparativoPrecosChart = ref<HTMLCanvasElement | null>(null)
 
 // Instâncias dos gráficos
 let lucroTotalChartInstance: Chart | null = null
+let lucroPorKgChartInstance: Chart | null = null
 let custoPorKgChartInstance: Chart | null = null
 let lucroPorAveChartInstance: Chart | null = null
 let rendimentoChartInstance: Chart | null = null
@@ -213,6 +223,58 @@ const criarGraficoCustoPorKg = () => {
   })
 }
 
+// Criar gráfico de Lucro por Kg (linha)
+const criarGraficoLucroPorKg = () => {
+  if (!lucroPorKgChart.value || abatesCompletos.value.length === 0) return
+  
+  if (lucroPorKgChartInstance) {
+    lucroPorKgChartInstance.destroy()
+  }
+  
+  const ctx = lucroPorKgChart.value.getContext('2d')
+  if (!ctx) return
+  
+  const dados = abatesCompletos.value.map(abate => ({
+    data: formatarData(abate.data_abate),
+    valor: abate.lucro_kg || 0
+  }))
+  
+  lucroPorKgChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: dados.map(d => d.data),
+      datasets: [{
+        label: 'Lucro por Kg (R$)',
+        data: dados.map(d => d.valor),
+        borderColor: 'rgba(34, 197, 94, 1)',
+        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return 'R$ ' + Number(value).toFixed(2)
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
 // Criar gráfico de Lucro por Ave (linha)
 const criarGraficoLucroPorAve = () => {
   if (!lucroPorAveChart.value || abatesCompletos.value.length === 0) return
@@ -306,7 +368,6 @@ const criarGraficoRendimento = () => {
       scales: {
         y: {
           beginAtZero: true,
-          max: 100,
           ticks: {
             callback: function(value) {
               return Number(value).toFixed(1) + '%'
@@ -359,7 +420,6 @@ const criarGraficoEficiencia = () => {
       scales: {
         y: {
           beginAtZero: true,
-          max: 100,
           ticks: {
             callback: function(value) {
               return Number(value).toFixed(1) + '%'
@@ -489,11 +549,12 @@ const criarGraficoComparativoPrecos = () => {
 const criarGraficos = () => {
   nextTick(() => {
     criarGraficoLucroTotal()
-    criarGraficoCustoPorKg()
+    criarGraficoLucroPorKg()
     criarGraficoLucroPorAve()
+    criarGraficoCustoPorKg()
     criarGraficoRendimento()
-    criarGraficoEficiencia()
     criarGraficoComparativoPrecos()
+    criarGraficoEficiencia()
   })
 }
 
@@ -502,6 +563,10 @@ const destruirGraficos = () => {
   if (lucroTotalChartInstance) {
     lucroTotalChartInstance.destroy()
     lucroTotalChartInstance = null
+  }
+  if (lucroPorKgChartInstance) {
+    lucroPorKgChartInstance.destroy()
+    lucroPorKgChartInstance = null
   }
   if (custoPorKgChartInstance) {
     custoPorKgChartInstance.destroy()
