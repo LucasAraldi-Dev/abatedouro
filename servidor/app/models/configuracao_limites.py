@@ -25,6 +25,9 @@ class ConfiguracaoLimitesBase(BaseModel):
     custo_operacional_maximo_por_ave: float = Field(default=3.0, ge=0, description="Custo operacional máximo por ave (R$)")
     custo_operacional_ideal_por_ave: float = Field(default=2.5, ge=0, description="Custo operacional ideal por ave (R$)")
     
+    # Limites de Perdas
+    percentual_perdas_maximo: float = Field(default=15.0, ge=0, le=100, description="Percentual máximo de perdas aceitável (%)")
+    
     # Configurações de Alertas
     alertas_ativos: bool = Field(default=True, description="Se os alertas estão ativos")
     alerta_rendimento_baixo: bool = Field(default=True, description="Alerta para rendimento baixo")
@@ -49,6 +52,7 @@ class ConfiguracaoLimitesUpdate(BaseModel):
     peso_medio_ideal: Optional[float] = Field(None, ge=0)
     custo_operacional_maximo_por_ave: Optional[float] = Field(None, ge=0)
     custo_operacional_ideal_por_ave: Optional[float] = Field(None, ge=0)
+    percentual_perdas_maximo: Optional[float] = Field(None, ge=0, le=100)
     alertas_ativos: Optional[bool] = None
     alerta_rendimento_baixo: Optional[bool] = None
     alerta_lucro_baixo: Optional[bool] = None

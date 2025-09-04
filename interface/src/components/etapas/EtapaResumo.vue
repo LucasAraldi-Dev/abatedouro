@@ -1167,7 +1167,7 @@ const alertasCriticos = computed(() => {
       tipo: 'critico',
       icone: '⚠️',
       titulo: 'Perdas Excessivas',
-      mensagem: `Perdas de ${percentualPerdaTotal.value.toFixed(1)}% excedem o limite aceitável (<12%)`,
+      mensagem: `Perdas de ${percentualPerdaTotal.value.toFixed(1)}% excedem o limite aceitável (<15%)`,
       valor: `${percentualPerdaTotal.value.toFixed(1)}%`,
       categoria: 'perdas'
     })

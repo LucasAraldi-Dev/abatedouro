@@ -155,6 +155,25 @@
             </div>
           </div>
 
+          <!-- Seção de Perdas -->
+          <div class="config-section">
+            <h3>📉 Limites de Perdas</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="perdasMaximo">Percentual Máximo de Perdas (%):</label>
+                <input
+                  id="perdasMaximo"
+                  v-model.number="config.percentual_perdas_maximo"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  class="form-input"
+                />
+              </div>
+            </div>
+          </div>
+
           <!-- Seção de Alertas -->
           <div class="config-section">
             <h3>🔔 Configuração de Alertas</h3>
@@ -268,6 +287,7 @@ export default {
         peso_medio_ideal: 2.2,
         custo_operacional_maximo_por_ave: 3.0,
         custo_operacional_ideal_por_ave: 2.5,
+        percentual_perdas_maximo: 15.0,
         alertas_ativos: true,
         alerta_rendimento_baixo: true,
         alerta_lucro_baixo: true,

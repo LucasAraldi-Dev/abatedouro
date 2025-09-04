@@ -12,6 +12,9 @@ const abatesCompletos = ref<AbateCompleto[]>([])
 
 // Modal de configuração de limites
 const modalConfiguracaoLimitesVisible = ref(false)
+const configuracaoLimites = ref({
+  percentual_perdas_maximo: 15.0
+})
 
 // Filtros de data
 const filtros = ref({
@@ -568,7 +571,7 @@ const alertas = computed(() => {
   }
   
   // Alerta para percentual de perdas alto
-  if (metricasData.percentualPerdas > 5) {
+  if (metricasData.percentualPerdas > configuracaoLimites.value.percentual_perdas_maximo) {
     alertasAtivos.push({
       id: 'perdas-altas',
       tipo: 'error',
@@ -577,7 +580,7 @@ const alertas = computed(() => {
       titulo: 'Percentual de Perdas Elevado',
       mensagem: 'O percentual de perdas está acima do limite aceitável.',
       valorAtual: `${metricasData.percentualPerdas.toFixed(1)}%`,
-      limite: '5%'
+      limite: `${configuracaoLimites.value.percentual_perdas_maximo}%`
     })
   }
   
@@ -760,11 +763,25 @@ const fecharModalConfiguracaoLimites = () => {
 const onConfiguracaoSalva = () => {
   // Recarregar dados após salvar configuração
   loadData()
+  carregarConfiguracaoLimites()
+}
+
+// Carregar configuração de limites
+const carregarConfiguracaoLimites = async () => {
+  try {
+    const response = await axios.get('/api/v1/configuracao-limites/')
+    if (response.data) {
+      configuracaoLimites.value = { ...configuracaoLimites.value, ...response.data }
+    }
+  } catch (error) {
+    console.log('Usando configuração padrão de limites')
+  }
 }
 
 // Lifecycle
 onMounted(() => {
   inicializarDatas()
+  carregarConfiguracaoLimites()
   loadData()
 })
 </script>
@@ -1089,9 +1106,9 @@ onMounted(() => {
               <span class="trend-title">Tendência de Lucro</span>
             </div>
             <div class="trend-content">
-              <div class="trend-value primary">{{ formatCurrency(tendencias.lucroMedio) }}</div>
+              <div class="trend-value" :class="tendencias.lucroTendencia >= 0 ? 'positive' : 'negative'">{{ formatPercentage(Math.abs(tendencias.lucroTendencia)) }}</div>
               <div class="trend-change" :class="tendencias.lucroTendencia >= 0 ? 'positive' : 'negative'">
-                {{ tendencias.lucroTendencia >= 0 ? '↗' : '↘' }} {{ formatPercentage(Math.abs(tendencias.lucroTendencia)) }}
+                {{ tendencias.lucroTendencia >= 0 ? '↗' : '↘' }} Variação
               </div>
             </div>
           </div>
