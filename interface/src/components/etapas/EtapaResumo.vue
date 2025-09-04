@@ -911,7 +911,7 @@ const tempoMedioAve = computed(() => {
 })
 
 const eficienciaOperacional = computed(() => {
-  const metaAvesHora = 1800 // Meta de 1800 aves por hora
+  const metaAvesHora = 2000 // Meta de 2000 aves por hora
   const avesReaisPorHora = avesHora.value // Aves reais por hora calculadas
   return metaAvesHora > 0 ? (avesReaisPorHora / metaAvesHora) * 100 : 0
 })

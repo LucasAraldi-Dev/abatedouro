@@ -445,7 +445,12 @@ const custosOperacionais = computed(() => {
   
   abatesFiltrados.forEach(abate => {
     if (abate.despesas_fixas) {
-      custos.maoDeObra += (abate.despesas_fixas.funcionarios || 0) + (abate.despesas_fixas.horas_extras || 0) + (abate.despesas_fixas.diaristas || 0)
+      custos.maoDeObra += (abate.despesas_fixas.funcionarios || 0) + 
+                         (abate.despesas_fixas.horas_extras || 0) + 
+                         (abate.despesas_fixas.diaristas || 0) +
+                         (abate.despesas_fixas.ferias || 0) +
+                         (abate.despesas_fixas.inss || 0) +
+                         (abate.despesas_fixas.recisao || 0)
       custos.agua += abate.despesas_fixas.agua || 0
       custos.energia += abate.despesas_fixas.energia || 0
       custos.embalagem += abate.despesas_fixas.embalagem || 0
