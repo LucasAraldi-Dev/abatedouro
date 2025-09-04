@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { getLotesAbate, getProdutos, getAbatesCompletos, type LoteAbate, type Produto, type AbateCompleto } from '../services/api'
 import { exportToCSV, exportToPDF, formatDate, formatCurrency, formatWeight, type ExportColumn } from '../utils/exportUtils'
 import ModalConfiguracaoLimites from './ModalConfiguracaoLimites.vue'
+import GraficosDashboard from './GraficosDashboard.vue'
 
 const loading = ref(false)
 const error = ref('')
@@ -184,12 +185,9 @@ const metricas = computed(() => {
     return sum + (pesoVivo > 0 ? ((pesoVivo - pesoAbatido) / pesoVivo) * 100 : 0)
   }, 0) / abatesFiltrados.length : 0
   
-  const scorePerformance = (
-    (rendimentoAbate / 10) + 
-    (eficienciaOperacional / 10) + 
-    (Math.max(0, 10 - percentualPerdas)) + 
-    (Math.min(10, avesHora / 10))
-  ) / 4
+  const scorePerformance = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
+    return sum + (abate.score_performance || 0)
+  }, 0) / abatesFiltrados.length / 10 : 0  // Dividir por 10 para converter de 0-100 para 0-10
   
   return {
     totalLotes,
@@ -255,7 +253,13 @@ const distribuicaoTiposAve = computed(() => {
   }))
 })
 
-// Distribuição por tipo de produto com dados reais
+// Paginação para distribuição de produtos
+const paginacaoProdutos = ref({
+  paginaAtual: 1,
+  itensPorPagina: 5
+})
+
+// Distribuição por tipo de produto com dados reais, paginação e ordenação
 const distribuicaoTiposProduto = computed(() => {
   const abatesFiltrados = abatesCompletos.value.filter(abate => {
     if (!filtros.value.dataInicio && !filtros.value.dataFim) return true
@@ -293,11 +297,45 @@ const distribuicaoTiposProduto = computed(() => {
     })
   })
   
-  return Array.from(tiposMap.values()).map(item => ({
-    ...item,
-    percentualValor: valorTotal > 0 ? (item.valor / valorTotal) * 100 : 0
-  }))
+  // Ordenar por percentual de valor em ordem decrescente (maior % primeiro)
+  return Array.from(tiposMap.values())
+    .map(item => ({
+      ...item,
+      percentualValor: valorTotal > 0 ? (item.valor / valorTotal) * 100 : 0
+    }))
+    .sort((a, b) => b.percentualValor - a.percentualValor)
 })
+
+// Produtos paginados
+const produtosPaginados = computed(() => {
+  const inicio = (paginacaoProdutos.value.paginaAtual - 1) * paginacaoProdutos.value.itensPorPagina
+  const fim = inicio + paginacaoProdutos.value.itensPorPagina
+  return distribuicaoTiposProduto.value.slice(inicio, fim)
+})
+
+// Total de páginas para produtos
+const totalPaginasProdutos = computed(() => {
+  return Math.ceil(distribuicaoTiposProduto.value.length / paginacaoProdutos.value.itensPorPagina)
+})
+
+// Funções de navegação da paginação
+const irParaPaginaProdutos = (pagina: number) => {
+  if (pagina >= 1 && pagina <= totalPaginasProdutos.value) {
+    paginacaoProdutos.value.paginaAtual = pagina
+  }
+}
+
+const proximaPaginaProdutos = () => {
+  if (paginacaoProdutos.value.paginaAtual < totalPaginasProdutos.value) {
+    paginacaoProdutos.value.paginaAtual++
+  }
+}
+
+const paginaAnteriorProdutos = () => {
+  if (paginacaoProdutos.value.paginaAtual > 1) {
+    paginacaoProdutos.value.paginaAtual--
+  }
+}
 
 // Lotes recentes com dados reais (usando abates completos)
 const lotesRecentes = computed(() => {
@@ -671,9 +709,12 @@ const formatCurrency = (value: number | undefined | null): string => {
 
 const formatWeight = (value: number | undefined | null): string => {
   if (value === undefined || value === null || isNaN(value)) {
-    return '0.00 kg'
+    return '0,00 kg'
   }
-  return `${value.toFixed(2)} kg`
+  return `${new Intl.NumberFormat('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value)} kg`
 }
 
 const formatNumber = (value: number | undefined | null): string => {
@@ -895,6 +936,9 @@ onMounted(() => {
 
     <!-- Dashboard Content -->
     <div v-else class="dashboard-content">
+      <!-- Gráficos Comparativos -->
+      <GraficosDashboard :dados-abates="abatesCompletos" />
+      
       <!-- Cards de Métricas Principais -->
       <section class="metrics-section">
         <h3 class="section-title">Métricas do Abatedouro</h3>
@@ -1165,22 +1209,61 @@ onMounted(() => {
 
         <!-- Distribuição por Tipo de Produto -->
         <section class="distribution-section">
-          <h3 class="section-title">Distribuição por Tipo de Produto</h3>
+          <div class="section-header">
+            <h3 class="section-title">📦 Distribuição por Tipo de Produto</h3>
+            <div class="section-info">
+              <span class="total-items">{{ distribuicaoTiposProduto.length }} tipos</span>
+            </div>
+          </div>
+          
           <div class="distribution-list">
-            <div v-for="tipo in distribuicaoTiposProduto" :key="tipo.nome" class="distribution-item">
-              <div class="distribution-header">
-                <span class="distribution-name">{{ tipo.nome }}</span>
-                <span class="distribution-percentage">{{ formatPercentage(tipo.percentualValor) }}</span>
-              </div>
-              <div class="distribution-bar">
-                <div class="distribution-fill warning" :style="{ width: tipo.percentualValor + '%' }"></div>
-              </div>
-              <div class="distribution-details">
-                <span>{{ tipo.quantidade }} itens</span>
-                <span>{{ formatWeight(tipo.peso) }}</span>
-                <span>{{ formatCurrency(tipo.valor) }}</span>
+            <div v-if="produtosPaginados.length === 0" class="no-data">
+              Nenhum produto encontrado
+            </div>
+            <div v-for="tipo in produtosPaginados" :key="tipo.nome" class="distribution-item-compact">
+              <div class="product-info">
+                <span class="product-name">{{ tipo.nome }}</span>
+                <div class="product-metrics">
+                  <span class="product-percentage">{{ formatPercentage(tipo.percentualValor) }}</span>
+                  <span class="product-value">{{ formatCurrency(tipo.valor) }}</span>
+                </div>
               </div>
             </div>
+          </div>
+          
+          <!-- Controles de Paginação -->
+          <div v-if="totalPaginasProdutos > 1" class="pagination-controls">
+            <button 
+              @click="paginaAnteriorProdutos" 
+              :disabled="paginacaoProdutos.paginaAtual === 1"
+              class="btn btn-sm btn-secondary"
+            >
+              ← Anterior
+            </button>
+            
+            <div class="pagination-info">
+              <span class="page-numbers">
+                <button 
+                  v-for="pagina in Math.min(totalPaginasProdutos, 5)" 
+                  :key="pagina"
+                  @click="irParaPaginaProdutos(pagina)"
+                  :class="['page-btn', { active: pagina === paginacaoProdutos.paginaAtual }]"
+                >
+                  {{ pagina }}
+                </button>
+              </span>
+              <span class="page-text">
+                Página {{ paginacaoProdutos.paginaAtual }} de {{ totalPaginasProdutos }}
+              </span>
+            </div>
+            
+            <button 
+              @click="proximaPaginaProdutos" 
+              :disabled="paginacaoProdutos.paginaAtual === totalPaginasProdutos"
+              class="btn btn-sm btn-secondary"
+            >
+              Próxima →
+            </button>
           </div>
         </section>
       </div>
@@ -1368,6 +1451,7 @@ onMounted(() => {
   color: var(--text-primary);
   line-height: 1;
   margin-bottom: 0.25rem;
+  white-space: nowrap;
 }
 
 .metric-label {
@@ -1746,7 +1830,143 @@ onMounted(() => {
 
 .distribution-details {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  color: var(--text-secondary);
+}
+
+/* Layout compacto para produtos */
+.distribution-item-compact {
+  background: var(--bg-primary);
+  border-radius: 6px;
+  padding: 0.75rem;
+  border: 1px solid var(--border-light);
+  transition: all 0.2s ease;
+}
+
+.distribution-item-compact:hover {
+  background: var(--bg-accent);
+}
+
+.product-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.product-metrics {
+  display: flex;
   gap: 1rem;
+  align-items: center;
+}
+
+.product-percentage {
+  font-weight: 600;
+  color: var(--primary-red);
+  font-size: 0.875rem;
+}
+
+.product-value {
+  font-weight: 700;
+  color: var(--primary-red);
+  font-size: 0.875rem;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.detail-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.detail-value {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.detail-value.primary {
+  color: var(--primary-red);
+  font-weight: 700;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.section-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.total-items {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  background: var(--bg-accent);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+}
+
+/* Controles de Paginação */
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-light);
+}
+
+.pagination-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.page-btn {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--border-light);
+  background: var(--bg-accent);
+  color: var(--text-primary);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.page-btn:hover {
+  background: var(--border-light);
+}
+
+.page-btn.active {
+  background: var(--primary-red);
+  color: white;
+  border-color: var(--primary-red);
+}
+
+.page-text {
   font-size: 0.75rem;
   color: var(--text-secondary);
 }

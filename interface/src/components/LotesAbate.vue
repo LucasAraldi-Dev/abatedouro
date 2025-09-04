@@ -222,7 +222,8 @@ const lotesFiltrados = computed(() => {
     resultado = resultado.filter(lote => new Date(lote.data_abate) <= dataFim)
   }
   
-  return resultado
+  // Ordenar por data da mais nova para a mais antiga
+  return resultado.sort((a, b) => new Date(b.data_abate).getTime() - new Date(a.data_abate).getTime())
 })
 
 // Função para lidar com dados salvos do modal

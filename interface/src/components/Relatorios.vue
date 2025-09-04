@@ -46,6 +46,8 @@ const lotesFiltrados = computed(() => {
     
     return true
   })
+  // Ordenar por data da mais nova para a mais antiga
+  .sort((a, b) => new Date(b.data_abate).getTime() - new Date(a.data_abate).getTime())
 })
 
 const produtosFiltrados = computed(() => {
