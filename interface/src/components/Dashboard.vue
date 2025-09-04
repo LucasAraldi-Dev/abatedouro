@@ -497,9 +497,10 @@ const tendencias = computed(() => {
   }, 0) / abatesFiltrados.length
   // Calcular lucro médio usando os mesmos cálculos das métricas principais
   // Usar dados calculados dos abates completos em vez de recalcular
-  const lucroMedio = abatesFiltrados.reduce((sum, abate) => {
+  // Calcular lucro médio por abate (não total)
+  const lucroMedio = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
     return sum + (abate.lucro_liquido || 0)
-  }, 0)
+  }, 0) / abatesFiltrados.length : 0
   
   // Usar eficiência operacional real dos abates completos
   const eficienciaMedia = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
@@ -512,7 +513,7 @@ const tendencias = computed(() => {
   let lucroTendencia = 0
   let eficienciaTendencia = 0
   
-  // Ordenar abates por data para calcular tendências corretamente
+  // Ordenar abates por data para calcular tendências corretamente (da data menor para maior)
   const abatesOrdenados = abatesFiltrados.sort((a, b) => new Date(a.data_abate).getTime() - new Date(b.data_abate).getTime())
   
   if (abatesOrdenados.length >= 2) {
@@ -533,9 +534,30 @@ const tendencias = computed(() => {
     
     rendimentoTendencia = rendimentoPrimeira > 0 ? ((rendimentoSegunda - rendimentoPrimeira) / rendimentoPrimeira) * 100 : 0
     
-    // Calcular tendência de lucro usando dados dos abates completos
-    const lucroPrimeira = primeiraMetade.reduce((sum, abate) => sum + (abate.lucro_liquido || 0), 0)
-    const lucroSegunda = segundaMetade.reduce((sum, abate) => sum + (abate.lucro_liquido || 0), 0)
+    // Calcular tendência de lucro usando uma abordagem mais precisa
+    // Comparar os últimos 30% dos abates com os 30% anteriores para detectar tendências recentes
+    let lucroPrimeira = 0
+    let lucroSegunda = 0
+    
+    if (abatesOrdenados.length >= 3) {
+      // Para tendências mais precisas, usar os últimos 30% vs 30% anteriores
+      const tamanhoGrupo = Math.max(1, Math.floor(abatesOrdenados.length * 0.3))
+      const grupoRecente = abatesOrdenados.slice(-tamanhoGrupo) // Últimos 30%
+      const grupoAnterior = abatesOrdenados.slice(-tamanhoGrupo * 2, -tamanhoGrupo) // 30% anteriores
+      
+      if (grupoAnterior.length > 0 && grupoRecente.length > 0) {
+        lucroPrimeira = grupoAnterior.reduce((sum, abate) => sum + (abate.lucro_liquido || 0), 0) / grupoAnterior.length
+        lucroSegunda = grupoRecente.reduce((sum, abate) => sum + (abate.lucro_liquido || 0), 0) / grupoRecente.length
+      } else {
+        // Fallback para método original se não há dados suficientes
+        lucroPrimeira = primeiraMetade.length > 0 ? primeiraMetade.reduce((sum, abate) => sum + (abate.lucro_liquido || 0), 0) / primeiraMetade.length : 0
+        lucroSegunda = segundaMetade.length > 0 ? segundaMetade.reduce((sum, abate) => sum + (abate.lucro_liquido || 0), 0) / segundaMetade.length : 0
+      }
+    } else {
+      // Para poucos dados, usar método original
+      lucroPrimeira = primeiraMetade.length > 0 ? primeiraMetade.reduce((sum, abate) => sum + (abate.lucro_liquido || 0), 0) / primeiraMetade.length : 0
+      lucroSegunda = segundaMetade.length > 0 ? segundaMetade.reduce((sum, abate) => sum + (abate.lucro_liquido || 0), 0) / segundaMetade.length : 0
+    }
     
     lucroTendencia = lucroPrimeira > 0 ? ((lucroSegunda - lucroPrimeira) / lucroPrimeira) * 100 : 0
     
@@ -645,7 +667,7 @@ const alertas = computed(() => {
       icone: '💰',
       titulo: 'Tendência de Lucro em Declínio',
       mensagem: 'O lucro está apresentando tendência de queda significativa.',
-      valorAtual: `${(tendenciasData.lucroTendencia * 100).toFixed(1)}%`,
+      valorAtual: `${tendenciasData.lucroTendencia.toFixed(1)}%`,
       limite: '-10%'
     })
   }
@@ -1127,57 +1149,63 @@ onMounted(() => {
         </div>
       </section>
 
-      <!-- Análise de Tendências e Performance -->
-      <section class="trends-section">
-        <h3 class="section-title">Análise de Performance por Período</h3>
-        <div class="trends-grid">
-          <div class="trend-card">
-            <div class="trend-header">
-              <span class="trend-icon">📈</span>
-              <span class="trend-title">Tendência de Rendimento</span>
+      <!-- Análise de Performance por Período -->
+      <section class="performance-section">
+        <h3 class="section-title">📊 Análise de Performance por Período</h3>
+        <div class="performance-grid">
+          <div class="performance-card">
+            <div class="performance-header">
+              <div class="performance-icon rendimento">📈</div>
+              <div class="performance-title">Tendência de Rendimento</div>
             </div>
-            <div class="trend-content">
-              <div class="trend-value success">{{ formatPercentage(tendencias.rendimentoMedio) }}</div>
-              <div class="trend-change" :class="tendencias.rendimentoTendencia >= 0 ? 'positive' : 'negative'">
-                {{ tendencias.rendimentoTendencia >= 0 ? '↗' : '↘' }} {{ formatPercentage(Math.abs(tendencias.rendimentoTendencia)) }}
+            <div class="performance-content">
+              <div class="performance-value">{{ formatPercentage(tendencias.rendimentoMedio) }}</div>
+              <div class="performance-change" :class="tendencias.rendimentoTendencia >= 0 ? 'positive' : 'negative'">
+                <span class="change-icon">{{ tendencias.rendimentoTendencia >= 0 ? '↗️' : '↘️' }}</span>
+                <span class="change-text">{{ formatPercentage(Math.abs(tendencias.rendimentoTendencia)) }} Variação</span>
               </div>
             </div>
           </div>
           
-          <div class="trend-card">
-            <div class="trend-header">
-              <span class="trend-icon">💰</span>
-              <span class="trend-title">Tendência de Lucro</span>
+          <div class="performance-card">
+            <div class="performance-header">
+              <div class="performance-icon lucro">💰</div>
+              <div class="performance-title">Tendência de Lucro</div>
             </div>
-            <div class="trend-content">
-              <div class="trend-value" :class="tendencias.lucroTendencia >= 0 ? 'positive' : 'negative'">{{ formatPercentage(Math.abs(tendencias.lucroTendencia)) }}</div>
-              <div class="trend-change" :class="tendencias.lucroTendencia >= 0 ? 'positive' : 'negative'">
-                {{ tendencias.lucroTendencia >= 0 ? '↗' : '↘' }} Variação
+            <div class="performance-content">
+              <div class="performance-value">{{ formatCurrency(tendencias.lucroMedio) }}</div>
+              <div class="performance-change" :class="tendencias.lucroTendencia >= 0 ? 'positive' : 'negative'">
+                <span class="change-icon">{{ tendencias.lucroTendencia >= 0 ? '↗️' : '↘️' }}</span>
+                <span class="change-text">{{ formatPercentage(Math.abs(tendencias.lucroTendencia)) }} Variação</span>
               </div>
             </div>
           </div>
           
-          <div class="trend-card">
-            <div class="trend-header">
-              <span class="trend-icon">⚡</span>
-              <span class="trend-title">Eficiência Operacional</span>
+          <div class="performance-card">
+            <div class="performance-header">
+              <div class="performance-icon eficiencia">⚡</div>
+              <div class="performance-title">Eficiência Operacional</div>
             </div>
-            <div class="trend-content">
-              <div class="trend-value info">{{ formatNumber(tendencias.eficienciaMedia) }}%</div>
-              <div class="trend-change" :class="tendencias.eficienciaTendencia >= 0 ? 'positive' : 'negative'">
-                {{ tendencias.eficienciaTendencia >= 0 ? '↗' : '↘' }} {{ formatPercentage(Math.abs(tendencias.eficienciaTendencia)) }}
+            <div class="performance-content">
+              <div class="performance-value">{{ formatPercentage(tendencias.eficienciaMedia) }}</div>
+              <div class="performance-change" :class="tendencias.eficienciaTendencia >= 0 ? 'positive' : 'negative'">
+                <span class="change-icon">{{ tendencias.eficienciaTendencia >= 0 ? '↗️' : '↘️' }}</span>
+                <span class="change-text">{{ formatPercentage(Math.abs(tendencias.eficienciaTendencia)) }} Variação</span>
               </div>
             </div>
           </div>
           
-          <div class="trend-card">
-            <div class="trend-header">
-              <span class="trend-icon">🎯</span>
-              <span class="trend-title">Qualidade Geral</span>
+          <div class="performance-card">
+            <div class="performance-header">
+              <div class="performance-icon qualidade">🎯</div>
+              <div class="performance-title">Qualidade Geral</div>
             </div>
-            <div class="trend-content">
-              <div class="trend-value warning">{{ tendencias.qualidadeGeral.toFixed(1) }}/10</div>
-              <div class="trend-description">{{ tendencias.classificacaoQualidade }}</div>
+            <div class="performance-content">
+              <div class="performance-value">{{ tendencias.qualidadeGeral.toFixed(1) }}/10</div>
+              <div class="performance-change neutral">
+                <span class="change-icon">📊</span>
+                <span class="change-text">{{ tendencias.classificacaoQualidade }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1571,8 +1599,8 @@ onMounted(() => {
   color: var(--text-secondary);
 }
 
-/* Distribuições */
-.trends-section {
+/* Performance Section */
+.performance-section {
   background: var(--bg-secondary);
   border-radius: 12px;
   padding: 1.5rem;
@@ -1582,101 +1610,122 @@ onMounted(() => {
   margin-bottom: 2rem;
 }
 
-.trends-grid {
+.performance-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
-.trend-card {
+.performance-card {
   background: var(--bg-primary);
-  border-radius: 8px;
+  border-radius: 10px;
   padding: 1.25rem;
   border: 1px solid var(--border-light);
   transition: all 0.3s ease;
-  border-left: 3px solid var(--primary-red);
+  box-shadow: var(--shadow-light);
 }
 
-.trend-card:hover {
+.performance-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-medium);
-  border-left-color: var(--accent-red);
-  border-left-width: 4px;
+  border-color: var(--primary-red);
 }
 
-.trend-header {
+.performance-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-light);
 }
 
-.trend-icon {
+.performance-icon {
   font-size: 1.5rem;
   width: 40px;
   height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(220, 38, 38, 0.1);
   border-radius: 8px;
+  flex-shrink: 0;
 }
 
-.trend-title {
-  font-weight: 600;
-  color: var(--text-primary);
-  font-size: 0.875rem;
-}
-
-.trend-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.trend-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.trend-value.success {
+.performance-icon.rendimento {
+  background: rgba(16, 185, 129, 0.1);
   color: #10B981;
 }
 
-.trend-value.primary {
+.performance-icon.lucro {
+  background: rgba(220, 38, 38, 0.1);
   color: var(--primary-red);
 }
 
-.trend-value.info {
+.performance-icon.eficiencia {
+  background: rgba(59, 130, 246, 0.1);
   color: #3B82F6;
 }
 
-.trend-value.warning {
+.performance-icon.qualidade {
+  background: rgba(245, 158, 11, 0.1);
   color: #F59E0B;
 }
 
-.trend-change {
+.performance-title {
   font-size: 0.875rem;
   font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.trend-change.positive {
+.performance-content {
+  text-align: center;
+}
+
+.performance-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.performance-change {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.performance-change.positive {
+  background: rgba(16, 185, 129, 0.1);
   color: #10B981;
 }
 
-.trend-change.negative {
+.performance-change.negative {
+  background: rgba(239, 68, 68, 0.1);
   color: #EF4444;
 }
 
-.trend-description {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
+.performance-change.neutral {
+  background: rgba(107, 114, 128, 0.1);
+  color: var(--text-secondary);
+}
+
+.change-icon {
+  font-size: 0.875rem;
+}
+
+.change-text {
+  font-weight: 500;
+}
   
   /* Alertas */
   .alerts-section {

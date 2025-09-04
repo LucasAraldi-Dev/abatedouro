@@ -42,14 +42,23 @@
           <canvas ref="eficienciaChart" class="grafico-canvas"></canvas>
         </div>
       </div>
+      
+      <!-- Gráfico Comparativo de Preços -->
+      <div class="grafico-card">
+        <h4 class="grafico-titulo">💲 Comparativo: Preço Frango Vivo vs Abatido</h4>
+        <div class="grafico-container">
+          <canvas ref="comparativoPrecosChart" class="grafico-canvas"></canvas>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { Chart, registerables } from 'chart.js'
 import { getAbatesCompletos } from '../services/api'
+import type { AbateCompleto } from '../services/api'
 
 // Registrar componentes do Chart.js
 Chart.register(...registerables)
@@ -69,6 +78,7 @@ const custoPorKgChart = ref<HTMLCanvasElement | null>(null)
 const lucroPorAveChart = ref<HTMLCanvasElement | null>(null)
 const rendimentoChart = ref<HTMLCanvasElement | null>(null)
 const eficienciaChart = ref<HTMLCanvasElement | null>(null)
+const comparativoPrecosChart = ref<HTMLCanvasElement | null>(null)
 
 // Instâncias dos gráficos
 let lucroTotalChartInstance: Chart | null = null
@@ -76,6 +86,7 @@ let custoPorKgChartInstance: Chart | null = null
 let lucroPorAveChartInstance: Chart | null = null
 let rendimentoChartInstance: Chart | null = null
 let eficienciaChartInstance: Chart | null = null
+let comparativoPrecosChartInstance: Chart | null = null
 
 // Dados dos abates
 const abatesCompletos = ref<any[]>([])
@@ -360,24 +371,158 @@ const criarGraficoEficiencia = () => {
   })
 }
 
+// Criar gráfico comparativo de preços (linha dupla)
+const criarGraficoComparativoPrecos = () => {
+  if (!comparativoPrecosChart.value || abatesCompletos.value.length === 0) return
+  
+  if (comparativoPrecosChartInstance) {
+    comparativoPrecosChartInstance.destroy()
+  }
+  
+  const ctx = comparativoPrecosChart.value.getContext('2d')
+  if (!ctx) return
+  
+  const dados = abatesCompletos.value.map(abate => ({
+    data: formatarData(abate.data_abate),
+    precoVivo: abate.valor_kg_vivo || 0,
+    precoAbatido: abate.preco_venda_kg || 0
+  }))
+  
+  comparativoPrecosChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: dados.map(d => d.data),
+      datasets: [
+        {
+          label: 'Preço Frango Vivo (R$/kg)',
+          data: dados.map(d => d.precoVivo),
+          borderColor: 'rgba(34, 197, 94, 1)',
+          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+          borderWidth: 3,
+          fill: false,
+          tension: 0.4,
+          pointBackgroundColor: 'rgba(34, 197, 94, 1)',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 5
+        },
+        {
+          label: 'Preço Frango Abatido (R$/kg)',
+          data: dados.map(d => d.precoAbatido),
+          borderColor: 'rgba(239, 68, 68, 1)',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          borderWidth: 3,
+          fill: false,
+          tension: 0.4,
+          pointBackgroundColor: 'rgba(239, 68, 68, 1)',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointRadius: 5
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            usePointStyle: true,
+            padding: 20,
+            font: {
+              size: 12,
+              weight: '500'
+            }
+          }
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: function(context) {
+              return context.dataset.label + ': R$ ' + Number(context.parsed.y).toFixed(2)
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          display: true,
+          title: {
+            display: true,
+            text: 'Data do Abate',
+            font: {
+              size: 12,
+              weight: '600'
+            }
+          }
+        },
+        y: {
+          beginAtZero: true,
+          title: {
+            display: true,
+            text: 'Preço (R$/kg)',
+            font: {
+              size: 12,
+              weight: '600'
+            }
+          },
+          ticks: {
+            callback: function(value) {
+              return 'R$ ' + Number(value).toFixed(2)
+            }
+          }
+        }
+      },
+      interaction: {
+        mode: 'nearest',
+        axis: 'x',
+        intersect: false
+      }
+    }
+  })
+}
+
 // Criar todos os gráficos
 const criarGraficos = () => {
-  setTimeout(() => {
+  nextTick(() => {
     criarGraficoLucroTotal()
     criarGraficoCustoPorKg()
     criarGraficoLucroPorAve()
     criarGraficoRendimento()
     criarGraficoEficiencia()
-  }, 100)
+    criarGraficoComparativoPrecos()
+  })
 }
 
 // Destruir gráficos
 const destruirGraficos = () => {
-  if (lucroTotalChartInstance) lucroTotalChartInstance.destroy()
-  if (custoPorKgChartInstance) custoPorKgChartInstance.destroy()
-  if (lucroPorAveChartInstance) lucroPorAveChartInstance.destroy()
-  if (rendimentoChartInstance) rendimentoChartInstance.destroy()
-  if (eficienciaChartInstance) eficienciaChartInstance.destroy()
+  if (lucroTotalChartInstance) {
+    lucroTotalChartInstance.destroy()
+    lucroTotalChartInstance = null
+  }
+  if (custoPorKgChartInstance) {
+    custoPorKgChartInstance.destroy()
+    custoPorKgChartInstance = null
+  }
+  if (lucroPorAveChartInstance) {
+    lucroPorAveChartInstance.destroy()
+    lucroPorAveChartInstance = null
+  }
+  if (rendimentoChartInstance) {
+    rendimentoChartInstance.destroy()
+    rendimentoChartInstance = null
+  }
+  if (eficienciaChartInstance) {
+    eficienciaChartInstance.destroy()
+    eficienciaChartInstance = null
+  }
+  if (comparativoPrecosChartInstance) {
+    comparativoPrecosChartInstance.destroy()
+    comparativoPrecosChartInstance = null
+  }
 }
 
 // Watchers
@@ -484,5 +629,18 @@ onUnmounted(() => {
   .grafico-container {
     height: 180px;
   }
+}
+
+/* Estilos específicos para o gráfico comparativo de preços */
+.grafico-card:has(canvas[ref="comparativoPrecosChart"]) {
+  background: linear-gradient(135deg, #fefefe 0%, #f1f5f9 100%);
+  border-top: 4px solid transparent;
+  border-image: linear-gradient(90deg, rgba(34, 197, 94, 1) 0%, rgba(239, 68, 68, 1) 100%) 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.grafico-card:has(canvas[ref="comparativoPrecosChart"]):hover {
+  border-image: linear-gradient(90deg, rgba(34, 197, 94, 0.8) 0%, rgba(239, 68, 68, 0.8) 100%) 1;
 }
 </style>
