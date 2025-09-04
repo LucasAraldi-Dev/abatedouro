@@ -455,15 +455,15 @@ const tendencias = computed(() => {
     return sum + (pesoVivo > 0 ? (pesoAbatido / pesoVivo) * 100 : 0)
   }, 0) / abatesFiltrados.length
   // Calcular lucro médio usando os mesmos cálculos das métricas principais
-  const valorTotalProdutos = abatesFiltrados.reduce((sum, abate) => sum + abate.produtos.reduce((pSum, produto) => pSum + produto.valor_total, 0), 0)
-  const custoTotalAves = abatesFiltrados.reduce((sum, abate) => sum + abate.valor_total, 0)
-  const custoOperacionalTotal = abatesFiltrados.reduce((sum, abate) => {
-    const despesas = abate.despesas_fixas
-    return sum + (despesas.funcionarios + despesas.agua + despesas.energia + despesas.embalagem + despesas.gelo + despesas.manutencao)
+  // Usar dados calculados dos abates completos em vez de recalcular
+  const lucroMedio = abatesFiltrados.reduce((sum, abate) => {
+    return sum + (abate.lucro_liquido || 0)
   }, 0)
-  const lucroMedio = valorTotalProdutos - custoTotalAves - custoOperacionalTotal
   
-  const eficienciaMedia = rendimentoMedio > 0 ? Math.min(100, (rendimentoMedio / 75) * 100) : 0
+  // Usar eficiência operacional real dos abates completos
+  const eficienciaMedia = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
+    return sum + (abate.eficiencia_operacional || 0)
+  }, 0) / abatesFiltrados.length : 0
   
   // Calcular tendências (comparar primeira e segunda metade do período)
   // Garantir que temos pelo menos 2 abates para calcular tendência
@@ -481,35 +481,28 @@ const tendencias = computed(() => {
     
 
   
+    // Usar rendimento_final calculado dos abates completos
     const rendimentoPrimeira = primeiraMetade.length > 0 ? primeiraMetade.reduce((sum, abate) => {
-      const pesoVivo = abate.peso_total_kg
-      const pesoAbatido = abate.peso_inteiro_abatido || abate.produtos.reduce((pSum, produto) => pSum + produto.peso_kg, 0)
-      return sum + (pesoVivo > 0 ? (pesoAbatido / pesoVivo) * 100 : 0)
+      return sum + (abate.rendimento_final || 0)
     }, 0) / primeiraMetade.length : 0
     
     const rendimentoSegunda = segundaMetade.length > 0 ? segundaMetade.reduce((sum, abate) => {
-      const pesoVivo = abate.peso_total_kg
-      const pesoAbatido = abate.peso_inteiro_abatido || abate.produtos.reduce((pSum, produto) => pSum + produto.peso_kg, 0)
-      return sum + (pesoVivo > 0 ? (pesoAbatido / pesoVivo) * 100 : 0)
+      return sum + (abate.rendimento_final || 0)
     }, 0) / segundaMetade.length : 0
     
     rendimentoTendencia = rendimentoPrimeira > 0 ? ((rendimentoSegunda - rendimentoPrimeira) / rendimentoPrimeira) * 100 : 0
     
-    // Calcular tendência de lucro
-    const valorPrimeira = primeiraMetade.reduce((sum, abate) => sum + abate.produtos.reduce((pSum, produto) => pSum + produto.valor_total, 0), 0)
-    const custoPrimeira = primeiraMetade.reduce((sum, abate) => sum + abate.valor_total, 0)
-    const lucroPrimeira = valorPrimeira - custoPrimeira
-    
-    const valorSegunda = segundaMetade.reduce((sum, abate) => sum + abate.produtos.reduce((pSum, produto) => pSum + produto.valor_total, 0), 0)
-    const custoSegunda = segundaMetade.reduce((sum, abate) => sum + abate.valor_total, 0)
-    const lucroSegunda = valorSegunda - custoSegunda
+    // Calcular tendência de lucro usando dados dos abates completos
+    const lucroPrimeira = primeiraMetade.reduce((sum, abate) => sum + (abate.lucro_liquido || 0), 0)
+    const lucroSegunda = segundaMetade.reduce((sum, abate) => sum + (abate.lucro_liquido || 0), 0)
     
     lucroTendencia = lucroPrimeira > 0 ? ((lucroSegunda - lucroPrimeira) / lucroPrimeira) * 100 : 0
     
 
     
-    const eficienciaPrimeira = rendimentoPrimeira > 0 ? Math.min(100, (rendimentoPrimeira / 75) * 100) : 0
-    const eficienciaSegunda = rendimentoSegunda > 0 ? Math.min(100, (rendimentoSegunda / 75) * 100) : 0
+    // Calcular tendência de eficiência usando dados reais dos abates completos
+    const eficienciaPrimeira = primeiraMetade.length > 0 ? primeiraMetade.reduce((sum, abate) => sum + (abate.eficiencia_operacional || 0), 0) / primeiraMetade.length : 0
+    const eficienciaSegunda = segundaMetade.length > 0 ? segundaMetade.reduce((sum, abate) => sum + (abate.eficiencia_operacional || 0), 0) / segundaMetade.length : 0
     eficienciaTendencia = eficienciaPrimeira > 0 ? ((eficienciaSegunda - eficienciaPrimeira) / eficienciaPrimeira) * 100 : 0
   } else {
     // Não há dados suficientes para calcular tendências
@@ -518,14 +511,10 @@ const tendencias = computed(() => {
     eficienciaTendencia = 0
   }
   
-  // Calcular qualidade geral (média ponderada de vários indicadores)
-  const scorePerformance = (
-    (rendimentoMedio / 10) + 
-    (eficienciaMedia / 10) + 
-    (Math.max(0, 10 - (100 - rendimentoMedio))) + 
-    (Math.min(10, 5))
-  ) / 4
-  const qualidadeGeral = (rendimentoMedio * 0.3 + eficienciaMedia * 0.3 + scorePerformance * 0.4) / 10
+  // Calcular qualidade geral usando score_performance dos abates completos
+  const qualidadeGeral = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
+    return sum + (abate.score_performance || 0)
+  }, 0) / abatesFiltrados.length / 10 : 0  // Dividir por 10 para converter de 0-100 para 0-10
   
   let classificacaoQualidade = 'Ruim'
   if (qualidadeGeral >= 8) classificacaoQualidade = 'Excelente'

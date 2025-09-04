@@ -656,6 +656,7 @@ const props = defineProps<Props>()
 // Emits
 const emit = defineEmits<{
   'validate': [isValid: boolean]
+  'update-form': [data: any]
 }>()
 
 // Refs para os gráficos
@@ -1337,6 +1338,58 @@ const showPrejuizoAlert = () => {
   }
 }
 
+// Emitir atualizações
+const emitUpdate = () => {
+  const calculatedData = {
+    receita_bruta: receitaBruta.value,
+    custos_totais: custosTotais.value,
+    lucro_liquido: lucroLiquido.value,
+    rendimento_final: rendimentoFinal.value,
+    media_valor_kg: mediaValorKgProcessado.value,
+    custo_kg: custoKgReal.value,
+    custo_ave: custoAveReal.value,
+    custo_abate_kg: custoAbateKg.value,
+    custo_frango: custoFrango.value,
+    lucro_kg: lucroKg.value,
+    lucro_frango: lucroFrango.value,
+    lucro_total: lucroTotal.value,
+    percentual_receita_bruta: parseFloat(percentualMediaValorKg.value),
+    percentual_custos_totais: parseFloat(percentualCustoKgReal.value),
+    percentual_lucro_liquido: parseFloat(percentualLucroTotal.value),
+    percentual_rendimento_final: rendimentoFinal.value,
+    percentual_media_valor_kg: parseFloat(percentualMediaValorKg.value),
+    percentual_custo_kg: parseFloat(percentualCustoKgReal.value),
+    percentual_custo_ave: parseFloat(percentualCustoAve.value),
+    percentual_custo_abate_kg: parseFloat(percentualCustoAbateKg.value),
+    percentual_custo_frango: parseFloat(percentualCustoFrango.value),
+    percentual_lucro_kg: parseFloat(percentualLucroKg.value),
+    percentual_lucro_frango: parseFloat(percentualLucroFrango.value),
+    percentual_lucro_total: parseFloat(percentualLucroTotal.value),
+    // Novos indicadores de eficiência operacional
+    aves_hora: avesHora.value,
+    kg_hora: kgHora.value,
+    tempo_medio_ave: tempoMedioAve.value,
+    eficiencia_operacional: eficienciaOperacional.value,
+    // Indicadores de perdas
+    peso_total_perdas: pesoTotalPerdas.value,
+    percentual_perda_total: percentualPerdaTotal.value,
+    valor_perdas: valorPerdas.value,
+    eficiencia_aproveitamento: eficienciaAproveitamento.value,
+    // Indicadores de qualidade
+    diversificacao_produtos: diversificacaoProdutos.value,
+    peso_medio_geral: pesoMedioGeral.value,
+    // Indicadores de performance
+    score_performance: resumoPerformance.value.scoreGeral,
+    classificacao_performance: resumoPerformance.value.classificacao,
+    // Campos adicionais que estavam faltando
+    peso_inteiro_abatido: pesoTotalProcessado.value,
+    preco_venda_kg: mediaValorKgProcessado.value,
+    percentual_rendimento: rendimentoFinal.value
+  }
+  
+  emit('update-form', calculatedData)
+}
+
 // Emitir validação
 watch(isValid, (valid) => {
   emit('validate', valid)
@@ -1429,6 +1482,9 @@ watch(
       preco_venda_kg: mediaValorKgProcessado.value,
       percentual_rendimento: rendimentoFinal.value
     })
+    
+    // Emitir os dados calculados para o componente pai
+    emitUpdate()
   },
   { immediate: true, deep: true }
 )
