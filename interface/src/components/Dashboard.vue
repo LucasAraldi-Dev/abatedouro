@@ -4,6 +4,7 @@ import { getLotesAbate, getProdutos, getAbatesCompletos, type LoteAbate, type Pr
 import { exportToCSV, exportToPDF, formatDate, formatCurrency, formatWeight, type ExportColumn } from '../utils/exportUtils'
 import ModalConfiguracaoLimites from './ModalConfiguracaoLimites.vue'
 import GraficosDashboard from './GraficosDashboard.vue'
+import axios from 'axios'
 
 const loading = ref(false)
 const error = ref('')
@@ -54,13 +55,13 @@ const calcularDatasPeriodo = (periodo: string) => {
   
   switch (periodo) {
     case 'ultimos_7_dias':
-      dataInicio.setDate(hoje.getDate() - 7)
+      dataInicio.setDate(hoje.getDate() - 6) // Incluir hoje + 6 dias anteriores = 7 dias
       break
     case 'ultimos_15_dias':
-      dataInicio.setDate(hoje.getDate() - 15)
+      dataInicio.setDate(hoje.getDate() - 14) // Incluir hoje + 14 dias anteriores = 15 dias
       break
     case 'ultimos_30_dias':
-      dataInicio.setDate(hoje.getDate() - 30)
+      dataInicio.setDate(hoje.getDate() - 29) // Incluir hoje + 29 dias anteriores = 30 dias
       break
     case 'ultimos_3_meses':
       dataInicio.setMonth(hoje.getMonth() - 3)
@@ -79,69 +80,24 @@ const onPeriodoChange = () => {
   if (filtros.value.periodoPreDefinido !== 'personalizado') {
     calcularDatasPeriodo(filtros.value.periodoPreDefinido)
   }
+  // Recarregar dados após alterar o período
+  loadData()
 }
 
-// Dados filtrados por data
+// Dados filtrados por data - removido filtro local pois a API já filtra
 const dadosFiltrados = computed(() => {
-  const lotesFiltrados = lotes.value.filter(lote => {
-    // Filtro por data - usando comparação de timestamps
-    if (filtros.value.dataInicio || filtros.value.dataFim) {
-      const dataLote = new Date(lote.data_abate)
-      
-      if (filtros.value.dataInicio) {
-        const dataInicio = new Date(filtros.value.dataInicio)
-        if (dataLote < dataInicio) return false
-      }
-      
-      if (filtros.value.dataFim) {
-        const dataFim = new Date(filtros.value.dataFim)
-        dataFim.setHours(23, 59, 59, 999) // Incluir todo o dia final
-        if (dataLote > dataFim) return false
-      }
-    }
-    
-    return true
-  })
-  
-  const produtosFiltrados = produtos.value.filter(produto => {
-    // Filtro por data
-    if (filtros.value.dataInicio || filtros.value.dataFim) {
-      const dataProduto = new Date(produto.data_producao || produto.created_at)
-      const dataInicio = filtros.value.dataInicio ? new Date(filtros.value.dataInicio) : null
-      const dataFim = filtros.value.dataFim ? new Date(filtros.value.dataFim) : null
-      
-      if (dataInicio && dataProduto < dataInicio) return false
-      if (dataFim && dataProduto > dataFim) return false
-    }
-    
-    return true
-  })
-  
-  return { lotesFiltrados, produtosFiltrados }
+  // A API já aplica os filtros de data, então não precisamos filtrar novamente
+  return { 
+    lotesFiltrados: lotes.value, 
+    produtosFiltrados: produtos.value 
+  }
 })
 
 // Métricas calculadas com dados reais
 const metricas = computed(() => {
   const { lotesFiltrados, produtosFiltrados } = dadosFiltrados.value
-  const abatesFiltrados = abatesCompletos.value.filter(abate => {
-    // Filtro por data - usando comparação de timestamps
-    if (filtros.value.dataInicio || filtros.value.dataFim) {
-      const dataAbate = new Date(abate.data_abate)
-      
-      if (filtros.value.dataInicio) {
-        const dataInicio = new Date(filtros.value.dataInicio)
-        if (dataAbate < dataInicio) return false
-      }
-      
-      if (filtros.value.dataFim) {
-        const dataFim = new Date(filtros.value.dataFim)
-        dataFim.setHours(23, 59, 59, 999) // Incluir todo o dia final
-        if (dataAbate > dataFim) return false
-      }
-    }
-    
-    return true
-  })
+  // A API já aplica os filtros de data, usar dados diretos
+  const abatesFiltrados = abatesCompletos.value
   
   const totalLotes = lotesFiltrados.length
   const totalProdutos = produtosFiltrados.length
@@ -216,23 +172,8 @@ const metricas = computed(() => {
 // Distribuição por tipo de ave com dados reais
 const distribuicaoTiposAve = computed(() => {
   const { lotesFiltrados } = dadosFiltrados.value
-  const abatesFiltrados = abatesCompletos.value.filter(abate => {
-    if (!filtros.value.dataInicio && !filtros.value.dataFim) return true
-    
-    const dataAbateStr = new Date(abate.data_abate).toDateString()
-    
-    if (filtros.value.dataInicio) {
-      const dataInicioStr = new Date(filtros.value.dataInicio).toDateString()
-      if (dataAbateStr < dataInicioStr) return false
-    }
-    
-    if (filtros.value.dataFim) {
-      const dataFimStr = new Date(filtros.value.dataFim).toDateString()
-      if (dataAbateStr > dataFimStr) return false
-    }
-    
-    return true
-  })
+  // A API já aplica os filtros de data, usar dados diretos
+  const abatesFiltrados = abatesCompletos.value
   
   const tiposMap = new Map()
   const totalAves = abatesFiltrados.reduce((sum, abate) => sum + abate.quantidade_aves, 0)
@@ -261,23 +202,8 @@ const paginacaoProdutos = ref({
 
 // Distribuição por tipo de produto com dados reais, paginação e ordenação
 const distribuicaoTiposProduto = computed(() => {
-  const abatesFiltrados = abatesCompletos.value.filter(abate => {
-    if (!filtros.value.dataInicio && !filtros.value.dataFim) return true
-    
-    const dataAbateStr = new Date(abate.data_abate).toDateString()
-    
-    if (filtros.value.dataInicio) {
-      const dataInicioStr = new Date(filtros.value.dataInicio).toDateString()
-      if (dataAbateStr < dataInicioStr) return false
-    }
-    
-    if (filtros.value.dataFim) {
-      const dataFimStr = new Date(filtros.value.dataFim).toDateString()
-      if (dataAbateStr > dataFimStr) return false
-    }
-    
-    return true
-  })
+  // A API já aplica os filtros de data, usar dados diretos
+  const abatesFiltrados = abatesCompletos.value
   
   const tiposMap = new Map()
   const valorTotal = abatesFiltrados.reduce((sum, abate) => 
@@ -339,52 +265,18 @@ const paginaAnteriorProdutos = () => {
 
 // Lotes recentes com dados reais (usando abates completos)
 const lotesRecentes = computed(() => {
-  const abatesFiltrados = abatesCompletos.value.filter(abate => {
-    // Filtro por data - usando comparação de timestamps
-    if (filtros.value.dataInicio || filtros.value.dataFim) {
-      const dataAbate = new Date(abate.data_abate)
-      
-      if (filtros.value.dataInicio) {
-        const dataInicio = new Date(filtros.value.dataInicio)
-        if (dataAbate < dataInicio) return false
-      }
-      
-      if (filtros.value.dataFim) {
-        const dataFim = new Date(filtros.value.dataFim)
-        dataFim.setHours(23, 59, 59, 999) // Incluir todo o dia final
-        if (dataAbate > dataFim) return false
-      }
-    }
-    
-    return true
-  })
+  // A API já aplica os filtros de data, usar dados diretos
+  const abatesFiltrados = abatesCompletos.value
   
-  return abatesFiltrados
+  return [...abatesFiltrados]
     .sort((a, b) => new Date(b.data_abate).getTime() - new Date(a.data_abate).getTime())
     .slice(0, 5)
 })
 
 // Produtos mais valiosos com dados reais (usando produtos dos abates completos)
 const produtosMaisValiosos = computed(() => {
-  const abatesFiltrados = abatesCompletos.value.filter(abate => {
-    // Filtro por data - usando comparação de timestamps
-    if (filtros.value.dataInicio || filtros.value.dataFim) {
-      const dataAbate = new Date(abate.data_abate)
-      
-      if (filtros.value.dataInicio) {
-        const dataInicio = new Date(filtros.value.dataInicio)
-        if (dataAbate < dataInicio) return false
-      }
-      
-      if (filtros.value.dataFim) {
-        const dataFim = new Date(filtros.value.dataFim)
-        dataFim.setHours(23, 59, 59, 999) // Incluir todo o dia final
-        if (dataAbate > dataFim) return false
-      }
-    }
-    
-    return true
-  })
+  // A API já aplica os filtros de data, usar dados diretos
+  const abatesFiltrados = abatesCompletos.value
   
   // Extrair todos os produtos dos abates filtrados
   const todosProdutos = abatesFiltrados.flatMap(abate => 
@@ -418,21 +310,8 @@ const produtosMaisValiosos = computed(() => {
 
 // Custos operacionais calculados com dados reais
 const custosOperacionais = computed(() => {
-  const abatesFiltrados = abatesCompletos.value.filter(abate => {
-    if (!filtros.value.dataInicio && !filtros.value.dataFim) return true
-    const dataAbateStr = new Date(abate.data_abate).toDateString()
-    
-    if (filtros.value.dataInicio) {
-      const dataInicioStr = new Date(filtros.value.dataInicio).toDateString()
-      if (dataAbateStr < dataInicioStr) return false
-    }
-    
-    if (filtros.value.dataFim) {
-      const dataFimStr = new Date(filtros.value.dataFim).toDateString()
-      if (dataAbateStr > dataFimStr) return false
-    }
-    return true
-  })
+  // A API já aplica os filtros de data, usar dados diretos
+  const abatesFiltrados = abatesCompletos.value
   
   const custos = {
     maoDeObra: 0,
@@ -464,22 +343,8 @@ const custosOperacionais = computed(() => {
 
 // Análise de tendências e performance
 const tendencias = computed(() => {
-  const abatesFiltrados = abatesCompletos.value.filter(abate => {
-    if (!filtros.value.dataInicio && !filtros.value.dataFim) return true
-    const dataAbateStr = new Date(abate.data_abate).toDateString()
-    
-    if (filtros.value.dataInicio) {
-      const dataInicioStr = new Date(filtros.value.dataInicio).toDateString()
-      if (dataAbateStr < dataInicioStr) return false
-    }
-    
-    if (filtros.value.dataFim) {
-      const dataFimStr = new Date(filtros.value.dataFim).toDateString()
-      if (dataAbateStr > dataFimStr) return false
-    }
-    
-    return true
-  })
+  // A API já aplica os filtros de data, usar dados diretos
+  const abatesFiltrados = abatesCompletos.value
   
   if (abatesFiltrados.length === 0) {
     return {
@@ -519,7 +384,7 @@ const tendencias = computed(() => {
   let eficienciaTendencia = 0
   
   // Ordenar abates por data para calcular tendências corretamente (da data menor para maior)
-  const abatesOrdenados = abatesFiltrados.sort((a, b) => new Date(a.data_abate).getTime() - new Date(b.data_abate).getTime())
+  const abatesOrdenados = [...abatesFiltrados].sort((a, b) => new Date(a.data_abate).getTime() - new Date(b.data_abate).getTime())
   
   if (abatesOrdenados.length >= 2) {
     const metade = Math.max(1, Math.floor(abatesOrdenados.length / 2))
@@ -696,15 +561,32 @@ const alertas = computed(() => {
 
 // Carregar dados reais das APIs
 const loadData = async () => {
+  if (loading.value) {
+    // Evita chamadas concorrentes/reentrantes que podem causar loops
+    return
+  }
   try {
     loading.value = true
     error.value = ''
+    
+    // Preparar parâmetros de filtro de data para a API
+    const apiParams: any = { limit: 1000 }
+    
+    // Aplicar filtros de data se definidos (exceto para 'todos')
+    if (filtros.value.periodoPreDefinido !== 'todos' && (filtros.value.dataInicio || filtros.value.dataFim)) {
+      if (filtros.value.dataInicio) {
+        apiParams.data_inicio = filtros.value.dataInicio
+      }
+      if (filtros.value.dataFim) {
+        apiParams.data_fim = filtros.value.dataFim
+      }
+    }
     
     // Buscar dados em paralelo
     const [lotesResponse, produtosResponse, abatesResponse] = await Promise.all([
       getLotesAbate({ limit: 1000 }),
       getProdutos({ limit: 1000 }),
-      getAbatesCompletos({ limit: 1000 })
+      getAbatesCompletos(apiParams)
     ])
     
     lotes.value = lotesResponse || []

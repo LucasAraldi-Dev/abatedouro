@@ -2,6 +2,19 @@
   <div class="graficos-dashboard">
     <h3 class="section-title">📊 Análise Comparativa dos Abates</h3>
     
+    <!-- Informação sobre agrupamento de dados -->
+    <div v-if="props.dadosAbates && props.dadosAbates.length > 30" class="info-agrupamento">
+      <div class="info-card">
+        <span class="info-icon">ℹ️</span>
+        <span class="info-text">
+          {{ props.dadosAbates.length > 90 ? 
+            `Dados agrupados por mês (${props.dadosAbates.length} registros)` : 
+            `Dados agrupados por semana (${props.dadosAbates.length} registros)` 
+          }}
+        </span>
+      </div>
+    </div>
+    
     <div class="graficos-grid">
       <!-- Gráfico de Lucro Total -->
       <div class="grafico-card">
@@ -63,10 +76,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, watch, watchEffect, nextTick } from 'vue'
 import { Chart, registerables } from 'chart.js'
-import { getAbatesCompletos } from '../services/api'
-import type { AbateCompleto } from '../services/api'
 
 // Registrar componentes do Chart.js
 Chart.register(...registerables)
@@ -98,20 +109,149 @@ let rendimentoChartInstance: Chart | null = null
 let eficienciaChartInstance: Chart | null = null
 let comparativoPrecosChartInstance: Chart | null = null
 
-// Dados dos abates
-const abatesCompletos = ref<any[]>([])
+// Flag para evitar reentrância durante atualizações de gráficos
+const atualizandoGraficos = ref(false)
 
-// Carregar dados dos abates
-const carregarDadosAbates = async () => {
-  try {
-    const response = await getAbatesCompletos()
-    // Ordenar por data da mais antiga para a mais nova (melhor para visualização em gráficos)
-    abatesCompletos.value = (response || []).sort((a, b) => 
+// Dados dos abates vêm das props dadosAbates
+// Removida variável reativa desnecessária para evitar conflitos
+
+// Função para otimizar dados para visualização
+const otimizarDadosParaGraficos = (dados: any[]) => {
+  if (dados.length <= 30) {
+    return dados
+  }
+  
+  // Se há mais de 30 registros, agrupar por semana
+  if (dados.length <= 90) {
+    return agruparPorSemana(dados)
+  }
+  
+  // Se há mais de 90 registros, agrupar por mês
+  return agruparPorMes(dados)
+}
+
+// Agrupar dados por semana
+const agruparPorSemana = (dados: any[]) => {
+  const grupos = new Map()
+  
+  dados.forEach(abate => {
+    const data = new Date(abate.data_abate)
+    const inicioSemana = new Date(data)
+    inicioSemana.setDate(data.getDate() - data.getDay())
+    const chave = inicioSemana.toISOString().split('T')[0]
+    
+    if (!grupos.has(chave)) {
+      grupos.set(chave, {
+        data_abate: chave,
+        quantidade_aves: 0,
+        // Campos canônicos segundo a API
+        peso_total_kg: 0,
+        custos_totais: 0,
+        receita_bruta: 0,
+        lucro_total: 0,
+        rendimento_final: 0,
+        // Campos de compatibilidade com lógicas anteriores
+        peso_total: 0,
+        custo_total: 0,
+        receita_total: 0,
+        count: 0
+      })
+    }
+    
+    const grupo = grupos.get(chave)
+    grupo.quantidade_aves += toNumber(abate.quantidade_aves)
+
+    const ptk = toNumber(abate.peso_total_kg ?? abate.peso_total)
+    grupo.peso_total_kg += ptk
+    grupo.peso_total += ptk
+
+    const ct = toNumber(abate.custos_totais ?? abate.custo_total)
+    grupo.custos_totais += ct
+    grupo.custo_total += ct
+
+    const rb = toNumber(abate.receita_bruta ?? abate.receita_total)
+    grupo.receita_bruta += rb
+    grupo.receita_total += rb
+
+    grupo.lucro_total += toNumber(abate.lucro_total)
+    grupo.count += 1
+  })
+  
+  return Array.from(grupos.values()).map(grupo => ({
+    ...grupo,
+    rendimento_final: grupo.quantidade_aves > 0 ? (grupo.peso_total_kg / grupo.quantidade_aves) * 100 : 0
+  }))
+}
+
+// Agrupar dados por mês
+const agruparPorMes = (dados: any[]) => {
+  const grupos = new Map()
+  
+  dados.forEach(abate => {
+    const data = new Date(abate.data_abate)
+    const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`
+    
+    if (!grupos.has(chave)) {
+      grupos.set(chave, {
+        data_abate: chave,
+        quantidade_aves: 0,
+        // Campos canônicos segundo a API
+        peso_total_kg: 0,
+        custos_totais: 0,
+        receita_bruta: 0,
+        lucro_total: 0,
+        rendimento_final: 0,
+        // Campos de compatibilidade com lógicas anteriores
+        peso_total: 0,
+        custo_total: 0,
+        receita_total: 0,
+        count: 0
+      })
+    }
+    
+    const grupo = grupos.get(chave)
+    grupo.quantidade_aves += toNumber(abate.quantidade_aves)
+
+    const ptk = toNumber(abate.peso_total_kg ?? abate.peso_total)
+    grupo.peso_total_kg += ptk
+    grupo.peso_total += ptk
+
+    const ct = toNumber(abate.custos_totais ?? abate.custo_total)
+    grupo.custos_totais += ct
+    grupo.custo_total += ct
+
+    const rb = toNumber(abate.receita_bruta ?? abate.receita_total)
+    grupo.receita_bruta += rb
+    grupo.receita_total += rb
+
+    grupo.lucro_total += toNumber(abate.lucro_total)
+    grupo.count += 1
+  })
+  
+  return Array.from(grupos.values()).map(grupo => ({
+    ...grupo,
+    rendimento_final: grupo.quantidade_aves > 0 ? (grupo.peso_total_kg / grupo.quantidade_aves) * 100 : 0
+  }))
+}
+
+// Usar dados filtrados passados via props
+const inicializarGraficos = () => {
+  if (props.dadosAbates && props.dadosAbates.length > 0) {
+    if (import.meta.env.DEV) {
+      console.debug('[GraficosDashboard] Recebidos', props.dadosAbates.length, 'registros. Exemplo:', props.dadosAbates[0])
+    }
+    // Ordenar por data da mais antiga para a mais nova (sem mutar props)
+    const dadosOrdenados = [...props.dadosAbates].sort((a, b) => 
       new Date(a.data_abate).getTime() - new Date(b.data_abate).getTime()
     )
-    criarGraficos()
-  } catch (error) {
-    console.error('Erro ao carregar dados dos abates:', error)
+    
+    // Usar dados otimizados diretamente sem modificar variável reativa
+    const dadosOtimizados = otimizarDadosParaGraficos(dadosOrdenados)
+    criarGraficos(dadosOtimizados)
+  } else {
+    if (import.meta.env.DEV) {
+      console.debug('[GraficosDashboard] Nenhum dado recebido para os gráficos.')
+    }
   }
 }
 
@@ -124,8 +264,9 @@ const formatarData = (dataString: string): string => {
 }
 
 // Criar gráfico de Lucro Total (barras)
-const criarGraficoLucroTotal = () => {
-  if (!lucroTotalChart.value || abatesCompletos.value.length === 0) return
+const criarGraficoLucroTotal = (dados?: any[]) => {
+  const dadosGrafico = dados || props.dadosAbates
+  if (!lucroTotalChart.value || dadosGrafico.length === 0) return
   
   if (lucroTotalChartInstance) {
     lucroTotalChartInstance.destroy()
@@ -134,18 +275,23 @@ const criarGraficoLucroTotal = () => {
   const ctx = lucroTotalChart.value.getContext('2d')
   if (!ctx) return
   
-  const dados = abatesCompletos.value.map(abate => ({
+  const dadosFormatados = dadosGrafico.map(abate => ({
     data: formatarData(abate.data_abate),
-    valor: abate.lucro_total || 0
+    valor: toNumber(abate.lucro_total)
   }))
+  
+  // Log de amostra
+  if (import.meta.env.DEV) {
+    console.debug('[Lucro Total] Amostra:', dadosFormatados.slice(0, 5))
+  }
   
   lucroTotalChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: dados.map(d => d.data),
+      labels: dadosFormatados.map(d => d.data),
       datasets: [{
         label: 'Lucro Total (R$)',
-        data: dados.map(d => d.valor),
+        data: dadosFormatados.map(d => d.valor),
         backgroundColor: 'rgba(16, 185, 129, 0.8)',
         borderColor: 'rgba(16, 185, 129, 1)',
         borderWidth: 1
@@ -173,9 +319,55 @@ const criarGraficoLucroTotal = () => {
   })
 }
 
-// Criar gráfico de Custo por Kg (barras)
-const criarGraficoCustoPorKg = () => {
-  if (!custoPorKgChart.value || abatesCompletos.value.length === 0) return
+// Função utilitária para converter diversos formatos de número para Number
+const toNumber = (v: any): number => {
+  if (v === null || v === undefined) return 0
+  if (typeof v === 'number') return isFinite(v) ? v : 0
+  if (typeof v === 'string') {
+    let raw = v.trim()
+    // Remover quaisquer símbolos de moeda e caracteres não numéricos, preservando dígitos, vírgulas, pontos e sinal de menos
+    raw = raw.replace(/[^0-9,.-]/g, '')
+    if (raw.length === 0) return 0
+
+    const hasComma = raw.includes(',')
+    const hasDot = raw.includes('.')
+
+    // Caso 1: possui vírgula e não possui ponto -> vírgula é decimal pt-BR
+    if (hasComma && !hasDot) {
+      const s = raw.replace(/\s/g, '').replace(',', '.')
+      const n = Number(s)
+      return isNaN(n) ? 0 : n
+    }
+
+    // Caso 2: possui ambos -> decidir pelo último separador como decimal
+    if (hasComma && hasDot) {
+      const lastComma = raw.lastIndexOf(',')
+      const lastDot = raw.lastIndexOf('.')
+      if (lastComma > lastDot) {
+        // vírgula é decimal, ponto é milhar
+        const s = raw.replace(/\./g, '').replace(',', '.')
+        const n = Number(s)
+        return isNaN(n) ? 0 : n
+      } else {
+        // ponto é decimal, vírgula é milhar
+        const s = raw.replace(/,/g, '')
+        const n = Number(s)
+        return isNaN(n) ? 0 : n
+      }
+    }
+
+    // Caso 3: somente ponto ou sem separadores -> usar Number direto
+    const n = Number(raw.replace(/\s/g, ''))
+    return isNaN(n) ? 0 : n
+  }
+  const n = Number(v)
+  return isNaN(n) ? 0 : n
+}
+
+// Criar gráfico de Custo por Kg (barras horizontais)
+const criarGraficoCustoPorKg = (dados?: any[]) => {
+  const dadosGrafico = dados || props.dadosAbates
+  if (!custoPorKgChart.value || dadosGrafico.length === 0) return
   
   if (custoPorKgChartInstance) {
     custoPorKgChartInstance.destroy()
@@ -184,18 +376,30 @@ const criarGraficoCustoPorKg = () => {
   const ctx = custoPorKgChart.value.getContext('2d')
   if (!ctx) return
   
-  const dados = abatesCompletos.value.map(abate => ({
-    data: formatarData(abate.data_abate),
-    valor: abate.custo_kg || 0
-  }))
+  const dadosFormatados = dadosGrafico.map(abate => {
+    const peso = toNumber(abate.peso_total_kg ?? abate.peso_total)
+    const custoKgDireto = abate.custo_kg !== undefined && abate.custo_kg !== null ? toNumber(abate.custo_kg) : undefined
+    const custoTotal = toNumber(abate.custos_totais ?? abate.custo_total)
+    const valor = custoKgDireto ?? (peso > 0 ? (custoTotal / peso) : 0)
+    return {
+      data: formatarData(abate.data_abate),
+      valor
+    }
+  })
+  
+  // Opcional: log em dev para verificar dados
+  if (import.meta.env.DEV) {
+    const preview = dadosFormatados.slice(0, 5)
+    console.debug('[Custo por Kg] Amostra de dados formatados:', preview)
+  }
   
   custoPorKgChartInstance = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: dados.map(d => d.data),
+      labels: dadosFormatados.map(d => d.data),
       datasets: [{
         label: 'Custo por Kg (R$)',
-        data: dados.map(d => d.valor),
+        data: dadosFormatados.map(d => d.valor),
         backgroundColor: 'rgba(239, 68, 68, 0.8)',
         borderColor: 'rgba(239, 68, 68, 1)',
         borderWidth: 1
@@ -224,8 +428,9 @@ const criarGraficoCustoPorKg = () => {
 }
 
 // Criar gráfico de Lucro por Kg (linha)
-const criarGraficoLucroPorKg = () => {
-  if (!lucroPorKgChart.value || abatesCompletos.value.length === 0) return
+const criarGraficoLucroPorKg = (dados?: any[]) => {
+  const dadosGrafico = dados || props.dadosAbates
+  if (!lucroPorKgChart.value || dadosGrafico.length === 0) return
   
   if (lucroPorKgChartInstance) {
     lucroPorKgChartInstance.destroy()
@@ -234,18 +439,30 @@ const criarGraficoLucroPorKg = () => {
   const ctx = lucroPorKgChart.value.getContext('2d')
   if (!ctx) return
   
-  const dados = abatesCompletos.value.map(abate => ({
-    data: formatarData(abate.data_abate),
-    valor: abate.lucro_kg || 0
-  }))
+  const dadosFormatados = dadosGrafico.map(abate => {
+    const peso = toNumber(abate.peso_total_kg ?? abate.peso_total)
+    const lucroKgDireto = abate.lucro_kg !== undefined && abate.lucro_kg !== null ? toNumber(abate.lucro_kg) : undefined
+    const lucroTotal = toNumber(abate.lucro_total)
+    const valor = lucroKgDireto ?? (peso > 0 ? (lucroTotal / peso) : 0)
+    return {
+      data: formatarData(abate.data_abate),
+      valor
+    }
+  })
+  
+  // Opcional: log em dev para verificar dados
+  if (import.meta.env.DEV) {
+    const preview = dadosFormatados.slice(0, 5)
+    console.debug('[Lucro por Kg] Amostra de dados formatados:', preview)
+  }
   
   lucroPorKgChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: dados.map(d => d.data),
+      labels: dadosFormatados.map(d => d.data),
       datasets: [{
         label: 'Lucro por Kg (R$)',
-        data: dados.map(d => d.valor),
+        data: dadosFormatados.map(d => d.valor),
         borderColor: 'rgba(34, 197, 94, 1)',
         backgroundColor: 'rgba(34, 197, 94, 0.1)',
         borderWidth: 2,
@@ -275,9 +492,10 @@ const criarGraficoLucroPorKg = () => {
   })
 }
 
-// Criar gráfico de Lucro por Ave (linha)
-const criarGraficoLucroPorAve = () => {
-  if (!lucroPorAveChart.value || abatesCompletos.value.length === 0) return
+// Criar gráfico de Lucro por Ave (área)
+const criarGraficoLucroPorAve = (dados?: any[]) => {
+  const dadosGrafico = dados || props.dadosAbates
+  if (!lucroPorAveChart.value || dadosGrafico.length === 0) return
   
   if (lucroPorAveChartInstance) {
     lucroPorAveChartInstance.destroy()
@@ -286,18 +504,22 @@ const criarGraficoLucroPorAve = () => {
   const ctx = lucroPorAveChart.value.getContext('2d')
   if (!ctx) return
   
-  const dados = abatesCompletos.value.map(abate => ({
+  const dadosFormatados = dadosGrafico.map(abate => ({
     data: formatarData(abate.data_abate),
-    valor: abate.lucro_frango || 0
+    valor: toNumber(abate.lucro_frango)
   }))
+  
+  if (import.meta.env.DEV) {
+    console.debug('[Lucro por Ave] Amostra:', dadosFormatados.slice(0, 5))
+  }
   
   lucroPorAveChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: dados.map(d => d.data),
+      labels: dadosFormatados.map(d => d.data),
       datasets: [{
         label: 'Lucro por Ave (R$)',
-        data: dados.map(d => d.valor),
+        data: dadosFormatados.map(d => d.valor),
         borderColor: 'rgba(59, 130, 246, 1)',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         borderWidth: 2,
@@ -327,9 +549,10 @@ const criarGraficoLucroPorAve = () => {
   })
 }
 
-// Criar gráfico de Rendimento (linha)
-const criarGraficoRendimento = () => {
-  if (!rendimentoChart.value || abatesCompletos.value.length === 0) return
+// Criar gráfico de Rendimento (rosca)
+const criarGraficoRendimento = (dados?: any[]) => {
+  const dadosGrafico = dados || props.dadosAbates
+  if (!rendimentoChart.value || dadosGrafico.length === 0) return
   
   if (rendimentoChartInstance) {
     rendimentoChartInstance.destroy()
@@ -338,18 +561,22 @@ const criarGraficoRendimento = () => {
   const ctx = rendimentoChart.value.getContext('2d')
   if (!ctx) return
   
-  const dados = abatesCompletos.value.map(abate => ({
+  const dadosFormatados = dadosGrafico.map(abate => ({
     data: formatarData(abate.data_abate),
-    valor: abate.rendimento_final || 0
+    valor: toNumber(abate.rendimento_final)
   }))
+  
+  if (import.meta.env.DEV) {
+    console.debug('[Rendimento] Amostra:', dadosFormatados.slice(0, 5))
+  }
   
   rendimentoChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: dados.map(d => d.data),
+      labels: dadosFormatados.map(d => d.data),
       datasets: [{
         label: 'Rendimento (%)',
-        data: dados.map(d => d.valor),
+        data: dadosFormatados.map(d => d.valor),
         borderColor: 'rgba(245, 158, 11, 1)',
         backgroundColor: 'rgba(245, 158, 11, 0.1)',
         borderWidth: 2,
@@ -379,9 +606,10 @@ const criarGraficoRendimento = () => {
   })
 }
 
-// Criar gráfico de Eficiência Operacional (linha)
-const criarGraficoEficiencia = () => {
-  if (!eficienciaChart.value || abatesCompletos.value.length === 0) return
+// Criar gráfico de Eficiência (gauge/polar)
+const criarGraficoEficiencia = (dados?: any[]) => {
+  const dadosGrafico = dados || props.dadosAbates
+  if (!eficienciaChart.value || dadosGrafico.length === 0) return
   
   if (eficienciaChartInstance) {
     eficienciaChartInstance.destroy()
@@ -390,18 +618,22 @@ const criarGraficoEficiencia = () => {
   const ctx = eficienciaChart.value.getContext('2d')
   if (!ctx) return
   
-  const dados = abatesCompletos.value.map(abate => ({
+  const dadosFormatados = dadosGrafico.map(abate => ({
     data: formatarData(abate.data_abate),
-    valor: abate.eficiencia_operacional || 0
+    valor: toNumber(abate.eficiencia_operacional)
   }))
+  
+  if (import.meta.env.DEV) {
+    console.debug('[Eficiência] Amostra:', dadosFormatados.slice(0, 5))
+  }
   
   eficienciaChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: dados.map(d => d.data),
+      labels: dadosFormatados.map(d => d.data),
       datasets: [{
         label: 'Eficiência Operacional (%)',
-        data: dados.map(d => d.valor),
+        data: dadosFormatados.map(d => d.valor),
         borderColor: 'rgba(139, 92, 246, 1)',
         backgroundColor: 'rgba(139, 92, 246, 0.1)',
         borderWidth: 2,
@@ -431,9 +663,10 @@ const criarGraficoEficiencia = () => {
   })
 }
 
-// Criar gráfico comparativo de preços (linha dupla)
-const criarGraficoComparativoPrecos = () => {
-  if (!comparativoPrecosChart.value || abatesCompletos.value.length === 0) return
+// Criar gráfico Comparativo de Preços (radar)
+const criarGraficoComparativoPrecos = (dados?: any[]) => {
+  const dadosGrafico = dados || props.dadosAbates
+  if (!comparativoPrecosChart.value || dadosGrafico.length === 0) return
   
   if (comparativoPrecosChartInstance) {
     comparativoPrecosChartInstance.destroy()
@@ -442,20 +675,24 @@ const criarGraficoComparativoPrecos = () => {
   const ctx = comparativoPrecosChart.value.getContext('2d')
   if (!ctx) return
   
-  const dados = abatesCompletos.value.map(abate => ({
+  const dadosFormatados = dadosGrafico.map(abate => ({
     data: formatarData(abate.data_abate),
-    precoVivo: abate.valor_kg_vivo || 0,
-    precoAbatido: abate.preco_venda_kg || 0
+    precoVivo: toNumber(abate.valor_kg_vivo),
+    precoAbatido: toNumber(abate.preco_venda_kg)
   }))
+  
+  if (import.meta.env.DEV) {
+    console.debug('[Comparativo Preços] Amostra:', dadosFormatados.slice(0, 5))
+  }
   
   comparativoPrecosChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: dados.map(d => d.data),
+      labels: dadosFormatados.map(d => d.data),
       datasets: [
         {
           label: 'Preço Frango Vivo (R$/kg)',
-          data: dados.map(d => d.precoVivo),
+          data: dadosFormatados.map(d => d.precoVivo),
           borderColor: 'rgba(34, 197, 94, 1)',
           backgroundColor: 'rgba(34, 197, 94, 0.1)',
           borderWidth: 3,
@@ -468,7 +705,7 @@ const criarGraficoComparativoPrecos = () => {
         },
         {
           label: 'Preço Frango Abatido (R$/kg)',
-          data: dados.map(d => d.precoAbatido),
+          data: dadosFormatados.map(d => d.precoAbatido),
           borderColor: 'rgba(239, 68, 68, 1)',
           backgroundColor: 'rgba(239, 68, 68, 0.1)',
           borderWidth: 3,
@@ -546,15 +783,25 @@ const criarGraficoComparativoPrecos = () => {
 }
 
 // Criar todos os gráficos
-const criarGraficos = () => {
+const criarGraficos = (dadosParaGraficos?: any[]) => {
+  // Usar dados passados como parâmetro ou fallback para props.dadosAbates
+  const dados = dadosParaGraficos || props.dadosAbates
+  
+  // Prevenir reentrância
+  atualizandoGraficos.value = true
+  
   nextTick(() => {
-    criarGraficoLucroTotal()
-    criarGraficoLucroPorKg()
-    criarGraficoLucroPorAve()
-    criarGraficoCustoPorKg()
-    criarGraficoRendimento()
-    criarGraficoComparativoPrecos()
-    criarGraficoEficiencia()
+    try {
+      criarGraficoLucroTotal(dados)
+      criarGraficoLucroPorKg(dados)
+      criarGraficoLucroPorAve(dados)
+      criarGraficoCustoPorKg(dados)
+      criarGraficoRendimento(dados)
+      criarGraficoComparativoPrecos(dados)
+      criarGraficoEficiencia(dados)
+    } finally {
+      atualizandoGraficos.value = false
+    }
   })
 }
 
@@ -590,24 +837,37 @@ const destruirGraficos = () => {
   }
 }
 
-// Watchers
-watch(() => props.dadosAbates, () => {
-  if (props.dadosAbates && props.dadosAbates.length > 0) {
-    // Ordenar por data da mais antiga para a mais nova (melhor para visualização em gráficos)
-    abatesCompletos.value = props.dadosAbates.sort((a, b) => 
-      new Date(a.data_abate).getTime() - new Date(b.data_abate).getTime()
-    )
-    criarGraficos()
+// Flag para controlar se os gráficos já foram inicializados
+const graficosInicializados = ref(false)
+
+// Watcher para observar mudanças nos dados (apenas após inicialização)
+watch(() => props.dadosAbates, (newDados) => {
+  // Só atualizar se os gráficos já foram inicializados e há dados e não estamos atualizando no momento
+  if (graficosInicializados.value && newDados && newDados.length > 0 && !atualizandoGraficos.value) {
+    // Aguardar próximo tick para evitar conflitos
+    nextTick(() => {
+      // Destruir gráficos existentes
+      destruirGraficos()
+      // Aguardar mais um tick antes de recriar
+      nextTick(() => {
+        inicializarGraficos()
+      })
+    })
   }
-}, { deep: true })
+}, { deep: false, immediate: false })
 
 // Lifecycle
 onMounted(() => {
-  carregarDadosAbates()
+  inicializarGraficos()
+  // Marcar que os gráficos foram inicializados
+  graficosInicializados.value = true
 })
 
 onUnmounted(() => {
   destruirGraficos()
+  // Resetar flags
+  graficosInicializados.value = false
+  atualizandoGraficos.value = false
 })
 </script>
 
@@ -624,6 +884,32 @@ onUnmounted(() => {
   color: var(--text-primary);
   margin-bottom: 1.5rem;
   text-align: center;
+}
+
+.info-agrupamento {
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.info-card {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.info-icon {
+  font-size: 1rem;
+}
+
+.info-text {
+  font-weight: 500;
 }
 
 .graficos-grid {
