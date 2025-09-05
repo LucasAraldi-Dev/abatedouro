@@ -138,6 +138,7 @@
       quantidade_aves: formData.quantidade_aves,
       peso_total: formData.peso_total_kg
     }"
+    :form-data="formData"
     @close="handleSuccessModalClose"
     @view-lote="handleViewLote"
     @create-new="handleCreateNew"

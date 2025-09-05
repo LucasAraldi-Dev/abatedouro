@@ -565,16 +565,6 @@
       </div>
     </div>
 
-    <!-- Botão de Impressão -->
-    <div class="botao-impressao-section">
-      <button 
-        @click="abrirRelatorioImpressao" 
-        class="btn-impressao"
-        type="button"
-      >
-        🖨️ Gerar Relatório para Impressão
-      </button>
-    </div>
 
     <!-- Modal do Relatório de Impressão -->
     <div v-if="mostrarRelatorioImpressao" class="modal-impressao">
@@ -973,6 +963,7 @@ const analiseProdutos = computed(() => {
     
     return {
       nome: produto.nome,
+      tipo: produto.tipo,
       quantidade: produto.quantidade,
       total: produto.total,
       pesoMedio,
