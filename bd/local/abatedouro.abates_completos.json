@@ -1,0 +1,1313 @@
+[{
+  "_id": {
+    "$oid": "68b88f5a05d24473e3d80ac6"
+  },
+  "data_abate": {
+    "$date": "2025-09-01T11:00:00.000Z"
+  },
+  "quantidade_aves": 17392,
+  "valor_kg_vivo": 6,
+  "peso_total_kg": 36460,
+  "peso_medio_ave": 2.0963661453541858,
+  "valor_total": 218760,
+  "unidade": "Belo Jardim",
+  "tipo_ave": "Frango de Corte",
+  "observacoes": "\n",
+  "horarios": {
+    "hora_inicio": "06:00",
+    "hora_termino": "18:00",
+    "intervalo_minutos": 80,
+    "horas_trabalhadas": 12,
+    "horas_reais": 10.666666666666666
+  },
+  "produtos": [
+    {
+      "produto_id": "68b0e56353c3275b6f2fb04a",
+      "nome": "PEITO",
+      "tipo": "Peito",
+      "peso_kg": 988,
+      "preco_kg": 14.5,
+      "valor_total": 14326,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5ac53c3275b6f2fb04b",
+      "nome": "COXA C SOBRE",
+      "tipo": "Coxa",
+      "peso_kg": 5032,
+      "preco_kg": 10.5,
+      "valor_total": 52836,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5c153c3275b6f2fb04c",
+      "nome": "ASA",
+      "tipo": "Asa",
+      "peso_kg": 1630,
+      "preco_kg": 16,
+      "valor_total": 26080,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5cf53c3275b6f2fb04d",
+      "nome": "FILÉ DE PEITO",
+      "tipo": "Peito",
+      "peso_kg": 3012,
+      "preco_kg": 19.99,
+      "valor_total": 60209.88,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e60153c3275b6f2fb04e",
+      "nome": "SASSAMI",
+      "tipo": "Peito",
+      "peso_kg": 612,
+      "preco_kg": 19.8,
+      "valor_total": 12117.6,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9d753c3275b6f2fb051",
+      "nome": "PERTENCE",
+      "tipo": "Miúdos",
+      "peso_kg": 4368,
+      "preco_kg": 2.49,
+      "valor_total": 10876.320000000002,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9e753c3275b6f2fb052",
+      "nome": "MOELA",
+      "tipo": "Miúdos",
+      "peso_kg": 264,
+      "preco_kg": 9.5,
+      "valor_total": 2508,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9f153c3275b6f2fb053",
+      "nome": "CORAÇÃO",
+      "tipo": "Miúdos",
+      "peso_kg": 176,
+      "preco_kg": 30,
+      "valor_total": 5280,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b45578dc20de695c3522b9",
+      "nome": "FIGADO",
+      "tipo": "Miúdos",
+      "peso_kg": 648,
+      "preco_kg": 8,
+      "valor_total": 5184,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ea2053c3275b6f2fb056",
+      "nome": "CABEÇA",
+      "tipo": "Outros",
+      "peso_kg": 120,
+      "preco_kg": 1.99,
+      "valor_total": 238.8,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ea2f53c3275b6f2fb057",
+      "nome": "PÉS",
+      "tipo": "Miúdos",
+      "peso_kg": 195,
+      "preco_kg": 4.5,
+      "valor_total": 877.5,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ee9a53c3275b6f2fb059",
+      "nome": "PASSARINHA",
+      "tipo": "Outros",
+      "peso_kg": 600,
+      "preco_kg": 9.49,
+      "valor_total": 5694,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eea653c3275b6f2fb05a",
+      "nome": "PESCOÇO",
+      "tipo": "Miúdos",
+      "peso_kg": 280,
+      "preco_kg": 3.99,
+      "valor_total": 1117.2,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eebd53c3275b6f2fb05c",
+      "nome": "SOBRECOXA",
+      "tipo": "Sobrecoxa",
+      "peso_kg": 12,
+      "preco_kg": 10.49,
+      "valor_total": 125.88,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ef6953c3275b6f2fb05d",
+      "nome": "FRANGO INTEIRO",
+      "tipo": "Congelado",
+      "peso_kg": 3060,
+      "preco_kg": 10,
+      "valor_total": 30600,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ef7253c3275b6f2fb05e",
+      "nome": "FRANGO INTEIRO ",
+      "tipo": "Resfriado",
+      "peso_kg": 1000,
+      "preco_kg": 10.3,
+      "valor_total": 10300,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efad53c3275b6f2fb061",
+      "nome": "CARCAÇA 0,9",
+      "tipo": "Carcaça",
+      "peso_kg": 594,
+      "preco_kg": 13,
+      "valor_total": 7722,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efbc53c3275b6f2fb062",
+      "nome": "CARCAÇA 1,0",
+      "tipo": "Carcaça",
+      "peso_kg": 1188,
+      "preco_kg": 13,
+      "valor_total": 15444,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efc853c3275b6f2fb063",
+      "nome": "CARCAÇA 1,1",
+      "tipo": "Carcaça",
+      "peso_kg": 1664,
+      "preco_kg": 13,
+      "valor_total": 21632,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efd253c3275b6f2fb064",
+      "nome": "CARCAÇA 1,2",
+      "tipo": "Carcaça",
+      "peso_kg": 1363,
+      "preco_kg": 13.3,
+      "valor_total": 18127.9,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efe053c3275b6f2fb065",
+      "nome": "CARCAÇA 1,3",
+      "tipo": "Carcaça",
+      "peso_kg": 858,
+      "preco_kg": 13.3,
+      "valor_total": 11411.400000000001,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efed53c3275b6f2fb066",
+      "nome": "CARCAÇA 1,4",
+      "tipo": "Carcaça",
+      "peso_kg": 431,
+      "preco_kg": 13,
+      "valor_total": 5603,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eff953c3275b6f2fb067",
+      "nome": "CARCAÇA 1,5",
+      "tipo": "Carcaça",
+      "peso_kg": 156,
+      "preco_kg": 13,
+      "valor_total": 2028,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f00153c3275b6f2fb068",
+      "nome": "CARCAÇA 1,6",
+      "tipo": "Carcaça",
+      "peso_kg": 57,
+      "preco_kg": 12.9,
+      "valor_total": 735.3000000000001,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f01153c3275b6f2fb069",
+      "nome": "CARCAÇA 1,7",
+      "tipo": "Carcaça",
+      "peso_kg": 18,
+      "preco_kg": 12.9,
+      "valor_total": 232.20000000000002,
+      "percentual": 0
+    }
+  ],
+  "despesas_fixas": {
+    "funcionarios": 8000,
+    "agua": 2000,
+    "energia": 6000,
+    "embalagem": 3000,
+    "refeicao": 450,
+    "materiais_limpeza": 150,
+    "gelo": 0,
+    "horas_extras": 600,
+    "amonia": 0,
+    "epi": 0,
+    "manutencao": 1000,
+    "lenha_caldeira": 800,
+    "diaristas": 980,
+    "depreciacao": 1000,
+    "recisao": 750,
+    "ferias": 888.5,
+    "inss": 1600,
+    "frango_morto_plataforma": 0,
+    "escaldagem_eviceracao": 0,
+    "pe_graxaria": 0,
+    "descarte": 0
+  },
+  "peso_inteiro_abatido": 28326,
+  "preco_venda_kg": 11.343182235402107,
+  "receita_bruta": 321306.9800000001,
+  "custos_totais": 245978.5,
+  "lucro_liquido": 75328.4800000001,
+  "rendimento_final": 77.69061985737795,
+  "media_valor_kg": 11.343182235402107,
+  "custo_kg": 8.68384170020476,
+  "custo_ave": 14.143198022079117,
+  "custo_abate_kg": 0.9609016451316812,
+  "custo_frango": 1.5650011499540017,
+  "lucro_kg": 2.6593405351973485,
+  "lucro_frango": 4.331214351425949,
+  "lucro_total": 75328.4800000001,
+  "aves_hora": 1630.5,
+  "kg_hora": 2655.5625,
+  "tempo_medio_ave": 0.03679852805887764,
+  "eficiencia_operacional": 81.525,
+  "peso_total_perdas": 8134,
+  "percentual_perda_total": 22.30938014262205,
+  "valor_perdas": 48804,
+  "eficiencia_aproveitamento": 77.69061985737795,
+  "diversificacao_produtos": 90.50354107126543,
+  "peso_medio_geral": 1.6286798528058877,
+  "score_performance": 63.333333333333336,
+  "classificacao_performance": "Regular",
+  "percentual_receita_bruta": 100,
+  "percentual_custos_totais": 100,
+  "percentual_lucro_liquido": 23.4,
+  "percentual_media_valor_kg": 100,
+  "percentual_custo_kg": 100,
+  "percentual_custo_ave": 100,
+  "percentual_custo_abate_kg": 11.1,
+  "percentual_custo_frango": 11.1,
+  "percentual_lucro_kg": 23.4,
+  "percentual_lucro_frango": 23.4,
+  "percentual_lucro_total": 23.4,
+  "percentual_rendimento": 77.69061985737795,
+  "created_at": {
+    "$date": "2025-09-03T18:56:26.935Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-05T00:54:04.795Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68b8969305d24473e3d80ac7"
+  },
+  "data_abate": {
+    "$date": "2025-09-02T11:00:00.000Z"
+  },
+  "quantidade_aves": 17151,
+  "valor_kg_vivo": 6,
+  "peso_total_kg": 41290,
+  "peso_medio_ave": 2.4074397994286048,
+  "valor_total": 247740,
+  "unidade": "Belo Jardim",
+  "tipo_ave": "Frango de Corte",
+  "observacoes": "\n",
+  "horarios": {
+    "hora_inicio": "06:00",
+    "hora_termino": "18:00",
+    "intervalo_minutos": 80,
+    "horas_trabalhadas": 12,
+    "horas_reais": 10.666666666666666
+  },
+  "produtos": [
+    {
+      "produto_id": "68b0e56353c3275b6f2fb04a",
+      "nome": "PEITO",
+      "tipo": "Peito",
+      "peso_kg": 1420,
+      "preco_kg": 14.5,
+      "valor_total": 20590,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5ac53c3275b6f2fb04b",
+      "nome": "COXA C SOBRE",
+      "tipo": "Coxa",
+      "peso_kg": 2988,
+      "preco_kg": 10.5,
+      "valor_total": 31374,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5c153c3275b6f2fb04c",
+      "nome": "ASA",
+      "tipo": "Asa",
+      "peso_kg": 1578,
+      "preco_kg": 16,
+      "valor_total": 25248,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5cf53c3275b6f2fb04d",
+      "nome": "FILÉ DE PEITO",
+      "tipo": "Peito",
+      "peso_kg": 3000,
+      "preco_kg": 19.99,
+      "valor_total": 59969.99999999999,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e60153c3275b6f2fb04e",
+      "nome": "SASSAMI",
+      "tipo": "Peito",
+      "peso_kg": 684,
+      "preco_kg": 19.8,
+      "valor_total": 13543.2,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9d753c3275b6f2fb051",
+      "nome": "PERTENCE",
+      "tipo": "Miúdos",
+      "peso_kg": 4816,
+      "preco_kg": 2.49,
+      "valor_total": 11991.84,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9e753c3275b6f2fb052",
+      "nome": "MOELA",
+      "tipo": "Miúdos",
+      "peso_kg": 252,
+      "preco_kg": 9.5,
+      "valor_total": 2394,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9f153c3275b6f2fb053",
+      "nome": "CORAÇÃO",
+      "tipo": "Miúdos",
+      "peso_kg": 184,
+      "preco_kg": 30,
+      "valor_total": 5520,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b45578dc20de695c3522b9",
+      "nome": "FIGADO",
+      "tipo": "Miúdos",
+      "peso_kg": 528,
+      "preco_kg": 8,
+      "valor_total": 4224,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ea0f53c3275b6f2fb055",
+      "nome": "PELE",
+      "tipo": "Outros",
+      "peso_kg": 180,
+      "preco_kg": 3.5,
+      "valor_total": 630,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ea2053c3275b6f2fb056",
+      "nome": "CABEÇA",
+      "tipo": "Outros",
+      "peso_kg": 280,
+      "preco_kg": 1.99,
+      "valor_total": 557.2,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ea2f53c3275b6f2fb057",
+      "nome": "PÉS",
+      "tipo": "Miúdos",
+      "peso_kg": 30,
+      "preco_kg": 4.5,
+      "valor_total": 135,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ee9a53c3275b6f2fb059",
+      "nome": "PASSARINHA",
+      "tipo": "Outros",
+      "peso_kg": 900,
+      "preco_kg": 9.49,
+      "valor_total": 8541,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eea653c3275b6f2fb05a",
+      "nome": "PESCOÇO",
+      "tipo": "Miúdos",
+      "peso_kg": 360,
+      "preco_kg": 3.99,
+      "valor_total": 1436.4,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eeb153c3275b6f2fb05b",
+      "nome": "COXA",
+      "tipo": "Coxa",
+      "peso_kg": 1140,
+      "preco_kg": 10.49,
+      "valor_total": 11958.6,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eebd53c3275b6f2fb05c",
+      "nome": "SOBRECOXA",
+      "tipo": "Sobrecoxa",
+      "peso_kg": 1412,
+      "preco_kg": 10.49,
+      "valor_total": 14811.880000000001,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ef6953c3275b6f2fb05d",
+      "nome": "FRANGO INTEIRO",
+      "tipo": "Congelado",
+      "peso_kg": 2120,
+      "preco_kg": 10,
+      "valor_total": 21200,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ef7253c3275b6f2fb05e",
+      "nome": "FRANGO INTEIRO ",
+      "tipo": "Resfriado",
+      "peso_kg": 2020,
+      "preco_kg": 10.3,
+      "valor_total": 20806,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efad53c3275b6f2fb061",
+      "nome": "CARCAÇA 0,9",
+      "tipo": "Carcaça",
+      "peso_kg": 234,
+      "preco_kg": 13,
+      "valor_total": 3042,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efbc53c3275b6f2fb062",
+      "nome": "CARCAÇA 1,0",
+      "tipo": "Carcaça",
+      "peso_kg": 432,
+      "preco_kg": 13,
+      "valor_total": 5616,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efc853c3275b6f2fb063",
+      "nome": "CARCAÇA 1,1",
+      "tipo": "Carcaça",
+      "peso_kg": 935,
+      "preco_kg": 13,
+      "valor_total": 12155,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efd253c3275b6f2fb064",
+      "nome": "CARCAÇA 1,2",
+      "tipo": "Carcaça",
+      "peso_kg": 1382,
+      "preco_kg": 13.3,
+      "valor_total": 18380.600000000002,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efe053c3275b6f2fb065",
+      "nome": "CARCAÇA 1,3",
+      "tipo": "Carcaça",
+      "peso_kg": 1891,
+      "preco_kg": 13.3,
+      "valor_total": 25150.300000000003,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efed53c3275b6f2fb066",
+      "nome": "CARCAÇA 1,4",
+      "tipo": "Carcaça",
+      "peso_kg": 1960,
+      "preco_kg": 13,
+      "valor_total": 25480,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eff953c3275b6f2fb067",
+      "nome": "CARCAÇA 1,5",
+      "tipo": "Carcaça",
+      "peso_kg": 1521,
+      "preco_kg": 13,
+      "valor_total": 19773,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f00153c3275b6f2fb068",
+      "nome": "CARCAÇA 1,6",
+      "tipo": "Carcaça",
+      "peso_kg": 940.8,
+      "preco_kg": 12.9,
+      "valor_total": 12136.32,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f01153c3275b6f2fb069",
+      "nome": "CARCAÇA 1,7",
+      "tipo": "Carcaça",
+      "peso_kg": 448.8,
+      "preco_kg": 12.9,
+      "valor_total": 5789.52,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f01d53c3275b6f2fb06a",
+      "nome": "CARCAÇA 1,8 ",
+      "tipo": "Carcaça",
+      "peso_kg": 162,
+      "preco_kg": 12.9,
+      "valor_total": 2089.8,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f02553c3275b6f2fb06b",
+      "nome": "CARCAÇA 1,9",
+      "tipo": "Carcaça",
+      "peso_kg": 58,
+      "preco_kg": 12.9,
+      "valor_total": 748.2,
+      "percentual": 0
+    }
+  ],
+  "despesas_fixas": {
+    "funcionarios": 8000,
+    "agua": 2000,
+    "energia": 6000,
+    "embalagem": 3000,
+    "refeicao": 450,
+    "materiais_limpeza": 150,
+    "gelo": 0,
+    "horas_extras": 600,
+    "amonia": 0,
+    "epi": 0,
+    "manutencao": 1000,
+    "lenha_caldeira": 800,
+    "diaristas": 980,
+    "depreciacao": 1000,
+    "recisao": 750,
+    "ferias": 888.5,
+    "inss": 1600,
+    "frango_morto_plataforma": 0,
+    "escaldagem_eviceracao": 0,
+    "pe_graxaria": 0,
+    "descarte": 0
+  },
+  "peso_inteiro_abatido": 33856.600000000006,
+  "preco_venda_kg": 11.380110820342265,
+  "receita_bruta": 385291.86,
+  "custos_totais": 274958.5,
+  "lucro_liquido": 110333.35999999999,
+  "rendimento_final": 81.99709372729475,
+  "media_valor_kg": 11.380110820342265,
+  "custo_kg": 8.121267345214816,
+  "custo_ave": 16.0316308086992,
+  "custo_abate_kg": 0.803934831022607,
+  "custo_frango": 1.5869920121275727,
+  "lucro_kg": 3.258843475127448,
+  "lucro_frango": 6.433056964608477,
+  "lucro_total": 110333.35999999999,
+  "aves_hora": 1607.90625,
+  "kg_hora": 3174.0562500000005,
+  "tempo_medio_ave": 0.03731560841933415,
+  "eficiencia_operacional": 80.3953125,
+  "peso_total_perdas": 7433.399999999994,
+  "percentual_perda_total": 18.00290627270524,
+  "valor_perdas": 44600.399999999965,
+  "eficiencia_aproveitamento": 81.99709372729475,
+  "diversificacao_produtos": 93.60843834712111,
+  "peso_medio_geral": 1.97403066876567,
+  "score_performance": 56.666666666666664,
+  "classificacao_performance": "Regular",
+  "percentual_receita_bruta": 100,
+  "percentual_custos_totais": 100,
+  "percentual_lucro_liquido": 28.6,
+  "percentual_media_valor_kg": 100,
+  "percentual_custo_kg": 100,
+  "percentual_custo_ave": 100,
+  "percentual_custo_abate_kg": 9.9,
+  "percentual_custo_frango": 9.9,
+  "percentual_lucro_kg": 28.6,
+  "percentual_lucro_frango": 28.6,
+  "percentual_lucro_total": 28.6,
+  "percentual_rendimento": 81.99709372729475,
+  "created_at": {
+    "$date": "2025-09-03T19:27:15.687Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-04T22:43:28.737Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68b9a8bcc8fc2de072d88d13"
+  },
+  "data_abate": {
+    "$date": "2025-09-03T11:00:00.000Z"
+  },
+  "quantidade_aves": 17432,
+  "valor_kg_vivo": 6,
+  "peso_total_kg": 34660,
+  "peso_medio_ave": 1.9882973841211564,
+  "valor_total": 207960,
+  "unidade": "Belo Jardim",
+  "tipo_ave": "Frango de Corte",
+  "observacoes": "\n",
+  "horarios": {
+    "hora_inicio": "06:00",
+    "hora_termino": "14:40",
+    "intervalo_minutos": 90,
+    "horas_trabalhadas": 8.666666666666666,
+    "horas_reais": 7.166666666666667
+  },
+  "produtos": [
+    {
+      "produto_id": "68b0e56353c3275b6f2fb04a",
+      "nome": "PEITO",
+      "tipo": "Peito",
+      "peso_kg": 1200,
+      "preco_kg": 14.5,
+      "valor_total": 17400,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5ac53c3275b6f2fb04b",
+      "nome": "COXA C SOBRE",
+      "tipo": "Coxa",
+      "peso_kg": 3072,
+      "preco_kg": 10.5,
+      "valor_total": 32256,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5c153c3275b6f2fb04c",
+      "nome": "ASA",
+      "tipo": "Asa",
+      "peso_kg": 1492,
+      "preco_kg": 16,
+      "valor_total": 23872,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5cf53c3275b6f2fb04d",
+      "nome": "FILÉ DE PEITO",
+      "tipo": "Peito",
+      "peso_kg": 2800,
+      "preco_kg": 19.99,
+      "valor_total": 55971.99999999999,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e60153c3275b6f2fb04e",
+      "nome": "SASSAMI",
+      "tipo": "Peito",
+      "peso_kg": 600,
+      "preco_kg": 19.8,
+      "valor_total": 11880,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9d753c3275b6f2fb051",
+      "nome": "PERTENCE",
+      "tipo": "Miúdos",
+      "peso_kg": 4112,
+      "preco_kg": 2.49,
+      "valor_total": 10238.880000000001,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9e753c3275b6f2fb052",
+      "nome": "MOELA",
+      "tipo": "Miúdos",
+      "peso_kg": 36,
+      "preco_kg": 9.5,
+      "valor_total": 342,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9f153c3275b6f2fb053",
+      "nome": "CORAÇÃO",
+      "tipo": "Miúdos",
+      "peso_kg": 160,
+      "preco_kg": 30,
+      "valor_total": 4800,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ea2053c3275b6f2fb056",
+      "nome": "CABEÇA",
+      "tipo": "Outros",
+      "peso_kg": 340,
+      "preco_kg": 1.99,
+      "valor_total": 676.6,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ee9a53c3275b6f2fb059",
+      "nome": "PASSARINHA",
+      "tipo": "Outros",
+      "peso_kg": 1060,
+      "preco_kg": 9.49,
+      "valor_total": 10059.4,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eea653c3275b6f2fb05a",
+      "nome": "PESCOÇO",
+      "tipo": "Miúdos",
+      "peso_kg": 320,
+      "preco_kg": 3.99,
+      "valor_total": 1276.8000000000002,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eeb153c3275b6f2fb05b",
+      "nome": "COXA",
+      "tipo": "Coxa",
+      "peso_kg": 624,
+      "preco_kg": 10.49,
+      "valor_total": 6545.76,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eebd53c3275b6f2fb05c",
+      "nome": "SOBRECOXA",
+      "tipo": "Sobrecoxa",
+      "peso_kg": 800,
+      "preco_kg": 10.49,
+      "valor_total": 8392,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ef6953c3275b6f2fb05d",
+      "nome": "FRANGO INTEIRO",
+      "tipo": "Congelado",
+      "peso_kg": 2000,
+      "preco_kg": 10,
+      "valor_total": 20000,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efad53c3275b6f2fb061",
+      "nome": "CARCAÇA 0,9",
+      "tipo": "Carcaça",
+      "peso_kg": 684,
+      "preco_kg": 13,
+      "valor_total": 8892,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efbc53c3275b6f2fb062",
+      "nome": "CARCAÇA 1,0",
+      "tipo": "Carcaça",
+      "peso_kg": 1274,
+      "preco_kg": 13,
+      "valor_total": 16562,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efc853c3275b6f2fb063",
+      "nome": "CARCAÇA 1,1",
+      "tipo": "Carcaça",
+      "peso_kg": 1552,
+      "preco_kg": 13,
+      "valor_total": 20176,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efd253c3275b6f2fb064",
+      "nome": "CARCAÇA 1,2",
+      "tipo": "Carcaça",
+      "peso_kg": 1420,
+      "preco_kg": 13.3,
+      "valor_total": 18886,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efe053c3275b6f2fb065",
+      "nome": "CARCAÇA 1,3",
+      "tipo": "Carcaça",
+      "peso_kg": 975,
+      "preco_kg": 13.3,
+      "valor_total": 12967.5,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efed53c3275b6f2fb066",
+      "nome": "CARCAÇA 1,4",
+      "tipo": "Carcaça",
+      "peso_kg": 529,
+      "preco_kg": 13,
+      "valor_total": 6877,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eff953c3275b6f2fb067",
+      "nome": "CARCAÇA 1,5",
+      "tipo": "Carcaça",
+      "peso_kg": 234,
+      "preco_kg": 13,
+      "valor_total": 3042,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f00153c3275b6f2fb068",
+      "nome": "CARCAÇA 1,6",
+      "tipo": "Carcaça",
+      "peso_kg": 57.6,
+      "preco_kg": 12.9,
+      "valor_total": 743.0400000000001,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f01153c3275b6f2fb069",
+      "nome": "CARCAÇA 1,7",
+      "tipo": "Carcaça",
+      "peso_kg": 18.7,
+      "preco_kg": 12.9,
+      "valor_total": 241.23,
+      "percentual": 0
+    }
+  ],
+  "despesas_fixas": {
+    "funcionarios": 8000,
+    "agua": 2000,
+    "energia": 6000,
+    "embalagem": 3000,
+    "refeicao": 450,
+    "materiais_limpeza": 150,
+    "gelo": 0,
+    "horas_extras": 600,
+    "amonia": 0,
+    "epi": 0,
+    "manutencao": 1000,
+    "lenha_caldeira": 800,
+    "diaristas": 980,
+    "depreciacao": 1000,
+    "recisao": 750,
+    "ferias": 888.5,
+    "inss": 1600,
+    "frango_morto_plataforma": 0,
+    "escaldagem_eviceracao": 0,
+    "pe_graxaria": 0,
+    "descarte": 0
+  },
+  "peso_inteiro_abatido": 25360.3,
+  "preco_venda_kg": 11.517931964527232,
+  "receita_bruta": 292098.20999999996,
+  "custos_totais": 235178.5,
+  "lucro_liquido": 56919.70999999996,
+  "rendimento_final": 73.16878245816503,
+  "media_valor_kg": 11.517931964527232,
+  "custo_kg": 9.273490455554548,
+  "custo_ave": 13.491194355208812,
+  "custo_abate_kg": 1.0732720038800803,
+  "custo_frango": 1.5614100504818724,
+  "lucro_kg": 2.244441508972684,
+  "lucro_frango": 3.2652426571821915,
+  "lucro_total": 56919.70999999996,
+  "aves_hora": 2432.3720930232557,
+  "kg_hora": 3538.646511627907,
+  "tempo_medio_ave": 0.024667278568150527,
+  "eficiencia_operacional": 121.61860465116278,
+  "peso_total_perdas": 9299.7,
+  "percentual_perda_total": 26.831217541834974,
+  "valor_perdas": 55798.200000000004,
+  "eficiencia_aproveitamento": 73.16878245816503,
+  "diversificacao_produtos": 91.85026635701512,
+  "peso_medio_geral": 1.4548129876089948,
+  "score_performance": 61.666666666666664,
+  "classificacao_performance": "Regular",
+  "percentual_receita_bruta": 100,
+  "percentual_custos_totais": 100,
+  "percentual_lucro_liquido": 19.5,
+  "percentual_media_valor_kg": 100,
+  "percentual_custo_kg": 100,
+  "percentual_custo_ave": 100,
+  "percentual_custo_abate_kg": 11.6,
+  "percentual_custo_frango": 11.6,
+  "percentual_lucro_kg": 19.5,
+  "percentual_lucro_frango": 19.5,
+  "percentual_lucro_total": 19.5,
+  "percentual_rendimento": 73.16878245816503,
+  "created_at": {
+    "$date": "2025-09-04T14:57:00.083Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-04T20:21:35.288Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "68bae7a359ce5e11e22bfe27"
+  },
+  "data_abate": {
+    "$date": "2025-09-04T11:00:00.000Z"
+  },
+  "quantidade_aves": 16372,
+  "valor_kg_vivo": 6,
+  "peso_total_kg": 38160,
+  "peso_medio_ave": 2.3308086977766918,
+  "valor_total": 228960,
+  "unidade": "Belo Jardim",
+  "tipo_ave": "Frango de Corte",
+  "observacoes": "\n",
+  "horarios": {
+    "hora_inicio": "06:00",
+    "hora_termino": "16:00",
+    "intervalo_minutos": 90,
+    "horas_trabalhadas": 10,
+    "horas_reais": 8.5
+  },
+  "produtos": [
+    {
+      "produto_id": "68b0e56353c3275b6f2fb04a",
+      "nome": "PEITO",
+      "tipo": "Peito",
+      "peso_kg": 4108,
+      "preco_kg": 14.5,
+      "valor_total": 59566,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5ac53c3275b6f2fb04b",
+      "nome": "COXA C SOBRE",
+      "tipo": "Coxa",
+      "peso_kg": 5532,
+      "preco_kg": 10.5,
+      "valor_total": 58086,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5c153c3275b6f2fb04c",
+      "nome": "ASA",
+      "tipo": "Asa",
+      "peso_kg": 1782,
+      "preco_kg": 16,
+      "valor_total": 28512,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e5cf53c3275b6f2fb04d",
+      "nome": "FILÉ DE PEITO",
+      "tipo": "Peito",
+      "peso_kg": 1656,
+      "preco_kg": 19.99,
+      "valor_total": 33103.439999999995,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e60153c3275b6f2fb04e",
+      "nome": "SASSAMI",
+      "tipo": "Peito",
+      "peso_kg": 320,
+      "preco_kg": 19.8,
+      "valor_total": 6336,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9d753c3275b6f2fb051",
+      "nome": "PERTENCE",
+      "tipo": "Miúdos",
+      "peso_kg": 4016,
+      "preco_kg": 2.49,
+      "valor_total": 9999.84,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9e753c3275b6f2fb052",
+      "nome": "MOELA",
+      "tipo": "Miúdos",
+      "peso_kg": 288,
+      "preco_kg": 9.5,
+      "valor_total": 2736,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0e9f153c3275b6f2fb053",
+      "nome": "CORAÇÃO",
+      "tipo": "Miúdos",
+      "peso_kg": 180,
+      "preco_kg": 30,
+      "valor_total": 5400,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b45578dc20de695c3522b9",
+      "nome": "FIGADO",
+      "tipo": "Miúdos",
+      "peso_kg": 732,
+      "preco_kg": 8,
+      "valor_total": 5856,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ea2053c3275b6f2fb056",
+      "nome": "CABEÇA",
+      "tipo": "Outros",
+      "peso_kg": 400,
+      "preco_kg": 1.99,
+      "valor_total": 796,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ea2f53c3275b6f2fb057",
+      "nome": "PÉS",
+      "tipo": "Miúdos",
+      "peso_kg": 45,
+      "preco_kg": 4.5,
+      "valor_total": 202.5,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ee9a53c3275b6f2fb059",
+      "nome": "PASSARINHA",
+      "tipo": "Outros",
+      "peso_kg": 360,
+      "preco_kg": 9.49,
+      "valor_total": 3416.4,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eea653c3275b6f2fb05a",
+      "nome": "PESCOÇO",
+      "tipo": "Miúdos",
+      "peso_kg": 280,
+      "preco_kg": 3.99,
+      "valor_total": 1117.2,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ef6953c3275b6f2fb05d",
+      "nome": "FRANGO INTEIRO",
+      "tipo": "Congelado",
+      "peso_kg": 1500,
+      "preco_kg": 10,
+      "valor_total": 15000,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ef7253c3275b6f2fb05e",
+      "nome": "FRANGO INTEIRO ",
+      "tipo": "Resfriado",
+      "peso_kg": 3000,
+      "preco_kg": 10.3,
+      "valor_total": 30900.000000000004,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ef8253c3275b6f2fb05f",
+      "nome": "CARCAÇA 0,7",
+      "tipo": "Carcaça",
+      "peso_kg": 61.6,
+      "preco_kg": 13,
+      "valor_total": 800.8000000000001,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0ef9353c3275b6f2fb060",
+      "nome": "CARCAÇA 0,8",
+      "tipo": "Carcaça",
+      "peso_kg": 240,
+      "preco_kg": 13,
+      "valor_total": 3120,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efad53c3275b6f2fb061",
+      "nome": "CARCAÇA 0,9",
+      "tipo": "Carcaça",
+      "peso_kg": 432,
+      "preco_kg": 13,
+      "valor_total": 5616,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efbc53c3275b6f2fb062",
+      "nome": "CARCAÇA 1,0",
+      "tipo": "Carcaça",
+      "peso_kg": 1044,
+      "preco_kg": 13,
+      "valor_total": 13572,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efc853c3275b6f2fb063",
+      "nome": "CARCAÇA 1,1",
+      "tipo": "Carcaça",
+      "peso_kg": 1720,
+      "preco_kg": 13,
+      "valor_total": 22360,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efd253c3275b6f2fb064",
+      "nome": "CARCAÇA 1,2",
+      "tipo": "Carcaça",
+      "peso_kg": 1555,
+      "preco_kg": 13.3,
+      "valor_total": 20681.5,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efe053c3275b6f2fb065",
+      "nome": "CARCAÇA 1,3",
+      "tipo": "Carcaça",
+      "peso_kg": 1033,
+      "preco_kg": 13.3,
+      "valor_total": 13738.900000000001,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0efed53c3275b6f2fb066",
+      "nome": "CARCAÇA 1,4",
+      "tipo": "Carcaça",
+      "peso_kg": 333,
+      "preco_kg": 13,
+      "valor_total": 4329,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0eff953c3275b6f2fb067",
+      "nome": "CARCAÇA 1,5",
+      "tipo": "Carcaça",
+      "peso_kg": 78,
+      "preco_kg": 13,
+      "valor_total": 1014,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f00153c3275b6f2fb068",
+      "nome": "CARCAÇA 1,6",
+      "tipo": "Carcaça",
+      "peso_kg": 19.2,
+      "preco_kg": 12.9,
+      "valor_total": 247.68,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f01153c3275b6f2fb069",
+      "nome": "CARCAÇA 1,7",
+      "tipo": "Carcaça",
+      "peso_kg": 18.7,
+      "preco_kg": 12.9,
+      "valor_total": 241.23,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f01d53c3275b6f2fb06a",
+      "nome": "CARCAÇA 1,8 ",
+      "tipo": "Carcaça",
+      "peso_kg": 18,
+      "preco_kg": 12.9,
+      "valor_total": 232.20000000000002,
+      "percentual": 0
+    },
+    {
+      "produto_id": "68b0f02553c3275b6f2fb06b",
+      "nome": "CARCAÇA 1,9",
+      "tipo": "Carcaça",
+      "peso_kg": 57,
+      "preco_kg": 12.9,
+      "valor_total": 735.3000000000001,
+      "percentual": 0
+    }
+  ],
+  "despesas_fixas": {
+    "funcionarios": 8000,
+    "agua": 2000,
+    "energia": 6000,
+    "embalagem": 3000,
+    "refeicao": 450,
+    "materiais_limpeza": 150,
+    "gelo": 0,
+    "horas_extras": 600,
+    "amonia": 0,
+    "epi": 0,
+    "manutencao": 1000,
+    "lenha_caldeira": 800,
+    "diaristas": 980,
+    "depreciacao": 1000,
+    "recisao": 750,
+    "ferias": 888.5,
+    "inss": 1600,
+    "frango_morto_plataforma": 0,
+    "escaldagem_eviceracao": 0,
+    "pe_graxaria": 0,
+    "descarte": 0
+  },
+  "peso_inteiro_abatido": 30808.5,
+  "preco_venda_kg": 11.286365451093042,
+  "receita_bruta": 347715.99,
+  "custos_totais": 256178.5,
+  "lucro_liquido": 91537.48999999999,
+  "rendimento_final": 80.73506289308176,
+  "media_valor_kg": 11.286365451093042,
+  "custo_kg": 8.315188990051446,
+  "custo_ave": 15.647355240654777,
+  "custo_abate_kg": 0.883473716669101,
+  "custo_frango": 1.662503053994625,
+  "lucro_kg": 2.9711764610415954,
+  "lucro_frango": 5.591100048863914,
+  "lucro_total": 91537.48999999999,
+  "aves_hora": 1926.1176470588234,
+  "kg_hora": 3624.529411764706,
+  "tempo_medio_ave": 0.031150745174688493,
+  "eficiencia_operacional": 96.30588235294117,
+  "peso_total_perdas": 7351.5,
+  "percentual_perda_total": 19.26493710691824,
+  "valor_perdas": 44109,
+  "eficiencia_aproveitamento": 80.73506289308176,
+  "diversificacao_produtos": 90.53892047120537,
+  "peso_medio_geral": 1.8817798680674322,
+  "score_performance": 78.33333333333333,
+  "classificacao_performance": "Bom",
+  "percentual_receita_bruta": 100,
+  "percentual_custos_totais": 100,
+  "percentual_lucro_liquido": 26.3,
+  "percentual_media_valor_kg": 100,
+  "percentual_custo_kg": 100,
+  "percentual_custo_ave": 100,
+  "percentual_custo_abate_kg": 10.6,
+  "percentual_custo_frango": 10.6,
+  "percentual_lucro_kg": 26.3,
+  "percentual_lucro_frango": 26.3,
+  "percentual_lucro_total": 26.3,
+  "percentual_rendimento": 80.73506289308176,
+  "created_at": {
+    "$date": "2025-09-05T13:37:39.521Z"
+  },
+  "updated_at": {
+    "$date": "2025-09-05T13:59:11.894Z"
+  }
+}]

@@ -9,6 +9,7 @@ from ..models.abate_completo import (
     AbateCompletoInDB
 )
 from ..core.db import get_collection
+from ..services.metrics_calculator import MetricsCalculator
 
 
 class AbateCompletoCRUD:
@@ -21,6 +22,11 @@ class AbateCompletoCRUD:
         abate_dict = abate_data.model_dump()
         abate_dict["created_at"] = datetime.utcnow()
         abate_dict["updated_at"] = None
+        
+        # Calcular métricas automaticamente
+        calculator = MetricsCalculator()
+        metricas = calculator.calcular_metricas_completas(abate_dict)
+        abate_dict.update(metricas)
         
         result = await self.collection.insert_one(abate_dict)
         abate_dict["_id"] = result.inserted_id
@@ -76,6 +82,25 @@ class AbateCompletoCRUD:
         
         update_data = abate_update.model_dump(exclude_unset=True)
         if update_data:
+            # Buscar o documento atual para recalcular métricas
+            current_doc = await self.collection.find_one({"_id": ObjectId(abate_id)})
+            if not current_doc:
+                return None
+            
+            # Mesclar dados atuais com atualizações
+            merged_data = {**current_doc, **update_data}
+            
+            # Recalcular métricas se dados relevantes foram alterados
+            relevant_fields = {
+                'quantidade_aves', 'valor_kg_vivo', 'peso_total_kg', 'peso_medio_ave',
+                'valor_total', 'produtos', 'despesas_fixas', 'horarios'
+            }
+            
+            if any(field in update_data for field in relevant_fields):
+                calculator = MetricsCalculator()
+                metricas = calculator.calcular_metricas_completas(merged_data)
+                update_data.update(metricas)
+            
             update_data["updated_at"] = datetime.utcnow()
             
             result = await self.collection.update_one(

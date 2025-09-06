@@ -140,6 +140,17 @@ class AbateCompletoBase(BaseModel):
     percentual_lucro_frango: Optional[float] = Field(default=None, description="% Lucro por frango")
     percentual_lucro_total: Optional[float] = Field(default=None, description="% Lucro total")
     percentual_rendimento: Optional[float] = Field(default=None, ge=0, le=100, description="% Rendimento")
+    
+    # Métricas Cortes vs Inteiro (pré-calculadas)
+    cortes_peso_total: Optional[float] = Field(default=None, ge=0, description="Peso total dos cortes em kg")
+    cortes_valor_total: Optional[float] = Field(default=None, ge=0, description="Valor total dos cortes em R$")
+    cortes_percentual_peso: Optional[float] = Field(default=None, ge=0, le=100, description="% do peso total representado pelos cortes")
+    cortes_percentual_valor: Optional[float] = Field(default=None, ge=0, le=100, description="% do valor total representado pelos cortes")
+    
+    inteiro_peso_total: Optional[float] = Field(default=None, ge=0, description="Peso total do frango inteiro em kg")
+    inteiro_valor_total: Optional[float] = Field(default=None, ge=0, description="Valor total do frango inteiro em R$")
+    inteiro_percentual_peso: Optional[float] = Field(default=None, ge=0, le=100, description="% do peso total representado pelo frango inteiro")
+    inteiro_percentual_valor: Optional[float] = Field(default=None, ge=0, le=100, description="% do valor total representado pelo frango inteiro")
 
     class Config:
         json_encoders = {ObjectId: str}
@@ -251,6 +262,17 @@ class AbateCompletoUpdate(BaseModel):
     percentual_lucro_frango: Optional[float] = None
     percentual_lucro_total: Optional[float] = None
     percentual_rendimento: Optional[float] = Field(None, ge=0, le=100)
+    
+    # Métricas Cortes vs Inteiro (opcionais para update)
+    cortes_peso_total: Optional[float] = Field(None, ge=0, description="Peso total dos cortes em kg")
+    cortes_valor_total: Optional[float] = Field(None, ge=0, description="Valor total dos cortes em R$")
+    cortes_percentual_peso: Optional[float] = Field(None, ge=0, le=100, description="% do peso total representado pelos cortes")
+    cortes_percentual_valor: Optional[float] = Field(None, ge=0, le=100, description="% do valor total representado pelos cortes")
+    
+    inteiro_peso_total: Optional[float] = Field(None, ge=0, description="Peso total do frango inteiro em kg")
+    inteiro_valor_total: Optional[float] = Field(None, ge=0, description="Valor total do frango inteiro em R$")
+    inteiro_percentual_peso: Optional[float] = Field(None, ge=0, le=100, description="% do peso total representado pelo frango inteiro")
+    inteiro_percentual_valor: Optional[float] = Field(None, ge=0, le=100, description="% do valor total representado pelo frango inteiro")
 
 
 class AbateCompletoInDB(AbateCompletoBase):

@@ -249,107 +249,65 @@ const handleSave = async (dadosFormulario: any) => {
     
     const abateData = {
       data_abate: dataAbateISO,
-      quantidade_aves: dadosFormulario.quantidade_aves,
-      valor_kg_vivo: dadosFormulario.valor_kg_vivo,
-      peso_total_kg: dadosFormulario.peso_total_kg,
-      peso_medio_ave: dadosFormulario.peso_medio_ave,
-      valor_total: dadosFormulario.valor_total,
+      quantidade_aves: Number(dadosFormulario.quantidade_aves ?? 0),
+      valor_kg_vivo: Number(dadosFormulario.valor_kg_vivo ?? 0),
+      peso_total_kg: Number(dadosFormulario.peso_total_kg ?? 0),
+      peso_medio_ave: Number(dadosFormulario.peso_medio_ave ?? 0),
+      valor_total: Number(dadosFormulario.valor_total ?? 0),
       unidade: dadosFormulario.unidade,
       tipo_ave: dadosFormulario.tipo_ave,
       observacoes: dadosFormulario.observacoes,
       horarios: {
-        hora_inicio: dadosFormulario.hora_inicio,
-        hora_termino: dadosFormulario.hora_termino,
-        intervalo_minutos: dadosFormulario.intervalo_minutos,
-        horas_trabalhadas: dadosFormulario.horas_trabalhadas,
-        horas_reais: dadosFormulario.horas_reais || dadosFormulario.horas_trabalhadas
+        hora_inicio: (dadosFormulario.hora_inicio || '').toString().trim(),
+        hora_termino: (dadosFormulario.hora_termino || '').toString().trim(),
+        intervalo_minutos: Number(dadosFormulario.intervalo_minutos ?? 0),
+        horas_trabalhadas: Number(dadosFormulario.horas_trabalhadas ?? 0),
+        horas_reais: Number((dadosFormulario.horas_reais ?? dadosFormulario.horas_trabalhadas) ?? 0)
       },
-      produtos: (dadosFormulario.produtos || []).map(produto => ({
-        produto_id: produto._id || produto.produto_id,
-        nome: produto.nome,
-        tipo: produto.tipo,
-        peso_kg: produto.quantidade || produto.peso_kg || 0,
-        preco_kg: produto.preco_unitario || produto.preco_kg || 0,
-        valor_total: produto.total || produto.valor_total || 0,
-        percentual: produto.percentual || 0
-      })),
+      produtos: (dadosFormulario.produtos || [])
+        .map((produto: any) => {
+          const peso_kg = Number(produto.quantidade ?? produto.peso_kg ?? 0)
+          const preco_kg = Number(produto.preco_unitario ?? produto.preco_kg ?? 0)
+          const valor_total_calc = Number(produto.total ?? produto.valor_total ?? (peso_kg * preco_kg))
+          return {
+            produto_id: produto._id || produto.produto_id,
+            nome: produto.nome,
+            tipo: produto.tipo,
+            peso_kg,
+            preco_kg,
+            valor_total: valor_total_calc,
+            percentual: Number(produto.percentual ?? 0)
+          }
+        })
+        .filter((p: any) => p.peso_kg > 0 && p.preco_kg > 0 && p.valor_total > 0),
       despesas_fixas: {
-        funcionarios: dadosFormulario.despesas_fixas?.funcionarios || 0,
-        agua: dadosFormulario.despesas_fixas?.agua || 0,
-        energia: dadosFormulario.despesas_fixas?.energia || 0,
-        embalagem: dadosFormulario.despesas_fixas?.embalagem || 0,
-        refeicao: dadosFormulario.despesas_fixas?.refeicao || 0,
-        materiais_limpeza: dadosFormulario.despesas_fixas?.materiais_limpeza || 0,
-        gelo: dadosFormulario.despesas_fixas?.gelo || 0,
-        horas_extras: dadosFormulario.despesas_fixas?.horas_extras || 0,
-        amonia: dadosFormulario.despesas_fixas?.amonia || 0,
-        epi: dadosFormulario.despesas_fixas?.epi || 0,
-        manutencao: dadosFormulario.despesas_fixas?.manutencao || 0,
-        lenha_caldeira: dadosFormulario.despesas_fixas?.lenha_caldeira || 0,
-        diaristas: dadosFormulario.despesas_fixas?.diaristas || 0,
-        depreciacao: dadosFormulario.despesas_fixas?.depreciacao || 0,
-        recisao: dadosFormulario.despesas_fixas?.recisao || 0,
-        ferias: dadosFormulario.despesas_fixas?.ferias || 0,
-        inss: dadosFormulario.despesas_fixas?.inss || 0,
-        frango_morto_plataforma: dadosFormulario.despesas_fixas?.frango_morto_plataforma || 0,
-        escaldagem_eviceracao: dadosFormulario.despesas_fixas?.escaldagem_eviceracao || 0,
-        pe_graxaria: dadosFormulario.despesas_fixas?.pe_graxaria || 0,
-        descarte: dadosFormulario.despesas_fixas?.descarte || 0
+        funcionarios: Number(dadosFormulario.despesas_fixas?.funcionarios ?? 0),
+        agua: Number(dadosFormulario.despesas_fixas?.agua ?? 0),
+        energia: Number(dadosFormulario.despesas_fixas?.energia ?? 0),
+        embalagem: Number(dadosFormulario.despesas_fixas?.embalagem ?? 0),
+        refeicao: Number(dadosFormulario.despesas_fixas?.refeicao ?? 0),
+        materiais_limpeza: Number(dadosFormulario.despesas_fixas?.materiais_limpeza ?? 0),
+        gelo: Number(dadosFormulario.despesas_fixas?.gelo ?? 0),
+        horas_extras: Number(dadosFormulario.despesas_fixas?.horas_extras ?? 0),
+        amonia: Number(dadosFormulario.despesas_fixas?.amonia ?? 0),
+        epi: Number(dadosFormulario.despesas_fixas?.epi ?? 0),
+        manutencao: Number(dadosFormulario.despesas_fixas?.manutencao ?? 0),
+        lenha_caldeira: Number(dadosFormulario.despesas_fixas?.lenha_caldeira ?? 0),
+        diaristas: Number(dadosFormulario.despesas_fixas?.diaristas ?? 0),
+        depreciacao: Number(dadosFormulario.despesas_fixas?.depreciacao ?? 0),
+        recisao: Number(dadosFormulario.despesas_fixas?.recisao ?? 0),
+        ferias: Number(dadosFormulario.despesas_fixas?.ferias ?? 0),
+        inss: Number(dadosFormulario.despesas_fixas?.inss ?? 0),
+        frango_morto_plataforma: Number(dadosFormulario.despesas_fixas?.frango_morto_plataforma ?? 0),
+        escaldagem_eviceracao: Number(dadosFormulario.despesas_fixas?.escaldagem_eviceracao ?? 0),
+        pe_graxaria: Number(dadosFormulario.despesas_fixas?.pe_graxaria ?? 0),
+        descarte: Number(dadosFormulario.despesas_fixas?.descarte ?? 0)
       },
-      peso_inteiro_abatido: dadosFormulario.peso_inteiro_abatido,
-      preco_venda_kg: dadosFormulario.preco_venda_kg,
-      
-      // Indicadores de performance calculados
-      receita_bruta: dadosFormulario.receita_bruta || 0,
-      custos_totais: dadosFormulario.custos_totais || 0,
-      lucro_liquido: dadosFormulario.lucro_liquido || 0,
-      rendimento_final: dadosFormulario.rendimento_final || 0,
-      media_valor_kg: dadosFormulario.media_valor_kg || 0,
-      custo_kg: dadosFormulario.custo_kg || 0,
-      custo_ave: dadosFormulario.custo_ave || 0,
-      custo_abate_kg: dadosFormulario.custo_abate_kg || 0,
-      custo_frango: dadosFormulario.custo_frango || 0,
-      lucro_kg: dadosFormulario.lucro_kg || 0,
-      lucro_frango: dadosFormulario.lucro_frango || 0,
-      lucro_total: dadosFormulario.lucro_total || 0,
-      percentual_receita_bruta: dadosFormulario.percentual_receita_bruta || 0,
-      percentual_custos_totais: dadosFormulario.percentual_custos_totais || 0,
-      percentual_lucro_liquido: dadosFormulario.percentual_lucro_liquido || 0,
-      percentual_rendimento_final: dadosFormulario.percentual_rendimento_final || 0,
-      percentual_media_valor_kg: dadosFormulario.percentual_media_valor_kg || 0,
-      percentual_custo_kg: dadosFormulario.percentual_custo_kg || 0,
-      percentual_custo_ave: dadosFormulario.percentual_custo_ave || 0,
-      percentual_custo_abate_kg: dadosFormulario.percentual_custo_abate_kg || 0,
-      percentual_custo_frango: dadosFormulario.percentual_custo_frango || 0,
-      percentual_lucro_kg: dadosFormulario.percentual_lucro_kg || 0,
-      percentual_lucro_frango: dadosFormulario.percentual_lucro_frango || 0,
-      percentual_lucro_total: dadosFormulario.percentual_lucro_total || 0,
-      
-      // Indicadores de Eficiência Operacional
-      aves_hora: dadosFormulario.aves_hora || 0,
-      kg_hora: dadosFormulario.kg_hora || 0,
-      tempo_medio_ave: dadosFormulario.tempo_medio_ave || 0,
-      eficiencia_operacional: dadosFormulario.eficiencia_operacional || 0,
-      
-      // Análise de Perdas
-      peso_total_perdas: dadosFormulario.peso_total_perdas || 0,
-      percentual_perda_total: dadosFormulario.percentual_perda_total || 0,
-      valor_perdas: dadosFormulario.valor_perdas || 0,
-      eficiencia_aproveitamento: dadosFormulario.eficiencia_aproveitamento || 0,
-      
-      // Indicadores de Qualidade
-      diversificacao_produtos: dadosFormulario.diversificacao_produtos || 0,
-      peso_medio_geral: dadosFormulario.peso_medio_geral || 0,
-      
-      // Performance Score e Classificação
-      score_performance: dadosFormulario.score_performance || 0,
-      classificacao_performance: dadosFormulario.classificacao_performance || '',
-      
-      // Percentual de rendimento
-      percentual_rendimento: dadosFormulario.percentual_rendimento || 0
+      peso_inteiro_abatido: Number(dadosFormulario.peso_inteiro_abatido ?? 0),
+      preco_venda_kg: Number(dadosFormulario.preco_venda_kg ?? 0)
     }
 
-    console.log('=== DEBUG: Dados finais para envio ===', abateData)
+    console.log('=== DEBUG: Dados finais para envio (filtrados) ===', abateData)
     
     // Validar campos obrigatórios
     const camposObrigatorios = {
@@ -371,39 +329,38 @@ const handleSave = async (dadosFormulario: any) => {
       }
     }
 
+    // Para UPDATE, enviar apenas campos válidos para evitar 422 por defaults inválidos
+    let payloadToSend: any = abateData
+    if (editingLote.value) {
+      payloadToSend = { ...abateData }
+      // Remover campos com restrição gt>0 se valor <= 0
+      ;['quantidade_aves', 'valor_kg_vivo', 'peso_total_kg'].forEach((k) => {
+        if (payloadToSend[k] !== undefined && payloadToSend[k] !== null && Number(payloadToSend[k]) <= 0) {
+          delete payloadToSend[k]
+        }
+      })
+      // Horários: enviar somente se completos (hora_inicio e hora_termino preenchidos)
+      if (
+        !payloadToSend.horarios ||
+        !payloadToSend.horarios.hora_inicio ||
+        !payloadToSend.horarios.hora_termino
+      ) {
+        delete payloadToSend.horarios
+      }
+      // Produtos: se array vazio após filtragem, remover do update
+      if (!payloadToSend.produtos || payloadToSend.produtos.length === 0) {
+        delete payloadToSend.produtos
+      }
+      // Despesas fixas: se não existir, não enviar
+      if (!payloadToSend.despesas_fixas) {
+        delete payloadToSend.despesas_fixas
+      }
+    }
+
     if (editingLote.value) {
       console.log('=== DEBUG: Atualizando lote ===', editingLote.value.id)
-      console.log('=== DEBUG: DADOS ORIGINAIS (antes da edição) ===', {
-        aves_hora: editingLote.value.aves_hora,
-        kg_hora: editingLote.value.kg_hora,
-        tempo_medio_ave: editingLote.value.tempo_medio_ave,
-        eficiencia_operacional: editingLote.value.eficiencia_operacional,
-        peso_total_perdas: editingLote.value.peso_total_perdas,
-        percentual_perda_total: editingLote.value.percentual_perda_total,
-        valor_perdas: editingLote.value.valor_perdas,
-        eficiencia_aproveitamento: editingLote.value.eficiencia_aproveitamento,
-        diversificacao_produtos: editingLote.value.diversificacao_produtos,
-        peso_medio_geral: editingLote.value.peso_medio_geral,
-        score_performance: editingLote.value.score_performance,
-        classificacao_performance: editingLote.value.classificacao_performance,
-        percentual_rendimento: editingLote.value.percentual_rendimento
-      })
-      console.log('=== DEBUG: DADOS ENVIADOS (payload) ===', {
-        aves_hora: abateData.aves_hora,
-        kg_hora: abateData.kg_hora,
-        tempo_medio_ave: abateData.tempo_medio_ave,
-        eficiencia_operacional: abateData.eficiencia_operacional,
-        peso_total_perdas: abateData.peso_total_perdas,
-        percentual_perda_total: abateData.percentual_perda_total,
-        valor_perdas: abateData.valor_perdas,
-        eficiencia_aproveitamento: abateData.eficiencia_aproveitamento,
-        diversificacao_produtos: abateData.diversificacao_produtos,
-        peso_medio_geral: abateData.peso_medio_geral,
-        score_performance: abateData.score_performance,
-        classificacao_performance: abateData.classificacao_performance,
-        percentual_rendimento: abateData.percentual_rendimento
-      })
-      const response = await updateAbateCompleto(editingLote.value.id, abateData)
+      console.log('=== DEBUG: DADOS ENVIADOS (payload update) ===', payloadToSend)
+      const response = await updateAbateCompleto(editingLote.value.id, payloadToSend)
       console.log('=== DEBUG: Resposta da API (update) ===', response)
     } else {
       console.log('=== DEBUG: Criando novo lote ===')
