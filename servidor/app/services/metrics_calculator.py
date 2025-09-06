@@ -61,7 +61,10 @@ class MetricsCalculator:
         custo_kg = custos_totais / peso_total_produtos if peso_total_produtos > 0 else 0
         custo_abate_kg = custos_fixos / peso_total_produtos if peso_total_produtos > 0 else 0
         lucro_kg = lucro_liquido / peso_total_produtos if peso_total_produtos > 0 else 0
-        custo_frango = custo_frango_vivo / quantidade_aves if quantidade_aves > 0 else 0
+        # Novo: custo total por ave (inclui custos fixos + frango vivo)
+        custo_ave = custos_totais / quantidade_aves if quantidade_aves > 0 else 0
+        custo_franco_ajuste = custo_frango_vivo / quantidade_aves if quantidade_aves > 0 else 0
+        custo_frango = custo_franco_ajuste
         lucro_frango = lucro_liquido / quantidade_aves if quantidade_aves > 0 else 0
         lucro_total = lucro_liquido
         
@@ -86,7 +89,8 @@ class MetricsCalculator:
         
         # Indicadores de qualidade
         diversificacao_produtos = len(produtos)
-        peso_medio_geral = peso_total_produtos / quantidade_aves if quantidade_aves > 0 else 0
+        # Peso médio geral processado por ave (usando total de produtos)
+        peso_medio_geral = (peso_total_produtos / quantidade_aves) if quantidade_aves > 0 else 0
         
         # Performance Score (0-100)
         score_performance = (
@@ -107,22 +111,6 @@ class MetricsCalculator:
             classificacao_performance = "Regular"
         else:
             classificacao_performance = "Ruim"
-        
-        # Percentuais (para compatibilidade) - limitados a 100%
-        percentual_receita_bruta = 100.0  # Base
-        percentual_custos_totais = min((custos_totais / receita_bruta) * 100, 100.0) if receita_bruta > 0 else 0
-        percentual_lucro_liquido = min(max((lucro_liquido / receita_bruta) * 100, -100.0), 100.0) if receita_bruta > 0 else 0
-        percentual_rendimento = min(rendimento_final, 100.0)
-        
-        # Percentuais dos indicadores por unidade - limitados a 100%
-        percentual_media_valor_kg = 100.0  # Base
-        percentual_custo_kg = min((custo_kg / media_valor_kg) * 100, 100.0) if media_valor_kg > 0 else 0
-        percentual_custo_ave = min((custo_ave / (media_valor_kg * peso_medio_geral)) * 100, 100.0) if media_valor_kg > 0 and peso_medio_geral > 0 else 0
-        percentual_custo_abate_kg = min((custo_abate_kg / media_valor_kg) * 100, 100.0) if media_valor_kg > 0 else 0
-        percentual_custo_frango = min((custo_frango / (media_valor_kg * peso_medio_geral)) * 100, 100.0) if media_valor_kg > 0 and peso_medio_geral > 0 else 0
-        percentual_lucro_kg = min(max((lucro_kg / media_valor_kg) * 100, -100.0), 100.0) if media_valor_kg > 0 else 0
-        percentual_lucro_frango = min(max((lucro_frango / (media_valor_kg * peso_medio_geral)) * 100, -100.0), 100.0) if media_valor_kg > 0 and peso_medio_geral > 0 else 0
-        percentual_lucro_total = percentual_lucro_liquido
         
         # Cálculos Cortes vs Inteiro
         cortes_peso_total = 0
@@ -148,6 +136,42 @@ class MetricsCalculator:
         cortes_percentual_valor = (cortes_valor_total / receita_produtos) * 100 if receita_produtos > 0 else 0
         inteiro_percentual_peso = (inteiro_peso_total / peso_total_produtos) * 100 if peso_total_produtos > 0 else 0
         inteiro_percentual_valor = (inteiro_valor_total / receita_produtos) * 100 if receita_produtos > 0 else 0
+        
+        # Percentuais (garantidos entre 0 e 100 quando aplicável)
+        def clamp(v: float, lo: float = 0.0, hi: float = 100.0) -> float:
+            return max(lo, min(hi, v))
+        
+        # Notas:
+        # - Alguns percentuais são referências base para exibição e podem ser 100 por definição
+        # - Outros são calculados em relação a preço de venda/kg ou composição de custos
+        percentual_receita_bruta = 100.0
+        percentual_custos_totais = 100.0
+        percentual_lucro_liquido = (lucro_liquido / receita_bruta) * 100 if receita_bruta > 0 else 0
+        percentual_rendimento = rendimento_final
+        percentual_media_valor_kg = 100.0
+        percentual_custo_kg = 100.0
+        percentual_custo_ave = 100.0
+        percentual_custo_abate_kg = (custo_abate_kg / custo_kg) * 100 if custo_kg > 0 else 0
+        percentual_custo_frango = (custo_frango / custo_ave) * 100 if custo_ave > 0 else 0
+        percentual_lucro_kg = (lucro_kg / preco_venda_kg) * 100 if preco_venda_kg > 0 else 0
+        # Receita por ave (para base do lucro_frango)
+        receita_por_ave = (receita_bruta / quantidade_aves) if quantidade_aves > 0 else 0
+        percentual_lucro_frango = (lucro_frango / receita_por_ave) * 100 if receita_por_ave > 0 else 0
+        percentual_lucro_total = (lucro_liquido / receita_bruta) * 100 if receita_bruta > 0 else 0
+        
+        # Aplicar clamp onde faz sentido (evitar >100 ou <0 indevidos)
+        percentual_receita_bruta = clamp(percentual_receita_bruta)
+        percentual_custos_totais = clamp(percentual_custos_totais)
+        percentual_lucro_liquido = clamp(percentual_lucro_liquido, -100.0, 100.0)
+        percentual_rendimento = clamp(percentual_rendimento)
+        percentual_media_valor_kg = clamp(percentual_media_valor_kg)
+        percentual_custo_kg = clamp(percentual_custo_kg)
+        percentual_custo_ave = clamp(percentual_custo_ave)
+        percentual_custo_abate_kg = clamp(percentual_custo_abate_kg)
+        percentual_custo_frango = clamp(percentual_custo_frango)
+        percentual_lucro_kg = clamp(percentual_lucro_kg, -100.0, 100.0)
+        percentual_lucro_frango = clamp(percentual_lucro_frango, -100.0, 100.0)
+        percentual_lucro_total = clamp(percentual_lucro_total, -100.0, 100.0)
         
         # Retornar todas as métricas calculadas
         metricas = {
