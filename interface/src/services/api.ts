@@ -375,7 +375,11 @@ export async function createAbateCompleto(abateData: AbateCompletoCreate) {
   
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ detail: 'Erro desconhecido' }));
-    throw new Error(`Erro ao criar abate: ${response.status} - ${errorData.detail || response.statusText}`);
+    let detailMsg = typeof errorData.detail === 'string' ? errorData.detail : undefined
+    if (!detailMsg && Array.isArray(errorData.detail)) {
+      detailMsg = errorData.detail.map((d: any) => `${(d.loc || []).join('.')}: ${d.msg || d.detail || d.type || 'erro'}`).join('; ')
+    }
+    throw new Error(`Erro ao criar abate: ${response.status} - ${detailMsg || response.statusText}`);
   }
   
   return response.json();
@@ -403,7 +407,11 @@ export async function updateAbateCompleto(id: string, abateData: AbateCompletoUp
   
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ detail: 'Erro desconhecido' }));
-    throw new Error(`Erro ao atualizar abate: ${response.status} - ${errorData.detail || response.statusText}`);
+    let detailMsg = typeof errorData.detail === 'string' ? errorData.detail : undefined
+    if (!detailMsg && Array.isArray(errorData.detail)) {
+      detailMsg = errorData.detail.map((d: any) => `${(d.loc || []).join('.')}: ${d.msg || d.detail || d.type || 'erro'}`).join('; ')
+    }
+    throw new Error(`Erro ao atualizar abate: ${response.status} - ${detailMsg || response.statusText}`);
   }
   
   return response.json();

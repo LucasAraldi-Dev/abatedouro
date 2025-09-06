@@ -3,14 +3,11 @@
     <h3 class="section-title">📊 Análise Comparativa dos Abates</h3>
     
     <!-- Informação sobre agrupamento de dados -->
-    <div v-if="props.dadosAbates && props.dadosAbates.length > 30" class="info-agrupamento">
+    <div v-if="props.dadosAbates && props.dadosAbates.length > 0" class="info-agrupamento">
       <div class="info-card">
         <span class="info-icon">ℹ️</span>
         <span class="info-text">
-          {{ props.dadosAbates.length > 90 ? 
-            `Dados agrupados por mês (${props.dadosAbates.length} registros)` : 
-            `Dados agrupados por semana (${props.dadosAbates.length} registros)` 
-          }}
+          {{ getInfoAgrupamento() }}
         </span>
       </div>
     </div>
@@ -37,6 +34,14 @@
         <h4 class="grafico-titulo">🐔 Lucro por Ave</h4>
         <div class="grafico-container">
           <canvas ref="lucroPorAveChart" class="grafico-canvas"></canvas>
+        </div>
+      </div>
+      
+      <!-- Gráfico Comparativo Cortes vs Inteiro -->
+      <div class="grafico-card">
+        <h4 class="grafico-titulo">🥩 Cortes vs Frango Inteiro</h4>
+        <div class="grafico-container">
+          <canvas ref="cortesInteiroChart" class="grafico-canvas"></canvas>
         </div>
       </div>
       
@@ -96,6 +101,7 @@ const lucroTotalChart = ref<HTMLCanvasElement | null>(null)
 const lucroPorKgChart = ref<HTMLCanvasElement | null>(null)
 const custoPorKgChart = ref<HTMLCanvasElement | null>(null)
 const lucroPorAveChart = ref<HTMLCanvasElement | null>(null)
+const cortesInteiroChart = ref<HTMLCanvasElement | null>(null)
 const rendimentoChart = ref<HTMLCanvasElement | null>(null)
 const eficienciaChart = ref<HTMLCanvasElement | null>(null)
 const comparativoPrecosChart = ref<HTMLCanvasElement | null>(null)
@@ -105,6 +111,7 @@ let lucroTotalChartInstance: Chart | null = null
 let lucroPorKgChartInstance: Chart | null = null
 let custoPorKgChartInstance: Chart | null = null
 let lucroPorAveChartInstance: Chart | null = null
+let cortesInteiroChartInstance: Chart | null = null
 let rendimentoChartInstance: Chart | null = null
 let eficienciaChartInstance: Chart | null = null
 let comparativoPrecosChartInstance: Chart | null = null
@@ -115,27 +122,80 @@ const atualizandoGraficos = ref(false)
 // Dados dos abates vêm das props dadosAbates
 // Removida variável reativa desnecessária para evitar conflitos
 
-// Função para otimizar dados para visualização
+// Função para calcular diferença em dias entre duas datas
+const calcularDiferencaDias = (dados: any[]) => {
+  if (dados.length === 0) return 0
+  
+  const datasOrdenadas = dados
+    .map(item => new Date(item.data_abate))
+    .sort((a, b) => a.getTime() - b.getTime())
+  
+  const dataInicio = datasOrdenadas[0]
+  const dataFim = datasOrdenadas[datasOrdenadas.length - 1]
+  
+  const diferencaMs = dataFim.getTime() - dataInicio.getTime()
+  return Math.ceil(diferencaMs / (1000 * 60 * 60 * 24)) + 1 // +1 para incluir o dia inicial
+}
+
+// Função para obter informação sobre o agrupamento dos dados
+const getInfoAgrupamento = () => {
+  if (!props.dadosAbates || props.dadosAbates.length === 0) {
+    return 'Nenhum dado disponível'
+  }
+  
+  const diasPeriodo = calcularDiferencaDias(props.dadosAbates)
+  const totalRegistros = props.dadosAbates.length
+  
+  if (diasPeriodo <= 15) {
+    return `Dados por dia (${totalRegistros} registros, ${diasPeriodo} dias)`
+  } else if (diasPeriodo >= 16 && diasPeriodo <= 32) {
+    return `Dados agrupados por semana (${totalRegistros} registros, ${diasPeriodo} dias)`
+  } else {
+    return `Dados agrupados por mês (${totalRegistros} registros, ${diasPeriodo} dias)`
+  }
+}
+
+// Função para otimizar dados para visualização baseada no período de tempo
 const otimizarDadosParaGraficos = (dados: any[]) => {
-  if (dados.length <= 30) {
+  if (dados.length === 0) {
     return dados
   }
   
-  // Se há mais de 30 registros, agrupar por semana
-  if (dados.length <= 90) {
+  const diasPeriodo = calcularDiferencaDias(dados)
+  
+  // Regras baseadas no período de tempo:
+  // 15 dias ou menos = mostrar todos os dias
+  if (diasPeriodo <= 15) {
+    return dados
+  }
+  
+  // 16 a 30 dias = agrupar por semana
+  if (diasPeriodo >= 16 && diasPeriodo <= 30) {
     return agruparPorSemana(dados)
   }
   
-  // Se há mais de 90 registros, agrupar por mês
-  return agruparPorMes(dados)
+  // Mais de 32 dias = agrupar por mês
+  if (diasPeriodo > 32) {
+    return agruparPorMes(dados)
+  }
+  
+  // Entre 31-32 dias, usar semanas por padrão
+  return agruparPorSemana(dados)
 }
 
-// Agrupar dados por semana
+// Agrupar dados por semana (domingo a sábado)
 const agruparPorSemana = (dados: any[]) => {
   const grupos = new Map()
+  let contadorSemana = 1
   
-  dados.forEach(abate => {
+  // Ordenar dados por data para numeração sequencial das semanas
+  const dadosOrdenados = [...dados].sort((a, b) => 
+    new Date(a.data_abate).getTime() - new Date(b.data_abate).getTime()
+  )
+  
+  dadosOrdenados.forEach(abate => {
     const data = new Date(abate.data_abate)
+    // Calcular início da semana (domingo = 0)
     const inicioSemana = new Date(data)
     inicioSemana.setDate(data.getDate() - data.getDay())
     const chave = inicioSemana.toISOString().split('T')[0]
@@ -143,6 +203,7 @@ const agruparPorSemana = (dados: any[]) => {
     if (!grupos.has(chave)) {
       grupos.set(chave, {
         data_abate: chave,
+        nome_periodo: `SEMANA ${contadorSemana}`,
         quantidade_aves: 0,
         // Campos canônicos segundo a API
         peso_total_kg: 0,
@@ -154,8 +215,12 @@ const agruparPorSemana = (dados: any[]) => {
         peso_total: 0,
         custo_total: 0,
         receita_total: 0,
+        // Campos para preços corretos
+        valor_kg_vivo_total: 0,
+        preco_venda_kg_total: 0,
         count: 0
       })
+      contadorSemana++
     }
     
     const grupo = grupos.get(chave)
@@ -174,26 +239,48 @@ const agruparPorSemana = (dados: any[]) => {
     grupo.receita_total += rb
 
     grupo.lucro_total += toNumber(abate.lucro_total)
+    
+    // Acumular valores de preços corretos do banco de dados
+    grupo.valor_kg_vivo_total += toNumber(abate.valor_kg_vivo)
+    grupo.preco_venda_kg_total += toNumber(abate.preco_venda_kg)
+    
     grupo.count += 1
   })
   
   return Array.from(grupos.values()).map(grupo => ({
     ...grupo,
-    rendimento_final: grupo.quantidade_aves > 0 ? (grupo.peso_total_kg / grupo.quantidade_aves) * 100 : 0
+    rendimento_final: grupo.quantidade_aves > 0 ? (grupo.peso_total_kg / grupo.quantidade_aves) * 100 : 0,
+    // Métricas derivadas para os gráficos
+    lucro_frango: grupo.quantidade_aves > 0 ? grupo.lucro_total / grupo.quantidade_aves : 0,
+    eficiencia_operacional: grupo.peso_total_kg > 0 && grupo.quantidade_aves > 0 ? 
+      Math.min(100, ((grupo.peso_total_kg / grupo.quantidade_aves) / 2.5) * 100) : 0,
+    valor_kg_vivo: grupo.peso_total_kg > 0 ? (grupo.valor_kg_vivo_total / grupo.count) : 0,
+    preco_venda_kg: grupo.count > 0 ? (grupo.preco_venda_kg_total / grupo.count) : 0
   }))
 }
 
 // Agrupar dados por mês
 const agruparPorMes = (dados: any[]) => {
   const grupos = new Map()
+  const nomesMeses = [
+    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+  ]
   
-  dados.forEach(abate => {
+  // Ordenar dados por data para processamento sequencial
+  const dadosOrdenados = [...dados].sort((a, b) => 
+    new Date(a.data_abate).getTime() - new Date(b.data_abate).getTime()
+  )
+  
+  dadosOrdenados.forEach(abate => {
     const data = new Date(abate.data_abate)
     const chave = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}-01`
+    const nomeMes = `${nomesMeses[data.getMonth()]} ${data.getFullYear()}`
     
     if (!grupos.has(chave)) {
       grupos.set(chave, {
         data_abate: chave,
+        nome_periodo: nomeMes,
         quantidade_aves: 0,
         // Campos canônicos segundo a API
         peso_total_kg: 0,
@@ -205,6 +292,9 @@ const agruparPorMes = (dados: any[]) => {
         peso_total: 0,
         custo_total: 0,
         receita_total: 0,
+        // Campos para preços corretos
+        valor_kg_vivo_total: 0,
+        preco_venda_kg_total: 0,
         count: 0
       })
     }
@@ -225,12 +315,23 @@ const agruparPorMes = (dados: any[]) => {
     grupo.receita_total += rb
 
     grupo.lucro_total += toNumber(abate.lucro_total)
+    
+    // Acumular valores de preços corretos do banco de dados
+    grupo.valor_kg_vivo_total += toNumber(abate.valor_kg_vivo)
+    grupo.preco_venda_kg_total += toNumber(abate.preco_venda_kg)
+    
     grupo.count += 1
   })
   
   return Array.from(grupos.values()).map(grupo => ({
     ...grupo,
-    rendimento_final: grupo.quantidade_aves > 0 ? (grupo.peso_total_kg / grupo.quantidade_aves) * 100 : 0
+    rendimento_final: grupo.quantidade_aves > 0 ? (grupo.peso_total_kg / grupo.quantidade_aves) * 100 : 0,
+    // Métricas derivadas para os gráficos
+    lucro_frango: grupo.quantidade_aves > 0 ? grupo.lucro_total / grupo.quantidade_aves : 0,
+    eficiencia_operacional: grupo.peso_total_kg > 0 && grupo.quantidade_aves > 0 ? 
+      Math.min(100, ((grupo.peso_total_kg / grupo.quantidade_aves) / 2.5) * 100) : 0,
+    valor_kg_vivo: grupo.count > 0 ? (grupo.valor_kg_vivo_total / grupo.count) : 0,
+    preco_venda_kg: grupo.count > 0 ? (grupo.preco_venda_kg_total / grupo.count) : 0
   }))
 }
 
@@ -255,8 +356,15 @@ const inicializarGraficos = () => {
   }
 }
 
-// Função para formatar data
-const formatarData = (dataString: string): string => {
+// Função para formatar data ou usar nome do período
+const formatarData = (item: any): string => {
+  // Se o item tem nome_periodo (dados agrupados), usar ele
+  if (typeof item === 'object' && item.nome_periodo) {
+    return item.nome_periodo
+  }
+  
+  // Caso contrário, formatar a data normalmente
+  const dataString = typeof item === 'string' ? item : item.data_abate
   return new Date(dataString).toLocaleDateString('pt-BR', {
     day: '2-digit',
     month: '2-digit'
@@ -276,7 +384,7 @@ const criarGraficoLucroTotal = (dados?: any[]) => {
   if (!ctx) return
   
   const dadosFormatados = dadosGrafico.map(abate => ({
-    data: formatarData(abate.data_abate),
+    data: formatarData(abate),
     valor: toNumber(abate.lucro_total)
   }))
   
@@ -382,7 +490,7 @@ const criarGraficoCustoPorKg = (dados?: any[]) => {
     const custoTotal = toNumber(abate.custos_totais ?? abate.custo_total)
     const valor = custoKgDireto ?? (peso > 0 ? (custoTotal / peso) : 0)
     return {
-      data: formatarData(abate.data_abate),
+      data: formatarData(abate),
       valor
     }
   })
@@ -440,12 +548,12 @@ const criarGraficoLucroPorKg = (dados?: any[]) => {
   if (!ctx) return
   
   const dadosFormatados = dadosGrafico.map(abate => {
-    const peso = toNumber(abate.peso_total_kg ?? abate.peso_total)
+    const peso = toNumber(abate.peso_inteiro_abatido ?? abate.peso_total_kg ?? abate.peso_total)
     const lucroKgDireto = abate.lucro_kg !== undefined && abate.lucro_kg !== null ? toNumber(abate.lucro_kg) : undefined
-    const lucroTotal = toNumber(abate.lucro_total)
-    const valor = lucroKgDireto ?? (peso > 0 ? (lucroTotal / peso) : 0)
+    const lucroLiquido = toNumber(abate.lucro_liquido ?? abate.lucro_total)
+    const valor = lucroKgDireto ?? (peso > 0 ? (lucroLiquido / peso) : 0)
     return {
-      data: formatarData(abate.data_abate),
+      data: formatarData(abate),
       valor
     }
   })
@@ -505,7 +613,7 @@ const criarGraficoLucroPorAve = (dados?: any[]) => {
   if (!ctx) return
   
   const dadosFormatados = dadosGrafico.map(abate => ({
-    data: formatarData(abate.data_abate),
+    data: formatarData(abate),
     valor: toNumber(abate.lucro_frango)
   }))
   
@@ -549,6 +657,164 @@ const criarGraficoLucroPorAve = (dados?: any[]) => {
   })
 }
 
+// Criar gráfico comparativo Cortes vs Inteiro (rosca)
+const criarGraficoCortesInteiro = (dados?: any[]) => {
+  const dadosGrafico = dados || props.dadosAbates
+  if (!cortesInteiroChart.value || dadosGrafico.length === 0) return
+  
+  if (cortesInteiroChartInstance) {
+    cortesInteiroChartInstance.destroy()
+  }
+  
+  const ctx = cortesInteiroChart.value.getContext('2d')
+  if (!ctx) return
+  
+  // Categorizar produtos em cortes e inteiro
+  const categorizacao = { inteiro: { peso: 0, valor: 0 }, cortes: { peso: 0, valor: 0 } }
+  const tiposInteiro = ['Carcaça', 'CarcaÃ§a', 'Congelado', 'Resfriado']
+  const tiposCortes = ['Asa', 'Coxa', 'Peito', 'Sobrecoxa', 'MiÃºdos', 'Outros']
+  
+  if (import.meta.env.DEV) {
+    console.debug('[Cortes vs Inteiro] Dados recebidos:', dadosGrafico.length, 'abates')
+    console.debug('[Cortes vs Inteiro] Amostra de dados:', dadosGrafico.slice(0, 2))
+  }
+  
+
+
+  dadosGrafico.forEach((abate) => {
+    
+    if (abate.produtos && Array.isArray(abate.produtos)) {
+      abate.produtos.forEach(produto => {
+        const peso = toNumber(produto.peso_kg)
+        const valor = toNumber(produto.valor_total)
+        
+        if (tiposInteiro.includes(produto.tipo)) {
+          categorizacao.inteiro.peso += peso
+          categorizacao.inteiro.valor += valor
+        } else if (tiposCortes.includes(produto.tipo)) {
+          categorizacao.cortes.peso += peso
+          categorizacao.cortes.valor += valor
+        } else {
+          // Por padrão, considera como cortes
+          categorizacao.cortes.peso += peso
+          categorizacao.cortes.valor += valor
+        }
+      })
+    }
+  })
+  
+  const totalPeso = categorizacao.inteiro.peso + categorizacao.cortes.peso
+  const totalValor = categorizacao.inteiro.valor + categorizacao.cortes.valor
+  
+  if (import.meta.env.DEV) {
+    console.debug('[Cortes vs Inteiro] Dados:', {
+      cortes: { peso: categorizacao.cortes.peso, valor: categorizacao.cortes.valor },
+      inteiro: { peso: categorizacao.inteiro.peso, valor: categorizacao.inteiro.valor },
+      totais: { peso: totalPeso, valor: totalValor }
+    })
+  }
+  
+  // Calcular percentuais para exibir sempre visíveis
+  const percentualCortesPeso = totalPeso > 0 ? (categorizacao.cortes.peso / totalPeso) * 100 : 0
+  const percentualInteiroPeso = totalPeso > 0 ? (categorizacao.inteiro.peso / totalPeso) * 100 : 0
+  
+  // Labels com percentual (visíveis na legenda, sem precisar hover)
+  const labelsComPercentual = [
+    `🥩 Cortes (${percentualCortesPeso.toFixed(1)}%)`,
+    `🐔 Inteiro (${percentualInteiroPeso.toFixed(1)}%)`
+  ]
+  
+  // Plugin custom para desenhar os percentuais nas fatias do gráfico (sem hover)
+  const percentLabelsPlugin = {
+    id: 'percentLabels',
+    afterDatasetsDraw(chart: any) {
+      const { ctx } = chart
+      const dataset = chart.data.datasets[0]
+      const meta = chart.getDatasetMeta(0)
+      const total = (dataset.data as number[]).reduce((acc, v) => acc + Number(v || 0), 0)
+      if (!meta || !meta.data || total <= 0) return
+  
+      ctx.save()
+      ctx.font = 'bold 12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial'
+      ctx.textBaseline = 'middle'
+      meta.data.forEach((arc: any, i: number) => {
+        const value = Number(dataset.data[i] || 0)
+        if (value <= 0) return
+        const angle = (arc.startAngle + arc.endAngle) / 2
+        const r = (arc.innerRadius + arc.outerRadius) / 2
+        const x = arc.x + Math.cos(angle) * r
+        const y = arc.y + Math.sin(angle) * r
+        const percText = `${((value / total) * 100).toFixed(1)}%`
+  
+        // Estilos para boa legibilidade
+        ctx.font = 'bold 12px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillStyle = '#ffffff'
+        ctx.strokeStyle = 'rgba(0,0,0,0.35)'
+        ctx.lineWidth = 3
+        ctx.strokeText(percText, x, y)
+        ctx.fillText(percText, x, y)
+      })
+      ctx.restore()
+    }
+  }
+  
+  cortesInteiroChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: labelsComPercentual,
+      datasets: [{
+        label: 'Peso (kg)',
+        data: [categorizacao.cortes.peso, categorizacao.inteiro.peso],
+        backgroundColor: [
+          'rgba(239, 68, 68, 0.8)',
+          'rgba(34, 197, 94, 0.8)'
+        ],
+        borderColor: [
+          'rgba(239, 68, 68, 1)',
+          'rgba(34, 197, 94, 1)'
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: {
+        padding: 28
+      },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context: any) {
+              const peso = context.parsed
+              const percentualPeso = totalPeso > 0 ? ((peso / totalPeso) * 100).toFixed(1) : '0.0'
+              const categoria = context.dataIndex === 0 ? 'cortes' : 'inteiro'
+              const valor = categorizacao[categoria as 'cortes' | 'inteiro'].valor
+              const percentualValor = totalValor > 0 ? ((valor / totalValor) * 100).toFixed(1) : '0.0'
+              
+              return [
+                `${context.label}`,
+                `Peso: ${peso.toLocaleString('pt-BR')} kg (${percentualPeso}%)`,
+                `Valor: R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${percentualValor}%)`
+              ]
+            }
+          }
+        }
+      }
+    },
+    plugins: [percentLabelsPlugin]
+  })
+}
+
 // Criar gráfico de Rendimento (rosca)
 const criarGraficoRendimento = (dados?: any[]) => {
   const dadosGrafico = dados || props.dadosAbates
@@ -562,7 +828,7 @@ const criarGraficoRendimento = (dados?: any[]) => {
   if (!ctx) return
   
   const dadosFormatados = dadosGrafico.map(abate => ({
-    data: formatarData(abate.data_abate),
+    data: formatarData(abate),
     valor: toNumber(abate.rendimento_final)
   }))
   
@@ -619,7 +885,7 @@ const criarGraficoEficiencia = (dados?: any[]) => {
   if (!ctx) return
   
   const dadosFormatados = dadosGrafico.map(abate => ({
-    data: formatarData(abate.data_abate),
+    data: formatarData(abate),
     valor: toNumber(abate.eficiencia_operacional)
   }))
   
@@ -676,7 +942,7 @@ const criarGraficoComparativoPrecos = (dados?: any[]) => {
   if (!ctx) return
   
   const dadosFormatados = dadosGrafico.map(abate => ({
-    data: formatarData(abate.data_abate),
+    data: formatarData(abate),
     precoVivo: toNumber(abate.valor_kg_vivo),
     precoAbatido: toNumber(abate.preco_venda_kg)
   }))
@@ -795,6 +1061,7 @@ const criarGraficos = (dadosParaGraficos?: any[]) => {
       criarGraficoLucroTotal(dados)
       criarGraficoLucroPorKg(dados)
       criarGraficoLucroPorAve(dados)
+      criarGraficoCortesInteiro(dados)
       criarGraficoCustoPorKg(dados)
       criarGraficoRendimento(dados)
       criarGraficoComparativoPrecos(dados)
@@ -822,6 +1089,10 @@ const destruirGraficos = () => {
   if (lucroPorAveChartInstance) {
     lucroPorAveChartInstance.destroy()
     lucroPorAveChartInstance = null
+  }
+  if (cortesInteiroChartInstance) {
+    cortesInteiroChartInstance.destroy()
+    cortesInteiroChartInstance = null
   }
   if (rendimentoChartInstance) {
     rendimentoChartInstance.destroy()

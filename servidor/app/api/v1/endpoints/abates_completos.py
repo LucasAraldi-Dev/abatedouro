@@ -1,6 +1,6 @@
 from typing import List, Optional
 from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from ....core.db import get_db
@@ -44,6 +44,15 @@ async def create_abate_completo(
             "despesas_fixas": abate.despesas_fixas.model_dump(),
             "peso_inteiro_abatido": abate.peso_inteiro_abatido,
             "preco_venda_kg": abate.preco_venda_kg,
+            # Métricas Cortes vs Inteiro
+            "cortes_peso_total": abate.cortes_peso_total,
+            "cortes_valor_total": abate.cortes_valor_total,
+            "cortes_percentual_peso": abate.cortes_percentual_peso,
+            "cortes_percentual_valor": abate.cortes_percentual_valor,
+            "inteiro_peso_total": abate.inteiro_peso_total,
+            "inteiro_valor_total": abate.inteiro_valor_total,
+            "inteiro_percentual_peso": abate.inteiro_percentual_peso,
+            "inteiro_percentual_valor": abate.inteiro_percentual_valor,
             # Indicadores de Performance
             "receita_bruta": abate.receita_bruta,
             "custos_totais": abate.custos_totais,
@@ -173,6 +182,15 @@ async def get_abates_completos(
                 "despesas_fixas": abate.despesas_fixas.model_dump(),
                 "peso_inteiro_abatido": abate.peso_inteiro_abatido,
                 "preco_venda_kg": abate.preco_venda_kg,
+                # Métricas Cortes vs Inteiro
+                "cortes_peso_total": abate.cortes_peso_total,
+                "cortes_valor_total": abate.cortes_valor_total,
+                "cortes_percentual_peso": abate.cortes_percentual_peso,
+                "cortes_percentual_valor": abate.cortes_percentual_valor,
+                "inteiro_peso_total": abate.inteiro_peso_total,
+                "inteiro_valor_total": abate.inteiro_valor_total,
+                "inteiro_percentual_peso": abate.inteiro_percentual_peso,
+                "inteiro_percentual_valor": abate.inteiro_percentual_valor,
                 # Indicadores de Performance
                 "receita_bruta": abate.receita_bruta,
                 "custos_totais": abate.custos_totais,
@@ -314,6 +332,15 @@ async def get_abates_por_periodo(
                 "despesas_fixas": abate.despesas_fixas.model_dump(),
                 "peso_inteiro_abatido": abate.peso_inteiro_abatido,
                 "preco_venda_kg": abate.preco_venda_kg,
+                # Métricas Cortes vs Inteiro
+                "cortes_peso_total": abate.cortes_peso_total,
+                "cortes_valor_total": abate.cortes_valor_total,
+                "cortes_percentual_peso": abate.cortes_percentual_peso,
+                "cortes_percentual_valor": abate.cortes_percentual_valor,
+                "inteiro_peso_total": abate.inteiro_peso_total,
+                "inteiro_valor_total": abate.inteiro_valor_total,
+                "inteiro_percentual_peso": abate.inteiro_percentual_peso,
+                "inteiro_percentual_valor": abate.inteiro_percentual_valor,
                 "created_at": abate.created_at,
                 "updated_at": abate.updated_at
             }
@@ -356,6 +383,15 @@ async def get_abate_completo(
             "despesas_fixas": abate.despesas_fixas.model_dump(),
             "peso_inteiro_abatido": abate.peso_inteiro_abatido,
             "preco_venda_kg": abate.preco_venda_kg,
+            # Métricas Cortes vs Inteiro
+            "cortes_peso_total": abate.cortes_peso_total,
+            "cortes_valor_total": abate.cortes_valor_total,
+            "cortes_percentual_peso": abate.cortes_percentual_peso,
+            "cortes_percentual_valor": abate.cortes_percentual_valor,
+            "inteiro_peso_total": abate.inteiro_peso_total,
+            "inteiro_valor_total": abate.inteiro_valor_total,
+            "inteiro_percentual_peso": abate.inteiro_percentual_peso,
+            "inteiro_percentual_valor": abate.inteiro_percentual_valor,
             # Indicadores de Performance
             "receita_bruta": abate.receita_bruta,
             "custos_totais": abate.custos_totais,
@@ -398,6 +434,7 @@ async def get_abate_completo(
             "percentual_lucro_kg": abate.percentual_lucro_kg,
             "percentual_lucro_frango": abate.percentual_lucro_frango,
             "percentual_lucro_total": abate.percentual_lucro_total,
+            "percentual_rendimento": abate.percentual_rendimento,
             "created_at": abate.created_at,
             "updated_at": abate.updated_at
         }
@@ -410,7 +447,7 @@ async def get_abate_completo(
 @router.put("/{abate_id}", response_model=dict)
 async def update_abate_completo(
     abate_id: str,
-    abate_update: AbateCompletoUpdate,
+    abate_update_payload: dict = Body(...),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Atualizar abate completo"""
@@ -419,6 +456,34 @@ async def update_abate_completo(
     
     crud = get_abate_completo_crud(db)
     try:
+        print(f"DEBUG: Dados recebidos para atualização (raw): {abate_update_payload}")
+        print(f"DEBUG: ID do abate: {abate_id}")
+        
+        # Filtrar campos derivados enviados pelo cliente para evitar 422 de validação
+        _payload_raw = dict(abate_update_payload or {})
+        _allowed_fields = {
+            "data_abate",
+            "quantidade_aves",
+            "valor_kg_vivo",
+            "peso_total_kg",
+            "peso_medio_ave",
+            "valor_total",
+            "unidade",
+            "tipo_ave",
+            "observacoes",
+            "horarios",
+            "produtos",
+            "despesas_fixas",
+        }
+        _removed_fields = [k for k in _payload_raw.keys() if k not in _allowed_fields]
+        if _removed_fields:
+            print(f"DEBUG: Removendo campos derivados do payload no update: {_removed_fields}")
+        _filtered_payload = {k: v for k, v in _payload_raw.items() if k in _allowed_fields}
+        
+        # Construir o modelo de atualização somente com campos permitidos
+        abate_update = AbateCompletoUpdate(**_filtered_payload)
+        print(f"DEBUG: Payload filtrado (para modelo): {abate_update.model_dump(exclude_unset=True)}")
+        
         abate = await crud.update(abate_id, abate_update)
         if not abate:
             raise HTTPException(status_code=404, detail="Abate não encontrado")
@@ -439,12 +504,25 @@ async def update_abate_completo(
             "despesas_fixas": abate.despesas_fixas.model_dump(),
             "peso_inteiro_abatido": abate.peso_inteiro_abatido,
             "preco_venda_kg": abate.preco_venda_kg,
+            # Métricas Cortes vs Inteiro
+            "cortes_peso_total": abate.cortes_peso_total,
+            "cortes_valor_total": abate.cortes_valor_total,
+            "cortes_percentual_peso": abate.cortes_percentual_peso,
+            "cortes_percentual_valor": abate.cortes_percentual_valor,
+            "inteiro_peso_total": abate.inteiro_peso_total,
+            "inteiro_valor_total": abate.inteiro_valor_total,
+            "inteiro_percentual_peso": abate.inteiro_percentual_peso,
+            "inteiro_percentual_valor": abate.inteiro_percentual_valor,
             "created_at": abate.created_at,
             "updated_at": abate.updated_at
         }
+    except ValueError as ve:
+        print(f"ERROR: Erro de validação no PUT: {str(ve)}")
+        raise HTTPException(status_code=422, detail=f"Erro de validação: {str(ve)}")
     except HTTPException:
         raise
     except Exception as e:
+        print(f"ERROR: Erro interno no PUT: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Erro ao atualizar abate: {str(e)}")
 
 

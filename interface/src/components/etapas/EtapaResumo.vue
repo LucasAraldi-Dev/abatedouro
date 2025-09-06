@@ -633,7 +633,7 @@
 import { computed, watch, ref, onMounted, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import RelatorioImpressao from '../relatorios/RelatorioImpressao.vue'
-import { exportToPDF, type ExportColumn } from '../../utils/exportUtils'
+
 
 // Props
 interface Props {
@@ -1372,6 +1372,15 @@ const emitUpdate = () => {
     // Indicadores de performance
     score_performance: resumoPerformance.value.scoreGeral,
     classificacao_performance: resumoPerformance.value.classificacao,
+    // Métricas Cortes vs Inteiro
+    cortes_peso_total: comparativoCortesInteiro.value.cortes.peso,
+    cortes_valor_total: comparativoCortesInteiro.value.cortes.valor,
+    cortes_percentual_peso: comparativoCortesInteiro.value.cortes.percentualPeso,
+    cortes_percentual_valor: comparativoCortesInteiro.value.cortes.percentualValor,
+    inteiro_peso_total: comparativoCortesInteiro.value.inteiro.peso,
+    inteiro_valor_total: comparativoCortesInteiro.value.inteiro.valor,
+    inteiro_percentual_peso: comparativoCortesInteiro.value.inteiro.percentualPeso,
+    inteiro_percentual_valor: comparativoCortesInteiro.value.inteiro.percentualValor,
     // Campos adicionais que estavam faltando
     peso_inteiro_abatido: pesoTotalProcessado.value,
     preco_venda_kg: mediaValorKgProcessado.value,
@@ -1409,6 +1418,8 @@ watch(
     percentualLucroKg,
     percentualLucroFrango,
     percentualLucroTotal,
+    // Métricas Cortes vs Inteiro
+    comparativoCortesInteiro,
     // Novos indicadores de eficiência operacional
     avesHora,
     kgHora,
@@ -1452,6 +1463,15 @@ watch(
       percentual_lucro_kg: parseFloat(percentualLucroKg.value),
       percentual_lucro_frango: parseFloat(percentualLucroFrango.value),
       percentual_lucro_total: parseFloat(percentualLucroTotal.value),
+      // Métricas Cortes vs Inteiro
+      cortes_peso_total: comparativoCortesInteiro.value.cortes.peso,
+      cortes_valor_total: comparativoCortesInteiro.value.cortes.valor,
+      cortes_percentual_peso: comparativoCortesInteiro.value.cortes.percentualPeso,
+      cortes_percentual_valor: comparativoCortesInteiro.value.cortes.percentualValor,
+      inteiro_peso_total: comparativoCortesInteiro.value.inteiro.peso,
+      inteiro_valor_total: comparativoCortesInteiro.value.inteiro.valor,
+      inteiro_percentual_peso: comparativoCortesInteiro.value.inteiro.percentualPeso,
+      inteiro_percentual_valor: comparativoCortesInteiro.value.inteiro.percentualValor,
       // Novos indicadores de eficiência operacional
       aves_hora: avesHora.value,
       kg_hora: kgHora.value,
