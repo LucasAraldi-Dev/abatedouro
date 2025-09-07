@@ -1,174 +1,260 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import { getLotesAbate, getProdutos, type LoteAbate, type Produto } from '../services/api'
+import { getAbatesCompletos, type AbateCompleto } from '../services/api'
+import RelatorioImpressao from './relatorios/RelatorioImpressao.vue'
+import RelatorioProdutos from './relatorios/RelatorioProdutos.vue'
+import RelatorioMetricas from './relatorios/RelatorioMetricas.vue'
+import ModalGerarImagem from './modals/ModalGerarImagem.vue'
 
 const loading = ref(false)
 const error = ref('')
-const lotes = ref<LoteAbate[]>([])
-const produtos = ref<Produto[]>([])
+const abatesCompletos = ref<AbateCompleto[]>([])
+const mostrarRelatorioImpressao = ref(false)
 
 // Filtros
 const filtros = ref({
   dataInicio: '',
   dataFim: '',
   unidade: '',
-  tipoRelatorio: 'lotes' // 'lotes', 'produtos', 'resumo'
+  tipoRelatorio: 'produtos' // 'produtos', 'metricas'
 })
 
 // Opções para filtros
 const unidadesDisponiveis = computed(() => {
   const unidades = new Set<string>()
-  lotes.value.forEach(lote => unidades.add(lote.unidade))
-  produtos.value.forEach(produto => unidades.add(produto.unidade_origem))
+  abatesCompletos.value.forEach(abate => unidades.add(abate.unidade))
   return Array.from(unidades).sort()
 })
 
-// Dados filtrados
-const lotesFiltrados = computed(() => {
-  return lotes.value.filter(lote => {
-    // Filtro por data
-    if (filtros.value.dataInicio) {
-      const dataLote = new Date(lote.data_abate)
-      const dataInicio = new Date(filtros.value.dataInicio)
-      if (dataLote < dataInicio) return false
-    }
-    
-    if (filtros.value.dataFim) {
-      const dataLote = new Date(lote.data_abate)
-      const dataFim = new Date(filtros.value.dataFim)
-      if (dataLote > dataFim) return false
-    }
-    
-    // Filtro por unidade
-    if (filtros.value.unidade && lote.unidade !== filtros.value.unidade) {
-      return false
-    }
-    
-    return true
-  })
+// Dados filtrados - a API já aplica os filtros de data, então filtramos apenas por unidade
+const abatesFiltrados = computed(() => {
+  let resultado = [...abatesCompletos.value]
+  
+  // Filtrar apenas por unidade se especificada (a API já filtrou por data)
+  if (filtros.value.unidade) {
+    resultado = resultado.filter(abate => abate.unidade === filtros.value.unidade)
+  }
+  
   // Ordenar por data da mais nova para a mais antiga
-  .sort((a, b) => new Date(b.data_abate).getTime() - new Date(a.data_abate).getTime())
+  return resultado.sort((a, b) => new Date(b.data_abate).getTime() - new Date(a.data_abate).getTime())
 })
 
-const produtosFiltrados = computed(() => {
-  return produtos.value.filter(produto => {
-    // Filtro por data (usando data_producao)
-    if (filtros.value.dataInicio) {
-      const dataProduto = new Date(produto.data_producao)
-      const dataInicio = new Date(filtros.value.dataInicio)
-      if (dataProduto < dataInicio) return false
+// Dados consolidados para relatórios
+const dadosConsolidados = computed(() => {
+  if (abatesFiltrados.value.length === 0) return null
+  
+  const consolidado = {
+    totalAves: 0,
+    pesoTotalVivo: 0,
+    pesoTotalProcessado: 0,
+    receitaTotal: 0,
+    custoTotal: 0,
+    produtos: new Map(),
+    despesasFixas: {
+      recursos_humanos: 0,
+      utilidades: 0,
+      materiais: 0,
+      operacionais: 0,
+      compra_frango_vivo: 0
+    },
+    indicadores: {
+      tempo_total_horas: 0,
+      perdas_kg: 0,
+      energia_kwh: 0
+    }
+  }
+  
+  abatesFiltrados.value.forEach(abate => {
+    consolidado.totalAves += abate.quantidade_aves || 0
+    consolidado.pesoTotalVivo += abate.peso_total_kg || 0
+    consolidado.pesoTotalProcessado += abate.peso_inteiro_abatido || 0
+    
+    // Consolidar produtos
+    if (abate.produtos && Array.isArray(abate.produtos)) {
+      abate.produtos.forEach(produto => {
+        const key = produto.nome
+        if (!consolidado.produtos.has(key)) {
+          consolidado.produtos.set(key, {
+            nome: produto.nome,
+            tipo: produto.tipo, // Preservar o campo tipo
+            quantidade: 0,
+            preco_unitario: produto.preco_kg || 0,
+            total: 0
+          })
+        }
+        const produtoConsolidado = consolidado.produtos.get(key)
+        produtoConsolidado.quantidade += produto.peso_kg || 0
+        produtoConsolidado.total += produto.valor_total || 0
+      })
     }
     
-    if (filtros.value.dataFim) {
-      const dataProduto = new Date(produto.data_producao)
-      const dataFim = new Date(filtros.value.dataFim)
-      if (dataProduto > dataFim) return false
+    // Consolidar despesas fixas
+    if (abate.despesas_fixas) {
+      consolidado.despesasFixas.recursos_humanos += (abate.despesas_fixas.funcionarios || 0) + (abate.despesas_fixas.horas_extras || 0) + (abate.despesas_fixas.diaristas || 0)
+      consolidado.despesasFixas.utilidades += (abate.despesas_fixas.agua || 0) + (abate.despesas_fixas.energia || 0)
+      consolidado.despesasFixas.materiais += (abate.despesas_fixas.embalagem || 0) + (abate.despesas_fixas.materiais_limpeza || 0) + (abate.despesas_fixas.gelo || 0)
+      consolidado.despesasFixas.operacionais += (abate.despesas_fixas.refeicao || 0) + (abate.despesas_fixas.amonia || 0) + (abate.despesas_fixas.epi || 0) + (abate.despesas_fixas.manutencao || 0)
+      consolidado.despesasFixas.compra_frango_vivo += abate.valor_total || 0
     }
     
-    // Filtro por unidade
-    if (filtros.value.unidade && produto.unidade_origem !== filtros.value.unidade) {
-      return false
+    // Consolidar indicadores
+    if (abate.horarios) {
+      consolidado.indicadores.tempo_total_horas += abate.horarios.horas_reais || 0
     }
-    
-    return true
+    // Usar campos calculados se disponíveis
+    consolidado.indicadores.perdas_kg += abate.peso_total_perdas || 0
+    consolidado.indicadores.energia_kwh += 0 // Campo não disponível na estrutura atual
   })
+  
+  // Calcular receita e custo total
+  consolidado.produtos.forEach(produto => {
+    consolidado.receitaTotal += produto.total
+  })
+  
+  consolidado.custoTotal = Object.values(consolidado.despesasFixas).reduce((sum, val) => sum + val, 0)
+  
+  return consolidado
 })
 
 // Relatório de resumo
 const relatorioResumo = computed(() => {
-  const lotesPorUnidade = new Map<string, {
-    totalLotes: number
+  const resumoPorUnidade = new Map<string, {
+    totalAbates: number
     totalAves: number
-    pesoTotal: number
-    produtos: number
-    valorProdutos: number
+    pesoTotalVivo: number
+    pesoTotalProcessado: number
+    receitaTotal: number
+    custoTotal: number
   }>()
   
-  // Processar lotes
-  lotesFiltrados.value.forEach(lote => {
-    if (!lotesPorUnidade.has(lote.unidade)) {
-      lotesPorUnidade.set(lote.unidade, {
-        totalLotes: 0,
+  abatesFiltrados.value.forEach(abate => {
+    if (!resumoPorUnidade.has(abate.unidade)) {
+      resumoPorUnidade.set(abate.unidade, {
+        totalAbates: 0,
         totalAves: 0,
-        pesoTotal: 0,
-        produtos: 0,
-        valorProdutos: 0
+        pesoTotalVivo: 0,
+        pesoTotalProcessado: 0,
+        receitaTotal: 0,
+        custoTotal: 0
       })
     }
     
-    const dados = lotesPorUnidade.get(lote.unidade)!
-    dados.totalLotes++
-    dados.totalAves += lote.quantidade_aves
-    dados.pesoTotal += lote.peso_total_kg
-  })
-  
-  // Processar produtos
-  produtosFiltrados.value.forEach(produto => {
-    if (!lotesPorUnidade.has(produto.unidade_origem)) {
-      lotesPorUnidade.set(produto.unidade_origem, {
-        totalLotes: 0,
-        totalAves: 0,
-        pesoTotal: 0,
-        produtos: 0,
-        valorProdutos: 0
+    const dados = resumoPorUnidade.get(abate.unidade)!
+    dados.totalAbates++
+    dados.totalAves += abate.quantidade_aves || 0
+    dados.pesoTotalVivo += abate.peso_total_kg || 0
+    dados.pesoTotalProcessado += abate.peso_inteiro_abatido || 0
+    
+    // Somar receita dos produtos
+    if (abate.produtos && Array.isArray(abate.produtos)) {
+      abate.produtos.forEach(produto => {
+        dados.receitaTotal += produto.valor_total || 0
       })
     }
     
-    const dados = lotesPorUnidade.get(produto.unidade_origem)!
-    dados.produtos++
-    dados.valorProdutos += produto.peso_kg * produto.preco_kg
+    // Somar custos das despesas fixas
+    if (abate.despesas_fixas) {
+      dados.custoTotal += Object.values(abate.despesas_fixas).reduce((sum, val) => sum + (val || 0), 0)
+      dados.custoTotal += abate.valor_total || 0
+    }
   })
   
-  return Array.from(lotesPorUnidade.entries()).map(([unidade, dados]) => ({
+  return Array.from(resumoPorUnidade.entries()).map(([unidade, dados]) => ({
     unidade,
     ...dados,
-    mediaAvesPorLote: dados.totalLotes > 0 ? dados.totalAves / dados.totalLotes : 0,
-    mediaPesoPorLote: dados.totalLotes > 0 ? dados.pesoTotal / dados.totalLotes : 0,
-    valorMedioPorProduto: dados.produtos > 0 ? dados.valorProdutos / dados.produtos : 0
+    mediaAvesPorAbate: dados.totalAbates > 0 ? dados.totalAves / dados.totalAbates : 0,
+    mediaPesoVivoPorAbate: dados.totalAbates > 0 ? dados.pesoTotalVivo / dados.totalAbates : 0,
+    rendimento: dados.pesoTotalVivo > 0 ? (dados.pesoTotalProcessado / dados.pesoTotalVivo) * 100 : 0,
+    lucroTotal: dados.receitaTotal - dados.custoTotal,
+    margemLucro: dados.receitaTotal > 0 ? ((dados.receitaTotal - dados.custoTotal) / dados.receitaTotal) * 100 : 0
   }))
 })
 
 // Totais gerais
 const totaisGerais = computed(() => {
-  const totalLotes = lotesFiltrados.value.length
-  const totalProdutos = produtosFiltrados.value.length
-  const totalAves = lotesFiltrados.value.reduce((sum, lote) => sum + lote.quantidade_aves, 0)
-  const pesoTotalLotes = lotesFiltrados.value.reduce((sum, lote) => sum + lote.peso_total_kg, 0)
-  const pesoTotalProdutos = produtosFiltrados.value.reduce((sum, produto) => sum + produto.peso_kg, 0)
-  const valorTotalProdutos = produtosFiltrados.value.reduce((sum, produto) => sum + (produto.peso_kg * produto.preco_kg), 0)
+  if (!dadosConsolidados.value) {
+    return {
+      totalAbates: 0,
+      totalAves: 0,
+      pesoTotalVivo: 0,
+      pesoTotalProcessado: 0,
+      receitaTotal: 0,
+      custoTotal: 0,
+      lucroTotal: 0,
+      rendimentoMedio: 0,
+      margemLucro: 0
+    }
+  }
+  
+  const dados = dadosConsolidados.value
+  const lucroTotal = dados.receitaTotal - dados.custoTotal
+  const rendimentoMedio = dados.pesoTotalVivo > 0 ? (dados.pesoTotalProcessado / dados.pesoTotalVivo) * 100 : 0
+  const margemLucro = dados.receitaTotal > 0 ? (lucroTotal / dados.receitaTotal) * 100 : 0
   
   return {
-    totalLotes,
-    totalProdutos,
-    totalAves,
-    pesoTotalLotes,
-    pesoTotalProdutos,
-    valorTotalProdutos,
-    mediaAvesPorLote: totalLotes > 0 ? totalAves / totalLotes : 0,
-    mediaPesoPorLote: totalLotes > 0 ? pesoTotalLotes / totalLotes : 0,
-    precoMedioKg: pesoTotalProdutos > 0 ? valorTotalProdutos / pesoTotalProdutos : 0
+    totalAbates: abatesFiltrados.value.length,
+    totalAves: dados.totalAves,
+    pesoTotalVivo: dados.pesoTotalVivo,
+    pesoTotalProcessado: dados.pesoTotalProcessado,
+    receitaTotal: dados.receitaTotal,
+    custoTotal: dados.custoTotal,
+    lucroTotal,
+    rendimentoMedio,
+    margemLucro
   }
 })
 
-// Métodos
-const loadData = async () => {
+// Carregar dados
+const carregarDados = async () => {
+  loading.value = true
+  error.value = ''
+  
   try {
-    loading.value = true
-    error.value = ''
+    // Preparar parâmetros de filtro de data para a API
+    const params: any = { limit: 1000 }
     
-    const [lotesResponse, produtosResponse] = await Promise.all([
-      getLotesAbate(),
-      getProdutos()
-    ])
+    // Aplicar filtros de data se definidos
+    if (filtros.value.dataInicio || filtros.value.dataFim) {
+      if (filtros.value.dataInicio) {
+        params.data_inicio = filtros.value.dataInicio
+      }
+      if (filtros.value.dataFim) {
+        params.data_fim = filtros.value.dataFim
+      }
+    }
     
-    lotes.value = lotesResponse
-    produtos.value = produtosResponse
+    const abatesData = await getAbatesCompletos(params)
+    abatesCompletos.value = abatesData
   } catch (err) {
-    error.value = 'Erro ao carregar dados para relatórios'
-    console.error('Erro ao carregar dados:', err)
+    error.value = 'Erro ao carregar dados: ' + (err as Error).message
   } finally {
     loading.value = false
   }
+}
+
+// Estado do modal de gerar imagem
+const mostrarModalGerarImagem = ref(false)
+
+// Função para abrir modal de gerar imagem
+const abrirModalGerarImagem = () => {
+  if (!dadosConsolidados.value) return
+  mostrarModalGerarImagem.value = true
+}
+
+// Função para fechar modal de gerar imagem
+const fecharModalGerarImagem = () => {
+  mostrarModalGerarImagem.value = false
+}
+
+// Função para imprimir relatório (mantida para compatibilidade)
+const imprimirRelatorio = () => {
+  if (!dadosConsolidados.value) return
+  mostrarRelatorioImpressao.value = true
+}
+
+// Função para fechar relatório de impressão
+const fecharRelatorioImpressao = () => {
+  mostrarRelatorioImpressao.value = false
 }
 
 const limparFiltros = () => {
@@ -176,43 +262,48 @@ const limparFiltros = () => {
     dataInicio: '',
     dataFim: '',
     unidade: '',
-    tipoRelatorio: 'lotes'
+    tipoRelatorio: 'produtos'
   }
+}
+
+// Função para exportar PDF
+const exportarPDF = () => {
+  if (!dadosConsolidados.value) return
+  
+  // Abrir o relatório de impressão que já tem funcionalidade de impressão/PDF
+  mostrarRelatorioImpressao.value = true
+  
+  // Aguardar um pouco para o modal aparecer e então acionar a impressão
+  setTimeout(() => {
+    window.print()
+  }, 500)
 }
 
 const exportarCSV = () => {
   let dados: any[] = []
   let headers: string[] = []
   
-  if (filtros.value.tipoRelatorio === 'lotes') {
-    headers = ['Data Abate', 'Unidade', 'Tipo Ave', 'Quantidade Aves', 'Peso Total (kg)']
-    dados = lotesFiltrados.value.map(lote => [
-      formatDate(lote.data_abate),
-      lote.unidade,
-      lote.tipo_ave || 'N/A',
-      lote.quantidade_aves,
-      lote.peso_total_kg
-    ])
-  } else if (filtros.value.tipoRelatorio === 'produtos') {
-    headers = ['Nome', 'Tipo', 'Unidade Origem', 'Data Produção', 'Peso (kg)', 'Preço/kg', 'Valor Total']
-    dados = produtosFiltrados.value.map(produto => [
+  if (filtros.value.tipoRelatorio === 'produtos') {
+    if (!dadosConsolidados.value) return
+    
+    headers = ['Produto', 'Quantidade', 'Preço Unitário', 'Total']
+    dados = Array.from(dadosConsolidados.value.produtos.values()).map(produto => [
       produto.nome,
-      produto.tipo,
-      produto.unidade_origem,
-      formatDate(produto.data_producao),
-      produto.peso_kg,
-      produto.preco_kg,
-      produto.peso_kg * produto.preco_kg
+      produto.quantidade,
+      produto.preco_unitario,
+      produto.total
     ])
-  } else {
-    headers = ['Unidade', 'Total Lotes', 'Total Aves', 'Peso Total (kg)', 'Total Produtos', 'Valor Produtos (R$)']
+  } else if (filtros.value.tipoRelatorio === 'metricas') {
+    headers = ['Unidade', 'Total Abates', 'Total Aves', 'Peso Vivo (kg)', 'Peso Processado (kg)', 'Receita (R$)', 'Custo (R$)', 'Lucro (R$)']
     dados = relatorioResumo.value.map(item => [
       item.unidade,
-      item.totalLotes,
+      item.totalAbates,
       item.totalAves,
-      item.pesoTotal,
-      item.produtos,
-      item.valorProdutos
+      item.pesoTotalVivo,
+      item.pesoTotalProcessado,
+      item.receitaTotal,
+      item.custoTotal,
+      item.lucroTotal
     ])
   }
   
@@ -240,7 +331,7 @@ const formatCurrency = (value: number): string => {
 }
 
 const formatWeight = (value: number): string => {
-  return `${value.toFixed(2)} kg`
+  return `${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} kg`
 }
 
 const formatNumber = (value: number): string => {
@@ -251,16 +342,25 @@ const formatDate = (dateString: string): string => {
   return new Date(dateString).toLocaleDateString('pt-BR')
 }
 
+// Watch para recarregar dados quando filtros de data mudarem
+watch(
+  () => [filtros.value.dataInicio, filtros.value.dataFim],
+  () => {
+    carregarDados()
+  },
+  { deep: true }
+)
+
 // Lifecycle
 onMounted(() => {
-  loadData()
-  
   // Definir datas padrão (último mês)
   const hoje = new Date()
   const umMesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate())
   
   filtros.value.dataInicio = umMesAtras.toISOString().split('T')[0]
   filtros.value.dataFim = hoje.toISOString().split('T')[0]
+  
+  carregarDados()
 })
 </script>
 
@@ -269,13 +369,17 @@ onMounted(() => {
     <div class="relatorios-header">
       <h2 class="relatorios-title">Relatórios</h2>
       <div class="header-actions">
-        <button @click="loadData" class="btn btn-secondary btn-sm" :disabled="loading">
+        <button @click="carregarDados" class="btn btn-secondary btn-sm" :disabled="loading">
           <span class="btn-icon">🔄</span>
           {{ loading ? 'Atualizando...' : 'Atualizar' }}
         </button>
-        <button @click="exportarCSV" class="btn btn-primary btn-sm" :disabled="loading">
-          <span class="btn-icon">📊</span>
-          Exportar CSV
+        <button @click="abrirModalGerarImagem" class="btn btn-primary btn-sm" :disabled="loading || !dadosConsolidados">
+          <span class="btn-icon">🖨️</span>
+          Imprimir
+        </button>
+        <button @click="exportarPDF" class="btn btn-primary btn-sm" :disabled="loading || !dadosConsolidados">
+          <span class="btn-icon">📄</span>
+          Exportar PDF
         </button>
       </div>
     </div>
@@ -287,9 +391,8 @@ onMounted(() => {
         <div class="filtro-group">
           <label class="filtro-label">Tipo de Relatório</label>
           <select v-model="filtros.tipoRelatorio" class="filtro-input">
-            <option value="lotes">Abates</option>
             <option value="produtos">Produtos/Cortes</option>
-            <option value="resumo">Resumo por Unidade</option>
+            <option value="metricas">Métricas por Unidade</option>
           </select>
         </div>
         
@@ -349,8 +452,8 @@ onMounted(() => {
           <div class="total-card">
             <div class="total-icon">📊</div>
             <div class="total-content">
-              <div class="total-value">{{ formatNumber(totaisGerais.totalLotes) }}</div>
-              <div class="total-label">Lotes</div>
+              <div class="total-value">{{ formatNumber(totaisGerais.totalAbates) }}</div>
+              <div class="total-label">Abates</div>
             </div>
           </div>
           
@@ -365,139 +468,164 @@ onMounted(() => {
           <div class="total-card">
             <div class="total-icon">⚖️</div>
             <div class="total-content">
-              <div class="total-value">{{ formatWeight(totaisGerais.pesoTotalLotes) }}</div>
-              <div class="total-label">Peso (Lotes)</div>
+              <div class="total-value">{{ formatWeight(totaisGerais.pesoTotalVivo) }}</div>
+              <div class="total-label">Peso Vivo</div>
             </div>
           </div>
           
           <div class="total-card">
             <div class="total-icon">🥩</div>
             <div class="total-content">
-              <div class="total-value">{{ formatNumber(totaisGerais.totalProdutos) }}</div>
-              <div class="total-label">Produtos</div>
+              <div class="total-value">{{ formatWeight(totaisGerais.pesoTotalProcessado) }}</div>
+              <div class="total-label">Peso Processado</div>
             </div>
           </div>
           
           <div class="total-card">
             <div class="total-icon">💰</div>
             <div class="total-content">
-              <div class="total-value">{{ formatCurrency(totaisGerais.valorTotalProdutos) }}</div>
-              <div class="total-label">Valor Total</div>
+              <div class="total-value">{{ formatCurrency(totaisGerais.lucroTotal) }}</div>
+              <div class="total-label">Lucro Total</div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Relatório de Lotes -->
-      <section v-if="filtros.tipoRelatorio === 'lotes'" class="tabela-section">
-        <h3 class="section-title">Abates ({{ lotesFiltrados.length }} registros)</h3>
-        <div class="tabela-container">
-          <table class="tabela">
-            <thead>
-              <tr>
-                <th>Data Abate</th>
-                <th>Unidade</th>
-                <th>Tipo Ave</th>
-                <th>Quantidade Aves</th>
-                <th>Peso Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="lotesFiltrados.length === 0">
-                <td colspan="5" class="no-data">Nenhum lote encontrado para os filtros selecionados</td>
-              </tr>
-              <tr v-for="lote in lotesFiltrados" :key="lote.id">
-                <td>{{ formatDate(lote.data_abate) }}</td>
-                <td>{{ lote.unidade }}</td>
-                <td>{{ lote.tipo_ave || 'N/A' }}</td>
-                <td class="text-right">{{ formatNumber(lote.quantidade_aves) }}</td>
-                <td class="text-right">{{ formatWeight(lote.peso_total_kg) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
       <!-- Relatório de Produtos -->
       <section v-if="filtros.tipoRelatorio === 'produtos'" class="tabela-section">
-        <h3 class="section-title">Produtos/Cortes ({{ produtosFiltrados.length }} registros)</h3>
-        <div class="tabela-container">
-          <table class="tabela">
-            <thead>
-              <tr>
-                <th>Nome</th>
-                <th>Tipo</th>
-                <th>Unidade Origem</th>
-                <th>Data Produção</th>
-                <th>Peso</th>
-                <th>Preço/kg</th>
-                <th>Valor Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="produtosFiltrados.length === 0">
-                <td colspan="7" class="no-data">Nenhum produto encontrado para os filtros selecionados</td>
-              </tr>
-              <tr v-for="produto in produtosFiltrados" :key="produto._id">
-                <td>{{ produto.nome }}</td>
-                <td>{{ produto.tipo }}</td>
-                <td>{{ produto.unidade_origem }}</td>
-                <td>{{ formatDate(produto.data_producao) }}</td>
-                <td class="text-right">{{ formatWeight(produto.peso_kg) }}</td>
-                <td class="text-right">{{ formatCurrency(produto.preco_kg) }}</td>
-                <td class="text-right primary">{{ formatCurrency(produto.peso_kg * produto.preco_kg) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <RelatorioProdutos 
+          :dados-consolidados="dadosConsolidados"
+          :loading="loading"
+        />
       </section>
 
-      <!-- Relatório de Resumo -->
-      <section v-if="filtros.tipoRelatorio === 'resumo'" class="tabela-section">
-        <h3 class="section-title">Resumo por Unidade ({{ relatorioResumo.length }} unidades)</h3>
-        <div class="tabela-container">
-          <table class="tabela">
-            <thead>
-              <tr>
-                <th>Unidade</th>
-                <th>Total Lotes</th>
-                <th>Total Aves</th>
-                <th>Peso Total (kg)</th>
-                <th>Média Aves/Lote</th>
-                <th>Média Peso/Lote</th>
-                <th>Total Produtos</th>
-                <th>Valor Produtos</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="relatorioResumo.length === 0">
-                <td colspan="8" class="no-data">Nenhuma unidade encontrada para os filtros selecionados</td>
-              </tr>
-              <tr v-for="item in relatorioResumo" :key="item.unidade">
-                <td class="font-weight-bold">{{ item.unidade }}</td>
-                <td class="text-right">{{ formatNumber(item.totalLotes) }}</td>
-                <td class="text-right">{{ formatNumber(item.totalAves) }}</td>
-                <td class="text-right">{{ formatWeight(item.pesoTotal) }}</td>
-                <td class="text-right">{{ formatNumber(item.mediaAvesPorLote) }}</td>
-                <td class="text-right">{{ formatWeight(item.mediaPesoPorLote) }}</td>
-                <td class="text-right">{{ formatNumber(item.produtos) }}</td>
-                <td class="text-right primary">{{ formatCurrency(item.valorProdutos) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+      <!-- Relatório de Métricas -->
+      <section v-if="filtros.tipoRelatorio === 'metricas'" class="tabela-section">
+        <RelatorioMetricas 
+          :dados-consolidados="dadosConsolidados"
+          :relatorio-resumo="relatorioResumo"
+          :loading="loading"
+        />
       </section>
+
     </div>
+    
+    <!-- Modal de Relatório de Impressão -->
+    <div v-if="mostrarRelatorioImpressao" class="modal-overlay" @click="fecharRelatorioImpressao">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>Relatório de Impressão</h3>
+          <button @click="fecharRelatorioImpressao" class="btn-close">×</button>
+        </div>
+        <div class="modal-body">
+          <RelatorioImpressao 
+            v-if="dadosConsolidados"
+            :dados-relatorio="{
+              data_abate: filtros.dataInicio + ' a ' + filtros.dataFim,
+              unidade: filtros.unidade || 'Todas as unidades',
+              quantidade_aves: dadosConsolidados.totalAves,
+              peso_total_vivo: dadosConsolidados.pesoTotalVivo,
+              peso_total_processado: dadosConsolidados.pesoTotalProcessado,
+              produtos: Array.from(dadosConsolidados.produtos.values())
+            }"
+            :valores-calculados="{
+              receita_bruta: dadosConsolidados.receitaTotal,
+              lucro_liquido: dadosConsolidados.receitaTotal - dadosConsolidados.custoTotal,
+              rendimento: dadosConsolidados.pesoTotalVivo > 0 ? (dadosConsolidados.pesoTotalProcessado / dadosConsolidados.pesoTotalVivo) * 100 : 0
+            }"
+            :indicadores-formatados="{
+              tempo_total_horas: dadosConsolidados.indicadores.tempo_total_horas,
+              perdas_kg: dadosConsolidados.indicadores.perdas_kg,
+              energia_kwh: dadosConsolidados.indicadores.energia_kwh
+            }"
+            variant="produtos"
+          />
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal de Gerar Imagem -->
+     <ModalGerarImagem 
+       :is-visible="mostrarModalGerarImagem"
+       :dados-consolidados="dadosConsolidados"
+       :filtros="filtros"
+       @close="fecharModalGerarImagem"
+     />
   </div>
 </template>
 
 <style scoped>
 @import url('../styles/colors.css');
 
+/* Modal de Impressão */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f7fafc;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #718096;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.btn-close:hover {
+  background: #e2e8f0;
+  color: #2d3748;
+}
+
+.modal-body {
+  flex: 1;
+  overflow: auto;
+  padding: 0;
+}
+
 .relatorios-container {
   max-width: 100%;
   margin: 0 auto;
-  padding: 0;
+  padding: 1rem;
+}
 .relatorios-header {
   display: flex;
   justify-content: space-between;
@@ -508,8 +636,6 @@ onMounted(() => {
   border-radius: 16px;
   box-shadow: var(--shadow-light);
   border: 1px solid var(--border-light);
-} padding-bottom: 1rem;
-  border-bottom: 2px solid var(--border-light);
 }
 
 .relatorios-title {
@@ -601,7 +727,7 @@ onMounted(() => {
 
 .totais-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
 }
 
@@ -616,6 +742,8 @@ onMounted(() => {
   border: 2px solid var(--border-light);
   border-left: 4px solid var(--primary-red);
   transition: all 0.3s ease;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .total-card:hover {
@@ -638,14 +766,19 @@ onMounted(() => {
 
 .total-content {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .total-value {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
-  line-height: 1;
+  line-height: 1.2;
   margin-bottom: 0.25rem;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .total-label {
@@ -808,7 +941,7 @@ onMounted(() => {
   }
   
   .totais-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
 }
 
@@ -828,7 +961,11 @@ onMounted(() => {
   }
   
   .totais-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+  
+  .total-value {
+    font-size: 1.25rem;
   }
   
   .tabela-container {

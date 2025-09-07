@@ -23,19 +23,19 @@
       <div class="dados-grid">
         <div class="dado-item">
           <span class="label">Quantidade de Aves:</span>
-          <span class="valor">{{ formData.quantidade_aves || 0 }}</span>
+          <span class="valor">{{ (formData.quantidade_aves || 0).toLocaleString('pt-BR') }}</span>
         </div>
         <div class="dado-item">
           <span class="label">Peso Total Vivo:</span>
-          <span class="valor">{{ (formData.peso_total_kg || 0).toFixed(2) }} kg</span>
+          <span class="valor">{{ (formData.peso_total_kg || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }} kg</span>
         </div>
         <div class="dado-item">
           <span class="label">Peso Total Processado:</span>
-          <span class="valor">{{ pesoTotalProcessado.toFixed(2) }} kg</span>
+          <span class="valor">{{ pesoTotalProcessado.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }} kg</span>
         </div>
         <div class="dado-item">
           <span class="label">Rendimento:</span>
-          <span class="valor">{{ rendimentoPercentual }}%</span>
+          <span class="valor">{{ rendimentoPercentual }}</span>
         </div>
       </div>
     </div>
@@ -50,18 +50,18 @@
             <th>Quantidade (kg)</th>
             <th>Preço/kg</th>
             <th>Total</th>
-            <th>% Participação</th>
+            <th>% Partic.</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="produto in formData.produtos" :key="produto.id">
+          <tr v-for="produto in produtosOrdenados" :key="produto.id">
             <td>
               <div class="produto-nome-cell">
                 <div class="produto-nome-principal">{{ produto.nome }}</div>
                 <div class="produto-tipo-secundario" v-if="produto.tipo">{{ produto.tipo }}</div>
               </div>
             </td>
-            <td>{{ (produto.quantidade || 0).toFixed(2) }}</td>
+            <td>{{ (produto.quantidade || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</td>
             <td>{{ formatCurrency(produto.preco_unitario || 0) }}</td>
             <td>{{ formatCurrency((produto.quantidade || 0) * (produto.preco_unitario || 0)) }}</td>
             <td>{{ calcularPercentualProduto(produto) }}%</td>
@@ -102,7 +102,7 @@
           <div class="kpi-icon">🎯</div>
           <div class="kpi-content">
             <div class="kpi-title">Rendimento</div>
-            <div class="kpi-value">{{ rendimentoPercentual }}%</div>
+            <div class="kpi-value">{{ rendimentoPercentual }}</div>
             <div class="kpi-sub">{{ formatWeight(pesoTotalProcessado) }}</div>
           </div>
         </div>
@@ -497,9 +497,16 @@ const formatWeight = (value: number): string => {
   return `${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg`
 }
 
-// Data formatada
+// Data formatada - aceita tanto data específica quanto período
 const dataAbateFormatted = computed(() => {
   if (!props.formData.data_abate) return new Date().toLocaleDateString('pt-BR')
+  
+  // Se já contém 'a' é um período formatado (ex: "01/01/2024 a 31/01/2024")
+  if (props.formData.data_abate.includes(' a ')) {
+    return props.formData.data_abate
+  }
+  
+  // Caso contrário, é uma data específica que precisa ser formatada
   return new Date(props.formData.data_abate + 'T00:00:00').toLocaleDateString('pt-BR')
 })
 
@@ -664,6 +671,19 @@ const totalCustosOperacionais = computed(() => {
          props.totalOperacionais
 })
 
+// Produtos ordenados por percentual de participação
+const produtosOrdenados = computed(() => {
+  if (!props.formData.produtos || props.formData.produtos.length === 0) return []
+  
+  return [...props.formData.produtos].sort((a, b) => {
+    const totalA = (a.quantidade || 0) * (a.preco_unitario || 0)
+    const totalB = (b.quantidade || 0) * (b.preco_unitario || 0)
+    const percentualA = props.valorTotalProdutos > 0 ? (totalA / props.valorTotalProdutos) * 100 : 0
+    const percentualB = props.valorTotalProdutos > 0 ? (totalB / props.valorTotalProdutos) * 100 : 0
+    return percentualB - percentualA // Ordem decrescente
+  })
+})
+
 // Calcular percentual de cada produto
 const calcularPercentualProduto = (produto: any): string => {
   const totalProduto = produto.total || ((produto.quantidade || 0) * (produto.preco_unitario || 0))
@@ -690,8 +710,8 @@ const calcularPercentualProduto = (produto: any): string => {
     margin: 0;
     padding: 10mm;
     font-family: 'Arial', sans-serif;
-    font-size: 11px;
-    line-height: 1.3;
+    font-size: 10px;
+    line-height: 1.2;
     color: #000;
     background: white;
     width: 100%;
@@ -703,6 +723,18 @@ const calcularPercentualProduto = (produto: any): string => {
   }
   /* Em impressão, deixar a seção de produtos preencher toda a área útil (dentro das margens de 15mm) */
   .secao-produtos.full-width { width: 100%; margin-left: 0; margin-right: 0; }
+  
+  /* Estilos compactos para impressão */
+  .secao-dados, .secao-produtos { margin-top: 4px; }
+  .secao-dados h3, .secao-produtos h3 { margin: 0 0 3px 0; font-size: 11px; }
+  .dados-grid { gap: 3px; }
+  .dado-item { padding: 3px 5px; border-radius: 1px; }
+  .dado-item .label { font-size: 9px; }
+  .dado-item .valor { font-size: 9px; }
+  .tabela-produtos { font-size: 9px; }
+  .tabela-produtos thead th { padding: 1px 3px; font-size: 9px; }
+  .tabela-produtos tbody td { padding: 1px 3px; }
+  .tabela-produtos tfoot td { padding: 1px 3px; }
   
   .secao-duas-colunas {
     display: flex;
@@ -748,15 +780,15 @@ const calcularPercentualProduto = (produto: any): string => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 3px solid #dc2626;
-  padding-bottom: 15px;
-  margin-bottom: 25px;
+  border-bottom: 2px solid #dc2626;
+  padding-bottom: 10px;
+  margin-bottom: 16px;
 }
 
-.logo { height: 60px; width: auto; }
+.logo { height: 50px; width: auto; }
 .titulo-section { text-align: center; flex: 1; }
-.titulo-section h1 { font-size: 24px; font-weight: bold; color: #dc2626; margin: 0; }
-.titulo-section h2 { font-size: 16px; color: #666; margin: 5px 0 0 0; }
+.titulo-section h1 { font-size: 20px; font-weight: bold; color: #dc2626; margin: 0; }
+.titulo-section h2 { font-size: 14px; color: #666; margin: 3px 0 0 0; }
 .data-section { text-align: right; font-size: 14px; }
 .data-section p { margin: 2px 0; }
 .card-abate { display: inline-block; border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 12px; min-width: 160px; }
@@ -764,45 +796,45 @@ const calcularPercentualProduto = (produto: any): string => {
 .card-abate .card-date { font-size: 14px; text-align: center; margin-top: 4px; font-weight: 600; }
 
 /* Seções genéricas */
-.secao-dados, .secao-produtos, .secao-despesas, .secao-indicadores, .secao-financeiro { margin-top: 24px; }
+.secao-dados, .secao-produtos, .secao-despesas, .secao-indicadores, .secao-financeiro { margin-top: 6px; }
 .secao-dados h3, .secao-produtos h3, .secao-despesas h3, .secao-indicadores h3, .secao-financeiro h3 { 
-  margin: 0 0 12px 0; color: #dc2626; font-size: 18px; font-weight: 700;
+  margin: 0 0 4px 0; color: #dc2626; font-size: 12px; font-weight: 700;
 }
 
 /* Dados básicos */
-.dados-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.dado-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; }
-.dado-item .label { color: #6b7280; font-weight: 600; }
-.dado-item .valor { color: #111827; font-weight: 700; }
+.dados-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.dado-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 2px; padding: 4px 6px; display: flex; justify-content: space-between; }
+.dado-item .label { color: #6b7280; font-weight: 600; font-size: 10px; }
+.dado-item .valor { color: #111827; font-weight: 700; font-size: 10px; }
 
 /* Tabela de produtos */
-.tabela-produtos { width: 100%; border-collapse: collapse; }
+.tabela-produtos { width: 100%; border-collapse: collapse; font-size: 10px; }
 .tabela-produtos th, .tabela-produtos td { border: 1px solid #e5e7eb; }
-.tabela-produtos thead th { background: #f3f4f6; color: #111827; text-align: left; font-weight: 700; padding: 10px; }
-.tabela-produtos tbody td { padding: 10px; }
-.tabela-produtos tfoot td { padding: 10px; }
+.tabela-produtos thead th { background: #f3f4f6; color: #111827; text-align: left; font-weight: 700; padding: 2px 4px; font-size: 10px; }
+.tabela-produtos tbody td { padding: 2px 4px; }
+.tabela-produtos tfoot td { padding: 2px 4px; }
 .tabela-produtos .total-row { background: #fff; }
 .tabela-produtos .total-row td strong { color: #111827; }
 
 /* Despesas por categoria */
-.despesas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
-.categoria-despesa { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; text-align: center; }
-.categoria-despesa h4 { margin: 0 0 8px 0; color: #374151; font-size: 14px; }
-.categoria-despesa p { margin: 0; font-weight: 700; color: #111827; }
+.despesas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px; }
+.categoria-despesa { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 3px; padding: 6px; text-align: center; }
+.categoria-despesa h4 { margin: 0 0 4px 0; color: #374151; font-size: 12px; }
+.categoria-despesa p { margin: 0; font-weight: 700; color: #111827; font-size: 11px; }
 
 /* Indicadores de performance */
-.metricas-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-.indicadores-categoria { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }
-.indicadores-categoria h4 { margin: 0 0 10px 0; color: #374151; font-size: 16px; }
-.indicadores-dupla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.indicador-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 4px; }
-.indicador-item .valor-destaque { font-size: 18px; font-weight: 800; color: #111827; }
-.indicador-item .label { font-size: 12px; color: #6b7280; }
-.indicador-item .percentual { font-size: 12px; color: #2563eb; font-weight: 700; }
+.metricas-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.indicadores-categoria { background: #fff; border: 1px solid #e5e7eb; border-radius: 4px; padding: 6px; }
+.indicadores-categoria h4 { margin: 0 0 4px 0; color: #374151; font-size: 12px; }
+.indicadores-dupla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.indicador-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 3px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.indicador-item .valor-destaque { font-size: 14px; font-weight: 800; color: #111827; }
+.indicador-item .label { font-size: 10px; color: #6b7280; }
+.indicador-item .percentual { font-size: 10px; color: #2563eb; font-weight: 700; }
 
 /* Resumo financeiro */
-.financeiro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.financeiro-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
+.financeiro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.financeiro-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; }
 .financeiro-item .label { color: #6b7280; font-weight: 600; }
 .financeiro-item .valor { color: #111827; font-weight: 800; }
 .financeiro-item.receita .valor { color: #16a34a; }
@@ -811,7 +843,7 @@ const calcularPercentualProduto = (produto: any): string => {
 .financeiro-item.lucro.prejuizo .valor { color: #dc2626; }
 
 /* Rodapé */
-.footer-impressao { border-top: 3px solid #dc2626; margin-top: 28px; padding-top: 12px; display: flex; justify-content: space-between; gap: 16px; }
+.footer-impressao { border-top: 2px solid #dc2626; margin-top: 20px; padding-top: 8px; display: flex; justify-content: space-between; gap: 12px; }
 .footer-info p { margin: 2px 0; color: #374151; }
 .footer-assinatura { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 60%; }
 .linha-assinatura { text-align: center; }
@@ -834,9 +866,9 @@ const calcularPercentualProduto = (produto: any): string => {
 /* Resumo Financeiro Principal */
 .resumo-financeiro-principal {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 25px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .kpi-destaque {
@@ -905,35 +937,35 @@ const calcularPercentualProduto = (produto: any): string => {
 .indicadores-compactos {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  margin-bottom: 25px;
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
 .grupo-indicadores {
   background: #ffffff;
   border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 20px;
+  border-radius: 6px;
+  padding: 12px;
 }
 
 .grupo-indicadores h4 {
-  margin: 0 0 15px 0;
-  font-size: 16px;
+  margin: 0 0 10px 0;
+  font-size: 14px;
   color: #495057;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 8px;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 6px;
 }
 
 .kpi-mini-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
+  gap: 8px;
 }
 
 .kpi-mini {
   background: #f8f9fa;
-  border-radius: 6px;
-  padding: 12px;
+  border-radius: 4px;
+  padding: 8px;
   text-align: center;
 }
 
@@ -1065,23 +1097,23 @@ const calcularPercentualProduto = (produto: any): string => {
 .custos-operacionais {
   background: #ffffff;
   border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 12px;
 }
 
 .custos-operacionais h4 {
-  margin: 0 0 15px 0;
-  font-size: 16px;
+  margin: 0 0 10px 0;
+  font-size: 14px;
   color: #495057;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 8px;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 6px;
 }
 
 .custos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
 }
 
 .custo-item {
@@ -1089,8 +1121,8 @@ const calcularPercentualProduto = (produto: any): string => {
   justify-content: space-between;
   align-items: center;
   background: #f8f9fa;
-  border-radius: 6px;
-  padding: 12px;
+  border-radius: 4px;
+  padding: 8px;
 }
 
 .custo-label {
@@ -1108,8 +1140,8 @@ const calcularPercentualProduto = (produto: any): string => {
 /* Layout de duas colunas */
 .secao-duas-colunas {
   display: flex;
-  gap: 20px;
-  margin-top: 20px;
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .coluna-despesas,
@@ -1131,9 +1163,9 @@ const calcularPercentualProduto = (produto: any): string => {
 .despesas-detalhadas-card {
   background: #ffffff;
   border: 1px solid #e9ecef;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .despesas-detalhadas-card .card-header {
