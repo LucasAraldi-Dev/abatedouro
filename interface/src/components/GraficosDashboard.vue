@@ -408,6 +408,14 @@ const criarGraficoLucroTotal = (dados?: any[]) => {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 30,
+          bottom: 10,
+          left: 10,
+          right: 10
+        }
+      },
       plugins: {
         legend: {
           display: false
@@ -423,8 +431,133 @@ const criarGraficoLucroTotal = (dados?: any[]) => {
           }
         }
       }
-    }
+    },
+    plugins: [createDataLabelsPlugin()]
   })
+}
+
+// Plugin personalizado para exibir valores em gráficos de barras quando há poucos dados
+const createDataLabelsPlugin = (threshold: number = 10) => {
+  return {
+    id: 'dataLabels',
+    afterDatasetsDraw(chart: any) {
+      const { ctx, data } = chart
+      const dataset = data.datasets[0]
+      const meta = chart.getDatasetMeta(0)
+      
+      // Só exibir valores se houver poucos dados (≤ threshold)
+      if (!dataset || !meta || !meta.data || data.labels.length > threshold) return
+      
+      ctx.save()
+      ctx.font = 'bold 11px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      
+      meta.data.forEach((element: any, index: number) => {
+        const value = dataset.data[index]
+        if (value === null || value === undefined || value === 0) return
+        
+        let x = element.x
+        let y = element.y
+        
+        // Para gráficos de barras, posicionar o texto acima da barra
+        if (chart.config.type === 'bar') {
+          y = element.y - 15
+        }
+        
+        // Formatação do valor baseada no tipo de dado
+        let displayValue = ''
+        if (typeof value === 'number') {
+          if (value >= 1000) {
+            displayValue = 'R$ ' + new Intl.NumberFormat('pt-BR', { 
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0 
+            }).format(value)
+          } else if (value >= 1) {
+            displayValue = 'R$ ' + value.toFixed(2)
+          } else {
+            displayValue = value.toFixed(3)
+          }
+          
+          // Para percentuais (rendimento, eficiência)
+          if (dataset.label && (dataset.label.includes('%') || dataset.label.includes('Rendimento') || dataset.label.includes('Eficiência'))) {
+            displayValue = value.toFixed(1) + '%'
+          }
+        }
+        
+        // Estilo do texto com contorno para melhor legibilidade
+        ctx.fillStyle = '#ffffff'
+        ctx.strokeStyle = 'rgba(0,0,0,0.7)'
+        ctx.lineWidth = 3
+        ctx.strokeText(displayValue, x, y)
+        ctx.fillText(displayValue, x, y)
+      })
+      
+      ctx.restore()
+    }
+  }
+}
+
+// Plugin personalizado para exibir valores em gráficos de linha quando há poucos dados
+const createLineDataLabelsPlugin = (threshold: number = 10) => {
+  return {
+    id: 'lineDataLabels',
+    afterDatasetsDraw(chart: any) {
+      const { ctx, data } = chart
+      
+      // Só exibir valores se houver poucos dados (≤ threshold)
+      if (!data || !data.labels || data.labels.length > threshold) return
+      
+      ctx.save()
+      ctx.font = 'bold 10px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'bottom'
+      
+      data.datasets.forEach((dataset: any, datasetIndex: number) => {
+        const meta = chart.getDatasetMeta(datasetIndex)
+        if (!meta || !meta.data) return
+        
+        meta.data.forEach((point: any, index: number) => {
+          const value = dataset.data[index]
+          if (value === null || value === undefined || value === 0) return
+          
+          let displayValue = ''
+          if (typeof value === 'number') {
+            if (value >= 1000) {
+              displayValue = 'R$ ' + new Intl.NumberFormat('pt-BR', { 
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0 
+              }).format(value)
+            } else if (value >= 1) {
+              displayValue = 'R$ ' + value.toFixed(2)
+            } else {
+              displayValue = value.toFixed(3)
+            }
+            
+            // Para percentuais (rendimento, eficiência)
+            if (dataset.label && (dataset.label.includes('%') || dataset.label.includes('Rendimento') || dataset.label.includes('Eficiência'))) {
+              displayValue = value.toFixed(1) + '%'
+            }
+          }
+          
+          // Posicionar o texto acima do ponto
+          const x = point.x
+          const y = point.y - 10
+          
+          // Contorno preto
+          ctx.strokeStyle = '#000000'
+          ctx.lineWidth = 3
+          ctx.strokeText(displayValue, x, y)
+          
+          // Texto branco
+          ctx.fillStyle = '#FFFFFF'
+          ctx.fillText(displayValue, x, y)
+        })
+      })
+      
+      ctx.restore()
+    }
+  }
 }
 
 // Função utilitária para converter diversos formatos de número para Number
@@ -531,7 +664,8 @@ const criarGraficoCustoPorKg = (dados?: any[]) => {
           }
         }
       }
-    }
+    },
+    plugins: [createDataLabelsPlugin()]
   })
 }
 
@@ -596,7 +730,8 @@ const criarGraficoLucroPorKg = (dados?: any[]) => {
           }
         }
       }
-    }
+    },
+    plugins: [createLineDataLabelsPlugin()]
   })
 }
 
@@ -653,7 +788,8 @@ const criarGraficoLucroPorAve = (dados?: any[]) => {
           }
         }
       }
-    }
+    },
+    plugins: [createLineDataLabelsPlugin()]
   })
 }
 
@@ -868,7 +1004,8 @@ const criarGraficoRendimento = (dados?: any[]) => {
           }
         }
       }
-    }
+    },
+    plugins: [createLineDataLabelsPlugin()]
   })
 }
 
@@ -925,7 +1062,8 @@ const criarGraficoEficiencia = (dados?: any[]) => {
           }
         }
       }
-    }
+    },
+    plugins: [createLineDataLabelsPlugin()]
   })
 }
 
@@ -990,7 +1128,7 @@ const criarGraficoComparativoPrecos = (dados?: any[]) => {
       plugins: {
         legend: {
           display: true,
-          position: 'top',
+          position: 'bottom',
           labels: {
             usePointStyle: true,
             padding: 20,
@@ -1014,16 +1152,12 @@ const criarGraficoComparativoPrecos = (dados?: any[]) => {
         x: {
           display: true,
           title: {
-            display: true,
-            text: 'Data do Abate',
-            font: {
-              size: 12,
-              weight: '600'
-            }
+            display: false
           }
         },
         y: {
           beginAtZero: true,
+          grace: '10%',
           title: {
             display: true,
             text: 'Preço (R$/kg)',
@@ -1044,7 +1178,8 @@ const criarGraficoComparativoPrecos = (dados?: any[]) => {
         axis: 'x',
         intersect: false
       }
-    }
+    },
+    plugins: [createLineDataLabelsPlugin()]
   })
 }
 

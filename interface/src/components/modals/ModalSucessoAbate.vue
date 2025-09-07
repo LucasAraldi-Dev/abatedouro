@@ -25,11 +25,11 @@
           </div>
           <div class="detail-item">
             <span class="detail-label">Aves Processadas:</span>
-            <span class="detail-value">{{ loteInfo.quantidade_aves }}</span>
+            <span class="detail-value">{{ formatNumber(loteInfo.quantidade_aves) }}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">Peso Total:</span>
-            <span class="detail-value">{{ formatWeight(loteInfo.peso_total) }}</span>
+            <span class="detail-value">{{ formatWeightWithThousands(loteInfo.peso_total) }}</span>
           </div>
         </div>
       </div>
@@ -38,11 +38,8 @@
         <button class="btn-secondary" @click="closeModal">
           Fechar
         </button>
-        <button class="btn-secondary" @click.stop="showRelatorio = true">
+        <button class="btn-primary" @click.stop="showRelatorio = true">
           Gerar Relatório para Impressão
-        </button>
-        <button class="btn-primary" @click="handlePrimaryAction">
-          {{ primaryButtonText }}
         </button>
       </div>
     </div>
@@ -181,12 +178,24 @@ const handlePrimaryAction = () => {
 
 const formatDate = (date: string | undefined) => {
   if (!date) return '-'
-  return new Date(date).toLocaleDateString('pt-BR')
+  // Adicionar timezone para evitar problemas de fuso horário
+  const dateObj = new Date(date + 'T00:00:00')
+  return dateObj.toLocaleDateString('pt-BR')
 }
 
 const formatWeight = (weight: number | undefined) => {
   if (!weight) return '-'
   return `${weight.toFixed(2)} kg`
+}
+
+const formatNumber = (number: number | undefined) => {
+  if (!number) return '-'
+  return number.toLocaleString('pt-BR')
+}
+
+const formatWeightWithThousands = (weight: number | undefined) => {
+  if (!weight) return '-'
+  return `${weight.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg`
 }
 
 // ====== Relatório de Impressão ======
@@ -209,7 +218,20 @@ const baixarRelatorioImagem = async () => {
     })
 
     const link = document.createElement('a')
-    const nome = `${selectedVariant.value === 'produtos' ? 'produtos_processados' : 'resultados_metricas'}_${relFormData.value?.lote || 'relatorio_abate'}`
+    // Usar a data do abate formatada corretamente para o nome do arquivo
+    const dataAbate = props.loteInfo?.data_abate || props.formData?.data_abate
+    let dataFormatada = ''
+    if (dataAbate) {
+      // Garantir que a data seja formatada corretamente (DD/MM/AAAA -> DD_MM_AAAA)
+      const date = new Date(dataAbate + 'T00:00:00')
+      const day = String(date.getDate()).padStart(2, '0')
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const year = date.getFullYear()
+      dataFormatada = `${day}_${month}_${year}`
+    } else {
+      dataFormatada = new Date().toLocaleDateString('pt-BR').replace(/\//g, '_')
+    }
+    const nome = `${selectedVariant.value === 'produtos' ? 'produtos_processados' : 'resultados_metricas'}_Lote ${dataFormatada}`
     link.download = `${nome}.png`
     link.href = dataUrl
     link.click()
@@ -416,23 +438,26 @@ const relFormData = computed(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  backdrop-filter: blur(4px);
+  padding: 1rem;
 }
 
 .modal-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  box-shadow: var(--shadow-heavy);
+  border: 2px solid var(--border-light);
   max-width: 500px;
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
   animation: modalSlideIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes modalSlideIn {
@@ -447,9 +472,10 @@ const relFormData = computed(() => {
 }
 
 .modal-header {
-  padding: 24px 24px 16px;
+  padding: 1.5rem 2rem;
   text-align: center;
-  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, var(--bg-accent) 0%, rgba(220, 38, 38, 0.05) 100%);
+  border-bottom: 3px solid var(--primary-red);
 }
 
 .success-icon {
@@ -460,35 +486,36 @@ const relFormData = computed(() => {
 
 .modal-title {
   font-size: 1.5rem;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 700;
+  color: var(--primary-red);
   margin: 0;
 }
 
 .modal-body {
-  padding: 24px;
+  padding: 1.5rem 2rem;
+  background: var(--bg-primary);
 }
 
 .success-message {
-  color: #6b7280;
+  color: var(--text-secondary);
   line-height: 1.6;
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
   text-align: center;
 }
 
 .details-section {
-  background: #f9fafb;
-  border-radius: 8px;
-  padding: 16px;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-accent);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid var(--border-light);
 }
 
 .detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .detail-item:last-child {
@@ -497,51 +524,53 @@ const relFormData = computed(() => {
 
 .detail-label {
   font-weight: 500;
-  color: #374151;
+  color: var(--text-secondary);
 }
 
 .detail-value {
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary);
 }
 
 .modal-footer {
-  padding: 16px 24px 24px;
+  padding: 1rem 2rem 1.5rem;
   display: flex;
-  gap: 12px;
+  gap: 1rem;
   justify-content: flex-end;
-  border-top: 1px solid #e5e7eb;
+  background: var(--bg-accent);
+  border-top: 1px solid var(--border-light);
 }
 
 .btn-secondary {
-  padding: 8px 16px;
-  border: 1px solid #d1d5db;
-  background: white;
-  color: #374151;
-  border-radius: 6px;
-  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--border-light);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .btn-secondary:hover {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  background: var(--bg-accent);
+  border-color: var(--border-medium);
 }
 
 .btn-primary {
-  padding: 8px 16px;
-  background: #10b981;
+  padding: 0.75rem 1.5rem;
+  background: var(--primary-red);
   color: white;
   border: none;
-  border-radius: 6px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
-  background: #059669;
+  background: #B91C1C;
+  transform: translateY(-1px);
 }
 
 .btn-primary:active {
@@ -554,12 +583,13 @@ const relFormData = computed(() => {
 
 /* Relatório */
 .relatorio-modal-container {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  width: 95%;
-  max-width: 1200px;
-  max-height: 90vh;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  box-shadow: var(--shadow-heavy);
+  border: 2px solid var(--border-light);
+  width: 98%;
+  max-width: 1600px;
+  max-height: 95vh;
   overflow: auto;
   animation: modalSlideIn 0.2s ease-out;
   display: flex;
@@ -570,8 +600,9 @@ const relFormData = computed(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, var(--bg-accent) 0%, rgba(220, 38, 38, 0.05) 100%);
+  border-bottom: 3px solid var(--primary-red);
 }
 
 .relatorio-actions {
@@ -588,23 +619,25 @@ const relFormData = computed(() => {
 
 .btn-toggle {
   position: relative;
-  padding: 6px 10px;
-  border: 1px solid #dc2626;
-  background: #ffffff;
-  color: #dc2626;
-  border-radius: 6px;
-  font-size: 12px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--primary-red);
+  background: var(--bg-primary);
+  color: var(--primary-red);
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .btn-toggle:hover {
-  background: #fef2f2;
+  background: var(--bg-accent);
 }
 
 .btn-toggle.active {
-  background: #dc2626;
-  color: #ffffff;
-  border-color: #dc2626;
+  background: var(--primary-red);
+  color: white;
+  border-color: var(--primary-red);
 }
 
 .btn-toggle.active::after {
@@ -617,14 +650,15 @@ const relFormData = computed(() => {
   height: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid #dc2626;
+  border-top: 6px solid var(--primary-red);
 }
 
 .relatorio-modal-body {
-  padding: 12px 16px;
+  padding: 1rem 1.5rem;
+  background: var(--bg-primary);
 }
 
 .relatorio-capture {
-  background: #ffffff;
+  background: var(--bg-primary);
 }
 </style>

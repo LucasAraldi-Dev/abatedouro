@@ -133,7 +133,7 @@
     :is-visible="showSuccessModal"
     :type="successType"
     :lote-info="{
-      numero_lote: formData.numero_lote || `Lote ${new Date().toLocaleDateString('pt-BR')}`,
+      numero_lote: formData.numero_lote || `Lote ${formData.data_abate ? new Date(formData.data_abate + 'T00:00:00').getDate().toString().padStart(2, '0') + '/' + (new Date(formData.data_abate + 'T00:00:00').getMonth() + 1).toString().padStart(2, '0') : new Date().getDate().toString().padStart(2, '0') + '/' + (new Date().getMonth() + 1).toString().padStart(2, '0')}`,
       data_abate: formData.data_abate,
       quantidade_aves: formData.quantidade_aves,
       peso_total: formData.peso_total_kg

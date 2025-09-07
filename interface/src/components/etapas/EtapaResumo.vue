@@ -811,10 +811,12 @@ const receitaBruta = computed(() => {
 })
 
 const custosTotais = computed(() => {
-  // Custos totais = despesas fixas + custo das aves (peso × preço de compra)
-  const peso = props.formData.peso_total_kg || 0
+  // Custos totais = despesas fixas + custo das aves (peso vivo × preço de compra)
+  const quantidadeAves = props.formData.quantidade_aves || 0
+  const pesoMedioAve = props.formData.peso_medio_ave || 0
+  const pesoVivoTotal = quantidadeAves * pesoMedioAve
   const valorKgVivo = props.formData.valor_kg_vivo || 0
-  const custoAves = peso * valorKgVivo
+  const custoAves = pesoVivoTotal * valorKgVivo
   return totalDespesas.value + custoAves
 })
 
@@ -1057,8 +1059,8 @@ const metasPerformance = {
   rendimentoMeta: 85, // % mínimo esperado
   custoKgMeta: 8.50, // R$ máximo por kg
   margemLucroMeta: 15, // % mínimo de margem
-  avesHoraMeta: 1800, // aves por hora mínimo
-  perdaMaxima: 12, // % máximo de perdas
+  avesHoraMeta: 2000, // aves por hora mínimo
+  perdaMaxima: 15, // % máximo de perdas
   eficienciaOperacionalMeta: 85 // % mínimo
 }
 
