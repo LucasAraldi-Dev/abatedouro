@@ -10,14 +10,10 @@
         <h2>Resumo Final do Lançamento</h2>
       </div>
       <div class="data-section">
-        <div v-if="variantNormalized === 'produtos'" class="card-abate">
+        <div class="card-abate">
           <div class="card-title">Abate do dia</div>
           <div class="card-date">{{ dataAbateFormatted }}</div>
         </div>
-        <template v-else>
-          <p><strong>Data:</strong> {{ dataAbateFormatted }}</p>
-          <p><strong>Lote:</strong> {{ formData.lote || 'N/A' }}</p>
-        </template>
       </div>
     </div>
 
@@ -203,132 +199,189 @@
 
 
 
-      <!-- Despesas por Categoria (Movido para o final) -->
-      <div class="despesas-detalhadas">
-        <h4>💰 Detalhamento de Despesas</h4>
-        <div class="despesas-compactas">
-          <div class="despesa-item">
-            <span class="despesa-categoria">Recursos Humanos</span>
-            <span class="despesa-valor">{{ formatCurrency(totalRecursosHumanos) }}</span>
-          </div>
-          <div class="despesa-item">
-            <span class="despesa-categoria">Utilidades</span>
-            <span class="despesa-valor">{{ formatCurrency(totalUtilidades) }}</span>
-          </div>
-          <div class="despesa-item">
-            <span class="despesa-categoria">Materiais</span>
-            <span class="despesa-valor">{{ formatCurrency(totalMateriais) }}</span>
-          </div>
-          <div class="despesa-item">
-            <span class="despesa-categoria">Operacionais</span>
-            <span class="despesa-valor">{{ formatCurrency(totalOperacionais) }}</span>
-          </div>
-          <div class="despesa-item perdas">
-            <span class="despesa-categoria">Perdas</span>
-            <span class="despesa-valor">{{ formatCurrency(totalPerdas) }}</span>
-          </div>
-          <div class="despesa-total">
-            <span class="despesa-categoria"><strong>Total Despesas</strong></span>
-            <span class="despesa-valor"><strong>{{ custosTotaisFormatted }}</strong></span>
-          </div>
-        </div>
-      </div>
-    </div>
+      <!-- Layout de duas colunas: Despesas (50%) + Métricas (50%) -->
+      <div class="secao-duas-colunas">
+        <!-- Coluna 1: Despesas Detalhadas (50%) -->
+        <div class="coluna-despesas">
+          <div class="despesas-detalhadas-card">
+            <div class="card-header">
+              <div class="card-icon">💰</div>
+              <h4>Detalhamento de Despesas</h4>
+            </div>
+            <div class="despesas-compactas">
+              <!-- Recursos Humanos -->
+              <div class="categoria-section">
+                <div class="categoria-header">
+                  <span class="categoria-titulo">👥 Recursos Humanos (Funcionários, Horas Extras, Diaristas, Rescisão, Férias, INSS)</span>
+                  <span class="categoria-total">{{ formatCurrency(totalRecursosHumanos) }}</span>
+                </div>
+              </div>
 
-    <!-- Painel Compacto de Resultados e Métricas -->
-    <div class="secao-metricas-compacta" v-if="variantNormalized === 'metricas'">
-      <h3>📈 Resultados e Métricas (Resumo Compacto)</h3>
-      <div class="kpi-compact-grid">
-        <!-- Receita e Rendimento -->
-        <div class="kpi-item">
-          <div class="kpi-title">Rendimento</div>
-          <div class="kpi-value">{{ rendimentoPercentual }}%</div>
-          <div class="kpi-sub">Processado: {{ formatWeight(pesoTotalProcessado) }}</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-title">Média Valor do Kg</div>
-          <div class="kpi-value">{{ mediaValorKgProcessadoFormatted }}</div>
-          <div class="kpi-sub">Participação: {{ percentualMediaValorKg }}%</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-title">Margem de Lucro</div>
-          <div class="kpi-value">{{ margemLucroFormatted }}</div>
-          <div class="kpi-sub">Lucro do dia: {{ lucroTotalFormatted }}</div>
-        </div>
+              <!-- Utilidades -->
+              <div class="categoria-section">
+                <div class="categoria-header">
+                  <span class="categoria-titulo">⚡ Utilidades (Água, Energia, Lenha/Caldeira)</span>
+                  <span class="categoria-total">{{ formatCurrency(totalUtilidades) }}</span>
+                </div>
+              </div>
 
-        <!-- Custos principais -->
-        <div class="kpi-item">
-          <div class="kpi-title">Custo por Kg</div>
-          <div class="kpi-value">{{ custoKgRealFormatted }}</div>
-          <div class="kpi-sub">Participação: {{ percentualCustoKgReal }}%</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-title">Custo por Ave</div>
-          <div class="kpi-value">{{ custoAveRealFormatted }}</div>
-          <div class="kpi-sub">Participação: {{ percentualCustoAve }}%</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-title">Custo Abate/Kg</div>
-          <div class="kpi-value">{{ custoAbateKgFormatted }}</div>
-          <div class="kpi-sub">Participação: {{ percentualCustoAbateKg }}%</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-title">Custo Frango</div>
-          <div class="kpi-value">{{ custoFrangoFormatted }}</div>
-          <div class="kpi-sub">Participação: {{ percentualCustoFrango }}%</div>
+              <!-- Materiais -->
+              <div class="categoria-section">
+                <div class="categoria-header">
+                  <span class="categoria-titulo">📦 Materiais (Embalagem, Materiais Limpeza, Gelo, Amônia, EPI)</span>
+                  <span class="categoria-total">{{ formatCurrency(totalMateriais) }}</span>
+                </div>
+              </div>
+
+              <!-- Operacionais -->
+              <div class="categoria-section">
+                <div class="categoria-header">
+                  <span class="categoria-titulo">🔧 Operacionais (Refeição, Manutenção, Depreciação)</span>
+                  <span class="categoria-total">{{ formatCurrency(totalOperacionais) }}</span>
+                </div>
+              </div>
+
+
+              <!-- Compra do Frango Vivo -->
+              <div class="categoria-section compra-frango">
+                <div class="categoria-header">
+                  <span class="categoria-titulo">🐔 Compra Frango Vivo {{ quantidadeAves }} Aves ({{ formatWeight(formData.peso_total_kg || 0) }} x {{ formatCurrency(precoKgFrangoVivo) }}/kg)</span>
+                  <span class="categoria-total">{{ formatCurrency(custoFrangoVivo) }}</span>
+                </div>
+              </div>
+
+              <!-- Totais -->
+              <div class="totais-section">
+                <div class="total-item operacionais">
+                  <span class="total-categoria"><strong>Total Custos Operacionais</strong></span>
+                  <span class="total-valor"><strong>{{ formatCurrency(totalCustosOperacionais) }}</strong></span>
+                </div>
+                <div class="total-item geral">
+                  <span class="total-categoria"><strong>Total Custos (Incluso compra frango vivo)</strong></span>
+                  <span class="total-valor"><strong>{{ custosTotaisFormatted }}</strong></span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Perdas e Aproveitamento -->
-        <div class="kpi-item">
-          <div class="kpi-title">Perdas</div>
-          <div class="kpi-value">{{ percentualPerdaTotalFormatted }}</div>
-          <div class="kpi-sub">Valor: {{ valorPerdasFormatted }}</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-title">Aproveitamento</div>
-          <div class="kpi-value">{{ eficienciaAproveitamentoFormatted }}</div>
-          <div class="kpi-sub">Peso vivo vs processado</div>
-        </div>
+        <!-- Coluna 2: Resultados e Métricas (50%) -->
+        <div class="coluna-metricas">
+          <div class="metricas-detalhadas-card">
+            <div class="card-header">
+              <div class="card-icon">📈</div>
+              <h4>Resultados e Métricas (Resumo Compacto)</h4>
+            </div>
+            <div class="kpi-compact-grid">
+                <!-- Rendimento -->
+                <div class="kpi-item">
+                  <div class="kpi-title">Frango Processado</div>
+                  <div class="kpi-value">{{ formatWeight(pesoTotalProcessado) }}</div>
+                  <div class="kpi-sub">Total processado</div>
+                </div>
+                
+                <!-- Receita e Rendimento -->
+                <div class="kpi-item">
+                  <div class="kpi-title">Valor do Kg após abatido</div>
+                  <div class="kpi-value">{{ mediaValorKgProcessadoFormatted }}</div>
+                  <div class="kpi-sub">Receita total ÷ kg processado</div>
+                </div>
+                <div class="kpi-item">
+                  <div class="kpi-title">Margem de Lucro</div>
+                  <div class="kpi-value">{{ margemLucroFormatted }}</div>
+                  <div class="kpi-sub">Lucro do dia: {{ lucroTotalFormatted }}</div>
+                </div>
 
-        <!-- Qualidade -->
-        <div class="kpi-item">
-          <div class="kpi-title">Kg Aproveitado/Ave</div>
-              <div class="kpi-value">{{ kgAproveitadoPorAveFormatted }}</div>
-          <div class="kpi-sub">Média do lote</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-title">Diversificação</div>
-          <div class="kpi-value">{{ diversificacaoProdutosFormatted }}</div>
-          <div class="kpi-sub">Distribuição de produtos</div>
-        </div>
+                <!-- Custos principais -->
+                <div class="kpi-item">
+                  <div class="kpi-title">Custo Abate/Kg</div>
+                  <div class="kpi-value">{{ custoAbateKgFormatted }}</div>
+                  <div class="kpi-sub">Custos operacionais ÷ kg processado</div>
+                </div>
+                <div class="kpi-item">
+                  <div class="kpi-title">Custo Frango</div>
+                  <div class="kpi-value">{{ custoFrangoFormatted }}</div>
+                  <div class="kpi-sub">Custo abate/kg × peso médio por ave</div>
+                </div>
 
-        <!-- Destaques -->
-        <div v-if="produtoMaisValioso" class="kpi-item">
-          <div class="kpi-title">Mais Valioso</div>
-          <div class="kpi-value">{{ produtoMaisValioso.nome }}</div>
-          <div class="kpi-sub">{{ formatCurrency(produtoMaisValioso.valorKg) }}/kg</div>
-        </div>
-        <div v-if="produtoMaiorVolume" class="kpi-item">
-          <div class="kpi-title">Maior Volume</div>
-          <div class="kpi-value">{{ produtoMaiorVolume.nome }}</div>
-          <div class="kpi-sub">{{ formatWeight(produtoMaiorVolume.quantidade) }}</div>
-        </div>
+                <!-- Qualidade -->
+                <div class="kpi-item">
+                  <div class="kpi-title">Diversificação</div>
+                  <div class="kpi-value">{{ diversificacaoProdutosFormatted }}</div>
+                  <div class="kpi-sub">Variedade de produtos processados</div>
+                </div>
 
-        <!-- Resumo Financeiro -->
-        <div class="kpi-item">
-          <div class="kpi-title">Receita Bruta</div>
-          <div class="kpi-value">{{ receitaBrutaFormatted }}</div>
-          <div class="kpi-sub">Faturamento do dia</div>
-        </div>
-        <div class="kpi-item">
-          <div class="kpi-title">Custos Totais</div>
-          <div class="kpi-value">{{ custosTotaisFormatted }}</div>
-          <div class="kpi-sub">Despesas + aves</div>
-        </div>
-        <div class="kpi-item" :class="{ negativo: lucroLiquido < 0 }">
-          <div class="kpi-title">{{ lucroLiquido >= 0 ? 'Lucro Líquido' : 'Prejuízo' }}</div>
-          <div class="kpi-value">{{ lucroLiquidoFormatted }}</div>
-          <div class="kpi-sub">Receita - Custos</div>
+                <!-- Destaques -->
+                <div v-if="produtoMaisValioso" class="kpi-item">
+                  <div class="kpi-title">Mais Valioso</div>
+                  <div class="kpi-value">{{ produtoMaisValioso.nome }}</div>
+                  <div class="kpi-sub">{{ formatCurrency(produtoMaisValioso.valorKg) }}/kg</div>
+                </div>
+                <div v-if="produtoMaiorVolume" class="kpi-item">
+                  <div class="kpi-title">Maior Volume</div>
+                  <div class="kpi-value">{{ produtoMaiorVolume.nome }}</div>
+                  <div class="kpi-sub">{{ formatWeight(produtoMaiorVolume.quantidade) }}</div>
+                </div>
+              </div>
+              
+              <!-- Seção Cortes vs Inteiro -->
+              <div class="cortes-vs-inteiro-section">
+                <h5>🥩 Cortes vs Inteiro</h5>
+                <div class="cortes-inteiro-grid">
+                  <!-- Cortes -->
+                  <div class="corte-card">
+                    <div class="corte-header">
+                      <span class="corte-icon">🍗</span>
+                      <span class="corte-titulo">Cortes</span>
+                    </div>
+                    <div class="corte-dados">
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ formatWeight(comparativoCortesInteiro.cortes.peso) }}</span>
+                        <span class="dado-label">Peso Total</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ formatCurrency(comparativoCortesInteiro.cortes.valor) }}</span>
+                        <span class="dado-label">Valor Total</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ comparativoCortesInteiro.cortes.percentualPeso.toFixed(1) }}%</span>
+                        <span class="dado-label">% do Peso</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ comparativoCortesInteiro.cortes.percentualValor.toFixed(1) }}%</span>
+                        <span class="dado-label">% do Valor</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Inteiro -->
+                  <div class="corte-card">
+                    <div class="corte-header">
+                      <span class="corte-icon">🐔</span>
+                      <span class="corte-titulo">Inteiro</span>
+                    </div>
+                    <div class="corte-dados">
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ formatWeight(comparativoCortesInteiro.inteiro.peso) }}</span>
+                        <span class="dado-label">Peso Total</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ formatCurrency(comparativoCortesInteiro.inteiro.valor) }}</span>
+                        <span class="dado-label">Valor Total</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ comparativoCortesInteiro.inteiro.percentualPeso.toFixed(1) }}%</span>
+                        <span class="dado-label">% do Peso</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ comparativoCortesInteiro.inteiro.percentualValor.toFixed(1) }}%</span>
+                        <span class="dado-label">% do Valor</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
         </div>
       </div>
     </div>
@@ -441,7 +494,7 @@ const formatCurrency = (value: number): string => {
 
 // Formatação de peso
 const formatWeight = (value: number): string => {
-  return `${value.toFixed(2)} kg`
+  return `${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} kg`
 }
 
 // Data formatada
@@ -516,7 +569,7 @@ const kgAproveitadoPorAve = computed(() => {
   return props.pesoTotalProcessado / props.formData.quantidade_aves
 })
 
-const kgAproveitadoPorAveFormatted = computed(() => `${kgAproveitadoPorAve.value.toFixed(3)} kg`)
+const kgAproveitadoPorAveFormatted = computed(() => `${kgAproveitadoPorAve.value.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} kg`)
 
 // Custo de Energia por Kg
 const custoEnergiaPorKg = computed(() => {
@@ -530,6 +583,87 @@ const custoMaoObraPorAve = computed(() => {
   return props.totalRecursosHumanos / props.formData.quantidade_aves
 })
 
+// Análise Cortes vs Inteiro
+const categorizacaoProdutos = computed(() => {
+  if (!props.formData.produtos || props.formData.produtos.length === 0) {
+    return {
+      inteiro: { peso: 0, valor: 0, produtos: [] },
+      cortes: { peso: 0, valor: 0, produtos: [] }
+    }
+  }
+
+  const tiposInteiro = ['Carcaça', 'Congelado', 'Resfriado']
+  const inteiro = { peso: 0, valor: 0, produtos: [] }
+  const cortes = { peso: 0, valor: 0, produtos: [] }
+
+  props.formData.produtos.forEach(produto => {
+    const categoria = tiposInteiro.includes(produto.tipo) ? inteiro : cortes
+    categoria.peso += produto.quantidade || 0
+    categoria.valor += (produto.quantidade || 0) * (produto.preco_kg || 0)
+    categoria.produtos.push(produto)
+  })
+
+  return { inteiro, cortes }
+})
+
+const comparativoCortesInteiro = computed(() => {
+  const { inteiro, cortes } = categorizacaoProdutos.value
+  const pesoTotal = inteiro.peso + cortes.peso
+  const valorTotal = inteiro.valor + cortes.valor
+
+  return {
+    inteiro: {
+      peso: inteiro.peso,
+      valor: inteiro.valor,
+      percentualPeso: pesoTotal > 0 ? (inteiro.peso / pesoTotal) * 100 : 0,
+      percentualValor: valorTotal > 0 ? (inteiro.valor / valorTotal) * 100 : 0,
+      produtos: inteiro.produtos.length
+    },
+    cortes: {
+      peso: cortes.peso,
+      valor: cortes.valor,
+      percentualPeso: pesoTotal > 0 ? (cortes.peso / pesoTotal) * 100 : 0,
+      percentualValor: valorTotal > 0 ? (cortes.valor / valorTotal) * 100 : 0,
+      produtos: cortes.produtos.length
+    },
+    total: {
+      peso: pesoTotal,
+      valor: valorTotal
+    }
+  }
+})
+
+// Cálculo de perdas baseado no peso não aproveitado
+const perdasCalculadas = computed(() => {
+  const pesoVivo = props.formData.peso_total_kg || 0
+  const pesoProcessado = props.pesoTotalProcessado || 0
+  const precoKgVivo = props.formData.valor_kg_vivo || 0
+  
+  // Peso não aproveitado = peso vivo - peso processado
+  const pesoNaoAproveitado = pesoVivo - pesoProcessado
+  
+  // Perdas = peso não aproveitado × preço do kg do frango vivo
+  return pesoNaoAproveitado > 0 ? pesoNaoAproveitado * precoKgVivo : 0
+})
+
+// Despesas fixas do formData
+const despesasFixas = computed(() => props.formData.despesas_fixas || {})
+
+// Dados do frango vivo
+const quantidadeAves = computed(() => props.formData.quantidade_aves || 0)
+const precoKgFrangoVivo = computed(() => props.formData.valor_kg_vivo || 0)
+const custoFrangoVivo = computed(() => {
+  const pesoTotal = props.formData.peso_total_kg || 0
+  const preco = props.formData.valor_kg_vivo || 0
+  return pesoTotal * preco
+})
+
+// Total de custos operacionais (sem frango vivo)
+const totalCustosOperacionais = computed(() => {
+  return props.totalRecursosHumanos + props.totalUtilidades + props.totalMateriais + 
+         props.totalOperacionais
+})
+
 // Calcular percentual de cada produto
 const calcularPercentualProduto = (produto: any): string => {
   const totalProduto = produto.total || ((produto.quantidade || 0) * (produto.preco_unitario || 0))
@@ -540,6 +674,10 @@ const calcularPercentualProduto = (produto: any): string => {
 <style scoped>
 /* Estilos para impressão */
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 15mm;
+  }
   .relatorio-impressao.portrait {
     width: 210mm;
     min-height: 297mm;
@@ -550,12 +688,14 @@ const calcularPercentualProduto = (produto: any): string => {
   }
   .relatorio-impressao {
     margin: 0;
-    padding: 15mm;
+    padding: 10mm;
     font-family: 'Arial', sans-serif;
-    font-size: 12px;
-    line-height: 1.4;
+    font-size: 11px;
+    line-height: 1.3;
     color: #000;
     background: white;
+    width: 100%;
+    max-width: none;
   }
   * {
     -webkit-print-color-adjust: exact;
@@ -563,6 +703,18 @@ const calcularPercentualProduto = (produto: any): string => {
   }
   /* Em impressão, deixar a seção de produtos preencher toda a área útil (dentro das margens de 15mm) */
   .secao-produtos.full-width { width: 100%; margin-left: 0; margin-right: 0; }
+  
+  .secao-duas-colunas {
+    display: flex;
+    gap: 15px;
+    page-break-inside: avoid;
+  }
+  
+  .coluna-despesas,
+  .coluna-metricas {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 /* Em tela, usar a largura total para evitar bordas vazias */
@@ -573,7 +725,7 @@ const calcularPercentualProduto = (produto: any): string => {
 }
 
 .relatorio-impressao {
-  max-width: 210mm;
+  max-width: 297mm;
   margin: 0 auto;
   padding: 20px;
   font-family: 'Arial', sans-serif;
@@ -581,11 +733,11 @@ const calcularPercentualProduto = (produto: any): string => {
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
-.relatorio-impressao.landscape { max-width: 297mm; }
+.relatorio-impressao.landscape { max-width: 420mm; }
 
 @media print {
-  .kpi-compact-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
-  .kpi-item { padding: 8px; }
+  .kpi-compact-grid { grid-template-columns: repeat(6, 1fr); gap: 8px; }
+  .kpi-item { padding: 10px; }
   .kpi-title { font-size: 11px; }
   .kpi-value { font-size: 14px; }
   .kpi-sub { font-size: 10px; }
@@ -618,7 +770,7 @@ const calcularPercentualProduto = (produto: any): string => {
 }
 
 /* Dados básicos */
-.dados-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.dados-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .dado-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; }
 .dado-item .label { color: #6b7280; font-weight: 600; }
 .dado-item .valor { color: #111827; font-weight: 700; }
@@ -633,7 +785,7 @@ const calcularPercentualProduto = (produto: any): string => {
 .tabela-produtos .total-row td strong { color: #111827; }
 
 /* Despesas por categoria */
-.despesas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.despesas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
 .categoria-despesa { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; text-align: center; }
 .categoria-despesa h4 { margin: 0 0 8px 0; color: #374151; font-size: 14px; }
 .categoria-despesa p { margin: 0; font-weight: 700; color: #111827; }
@@ -752,7 +904,7 @@ const calcularPercentualProduto = (produto: any): string => {
 /* Indicadores Compactos */
 .indicadores-compactos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   margin-bottom: 25px;
 }
@@ -953,73 +1105,293 @@ const calcularPercentualProduto = (produto: any): string => {
   color: #2c3e50;
 }
 
-/* Despesas Detalhadas */
-.despesas-detalhadas {
-  background: #ffffff;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 20px;
+/* Layout de duas colunas */
+.secao-duas-colunas {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
 }
 
-.despesas-detalhadas h4 {
-  margin: 0 0 15px 0;
+.coluna-despesas,
+.coluna-metricas {
+  flex: 1;
+  min-width: 0;
+}
+
+.despesas-detalhadas-card,
+.metricas-detalhadas-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  height: fit-content;
+}
+
+/* Despesas Detalhadas - Nova seção com 50% de largura */
+.despesas-detalhadas-card {
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.despesas-detalhadas-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.despesas-detalhadas-card .card-icon {
+  font-size: 20px;
+}
+
+.despesas-detalhadas-card h4 {
+  margin: 0;
   font-size: 16px;
   color: #495057;
-  border-bottom: 2px solid #e9ecef;
-  padding-bottom: 8px;
+  font-weight: 600;
 }
 
 .despesas-compactas {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 15px;
 }
 
-.despesa-item {
+/* Seções de categoria */
+.categoria-section {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.categoria-section.perdas {
+  border-color: #fed7d7;
+}
+
+.categoria-section.compra-frango {
+  border-color: #d1ecf1;
+}
+
+.categoria-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 15px;
+  padding: 12px 15px;
   background: #f8f9fa;
-  border-radius: 6px;
+  border-bottom: 1px solid #e9ecef;
 }
 
-.despesa-item.perdas {
+.categoria-section.perdas .categoria-header {
   background: #fff5f5;
-  border: 1px solid #fed7d7;
 }
 
-.despesa-total {
+.categoria-section.compra-frango .categoria-header {
+  background: #e7f3ff;
+}
+
+.categoria-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+}
+
+.categoria-total {
+  font-size: 14px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+/* Subcategorias */
+.subcategorias {
+  padding: 0;
+}
+
+.subcategoria-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  background: #e9ecef;
-  border-radius: 6px;
-  margin-top: 10px;
-  border: 2px solid #dee2e6;
+  padding: 8px 15px;
+  border-bottom: 1px solid #f1f3f4;
 }
 
-.despesa-categoria {
+.subcategoria-item:last-child {
+  border-bottom: none;
+}
+
+.subcategoria-nome {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+.subcategoria-valor {
+  font-size: 13px;
+  font-weight: 600;
+  color: #495057;
+}
+
+/* Seção de totais */
+.totais-section {
+  margin-top: 15px;
+  border-top: 2px solid #dee2e6;
+  padding-top: 15px;
+}
+
+.total-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+}
+
+.total-item.operacionais {
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+}
+
+.total-item.geral {
+  background: #e8f5e8;
+  border: 2px solid #c8e6c9;
+}
+
+.total-categoria {
   font-size: 14px;
   color: #495057;
 }
 
-.despesa-valor {
+.total-valor {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: #2c3e50;
+}
+
+/* Métricas Detalhadas Card */
+.metricas-detalhadas-card {
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.metricas-detalhadas-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.metricas-detalhadas-card .card-icon {
+  font-size: 20px;
+}
+
+.metricas-detalhadas-card h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #495057;
+  font-weight: 600;
 }
 
 /* Painel compacto de métricas */
 .secao-metricas-compacta { margin-top: 24px; }
 .secao-metricas-compacta h3 { margin: 0 0 10px 0; font-size: 16px; color: #111827; }
-.kpi-compact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.kpi-item { border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px; background: #fff; }
+.kpi-compact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+.kpi-item { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
 .kpi-item.negativo .kpi-value { color: #dc2626; }
-.kpi-title { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
-.kpi-value { font-size: 16px; font-weight: 700; color: #111827; line-height: 1; }
-.kpi-sub { font-size: 11px; color: #6b7280; margin-top: 4px; }
+.kpi-title { font-size: 13px; color: #6b7280; margin-bottom: 6px; font-weight: 600; }
+.kpi-value { font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+.kpi-sub { font-size: 11px; color: #9ca3af; }
+
+/* Estilos para a seção Cortes vs Inteiro */
+.cortes-vs-inteiro-section {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 2px solid #e9ecef;
+}
+
+.cortes-vs-inteiro-section h5 {
+  margin: 0 0 20px 0;
+  color: #2c3e50;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.cortes-inteiro-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.corte-card {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.corte-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+  border-color: #3498db;
+}
+
+.corte-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.corte-icon {
+  font-size: 24px;
+}
+
+.corte-titulo {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.corte-dados {
+  display: grid;
+  gap: 12px;
+}
+
+.dado-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.dado-item:last-child {
+  border-bottom: none;
+}
+
+.dado-valor {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.dado-label {
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
+}
 
 /* Responsividade para impressão */
 @media print {
@@ -1098,11 +1470,19 @@ const calcularPercentualProduto = (produto: any): string => {
     padding: 3px 6px;
   }
   
-  .kpi-compact-grid { grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .kpi-compact-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .kpi-item { padding: 8px; }
   .kpi-title { font-size: 11px; }
   .kpi-value { font-size: 14px; }
   .kpi-sub { font-size: 10px; }
+  
+  .cortes-inteiro-grid {
+    gap: 15px;
+  }
+  
+  .corte-card {
+    padding: 15px;
+  }
 }
 
 /* Cabeçalho */
