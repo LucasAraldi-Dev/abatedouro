@@ -1,58 +1,60 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import LotesAbate from './components/LotesAbate.vue'
-import Produtos from './components/Produtos.vue'
-import Dashboard from './components/Dashboard.vue'
-import Relatorios from './components/Relatorios.vue'
-import Graficos from './components/Graficos.vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from './stores/auth'
 import { checkApiHealth } from './services/api'
 
-const currentView = ref('dashboard')
-const apiStatus = ref('checking')
-const currentTheme = ref('light')
-const isOnline = ref(false)
+const router = useRouter()
+const auth = useAuthStore()
 
-const setView = (view: string) => {
-  if (currentView.value !== view) {
-    currentView.value = view
-    // Scroll to top when changing views
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-}
+// Estados da aplicação
+const currentTheme = ref(localStorage.getItem('theme') || 'light')
+const isOnline = ref(true)
 
+// Funções de tema
 const toggleTheme = () => {
   currentTheme.value = currentTheme.value === 'light' ? 'dark' : 'light'
   localStorage.setItem('theme', currentTheme.value)
-  // Força a aplicação do tema no documento
   document.documentElement.setAttribute('data-theme', currentTheme.value)
 }
 
+// Verificação da API
 const checkApi = async () => {
   try {
-    const status = await checkApiHealth()
-    apiStatus.value = status
+    await checkApiHealth()
     isOnline.value = true
   } catch (error) {
-    console.error('Erro ao verificar API:', error)
-    apiStatus.value = null
     isOnline.value = false
+    console.error('API offline:', error)
   }
 }
 
-onMounted(() => {
-  // Carregar tema salvo ou usar modo claro como padrão
-  const savedTheme = localStorage.getItem('theme')
-  
-  if (savedTheme) {
-    currentTheme.value = savedTheme
-  } else {
-    currentTheme.value = 'light' // Sempre usar modo claro como padrão
+// Navegação
+const navigateTo = (route: string) => {
+  router.push(route)
+}
+
+// Logout
+const handleLogout = async () => {
+  try {
+    await auth.logout()
+    router.push('/')
+  } catch (error) {
+    console.error('Erro no logout:', error)
   }
-  
-  // Aplicar tema no documento
+}
+
+// Inicialização
+onMounted(async () => {
+  // Aplicar tema
   document.documentElement.setAttribute('data-theme', currentTheme.value)
   
-  checkApi()
+  // Inicializar autenticação
+  await auth.initializeAuth()
+  
+  // Verificar API
+  await checkApi()
+  
   // Verificar API a cada 30 segundos
   setInterval(checkApi, 30000)
 })
@@ -60,7 +62,8 @@ onMounted(() => {
 
 <template>
   <div id="app" :data-theme="currentTheme">
-    <header class="app-header">
+    <!-- Header - apenas para páginas autenticadas -->
+    <header v-if="auth.isAuthenticated" class="app-header">
       <div class="header-content">
         <div class="header-left">
           <div class="logo-container">
@@ -79,84 +82,86 @@ onMounted(() => {
           <span class="status-indicator" :class="{ 'online': isOnline, 'offline': !isOnline }">
             {{ isOnline ? 'Online' : 'Offline' }}
           </span>
+          <div class="user-actions">
+            <span class="user-label">{{ auth.user?.username }}</span>
+            <button @click="handleLogout" class="logout-btn">Sair</button>
+          </div>
         </div>
       </div>
     </header>
     
-    <nav class="main-nav">
-          <button 
-            @click="setView('dashboard')" 
-            :class="['nav-btn', { active: currentView === 'dashboard' }]"
-            :aria-label="'Ir para Dashboard'"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="7" height="7"/>
-              <rect x="14" y="3" width="7" height="7"/>
-              <rect x="14" y="14" width="7" height="7"/>
-              <rect x="3" y="14" width="7" height="7"/>
-            </svg>
-            Dashboard
-          </button>
-          <button 
-            @click="setView('lotes')" 
-            :class="['nav-btn', { active: currentView === 'lotes' }]"
-            :aria-label="'Ir para Abates'"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
-              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
-            </svg>
-            Abates
-          </button>
-          <button 
-            @click="setView('produtos')" 
-            :class="['nav-btn', { active: currentView === 'produtos' }]"
-            :aria-label="'Ir para Produtos'"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-            </svg>
-            Produtos
-          </button>
-          <button 
-            @click="setView('relatorios')" 
-            :class="['nav-btn', { active: currentView === 'relatorios' }]"
-            :aria-label="'Ir para Relatórios'"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-              <polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/>
-              <line x1="16" y1="17" x2="8" y2="17"/>
-              <polyline points="10,9 9,9 8,9"/>
-            </svg>
-            Relatórios
-          </button>
-          <button 
-            @click="setView('graficos')" 
-            :class="['nav-btn', { active: currentView === 'graficos' }]"
-            :aria-label="'Ir para Gráficos'"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="20" x2="18" y2="10"/>
-              <line x1="12" y1="20" x2="12" y2="4"/>
-              <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
-            Gráficos
-          </button>
-        </nav>
+    <!-- Navigation - apenas para páginas autenticadas -->
+    <nav v-if="auth.isAuthenticated" class="main-nav">
+      <button 
+        @click="navigateTo('/dashboard')" 
+        :class="['nav-btn', { active: $route.path === '/dashboard' }]"
+        :aria-label="'Ir para Dashboard'"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        Dashboard
+      </button>
+      <button 
+        @click="navigateTo('/lotes')" 
+        :class="['nav-btn', { active: $route.path === '/lotes' }]"
+        :aria-label="'Ir para Abates'"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+          <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+        </svg>
+        Abates
+      </button>
+      <button 
+        @click="navigateTo('/produtos')" 
+        :class="['nav-btn', { active: $route.path === '/produtos' }]"
+        :aria-label="'Ir para Produtos'"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+        Produtos
+      </button>
+      <button 
+        @click="navigateTo('/relatorios')" 
+        :class="['nav-btn', { active: $route.path === '/relatorios' }]"
+        :aria-label="'Ir para Relatórios'"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14,2 14,8 20,8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10,9 9,9 8,9"/>
+        </svg>
+        Relatórios
+      </button>
+      <button 
+        @click="navigateTo('/graficos')" 
+        :class="['nav-btn', { active: $route.path === '/graficos' }]"
+        :aria-label="'Ir para Gráficos'"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
+        Gráficos
+      </button>
+    </nav>
     
+    <!-- Main Content -->
     <main class="main-content">
       <div class="content-wrapper">
-        <Transition name="fade" mode="out-in">
-          <div :key="currentView" class="view-container">
-            <Dashboard v-if="currentView === 'dashboard'" />
-            <LotesAbate v-else-if="currentView === 'lotes'" />
-            <Produtos v-else-if="currentView === 'produtos'" />
-            <Relatorios v-else-if="currentView === 'relatorios'" />
-            <Graficos v-else-if="currentView === 'graficos'" />
-          </div>
-        </Transition>
+        <router-view v-slot="{ Component }">
+          <Transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </Transition>
+        </router-view>
       </div>
     </main>
   </div>
@@ -294,6 +299,34 @@ onMounted(() => {
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
+.user-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-label {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.logout-btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-accent);
+  background: var(--bg-accent);
+  cursor: pointer;
+  color: var(--text-primary);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  background: var(--primary-red);
+  color: #fff;
+  border-color: var(--primary-red);
+}
+
 .main-nav {
   background: var(--bg-secondary);
   border-bottom: 2px solid var(--primary-red);
@@ -324,8 +357,6 @@ onMounted(() => {
   transition: transform 0.3s ease;
 }
 
-/* Pseudo-elemento removido para evitar conflitos de hover */
-
 .nav-btn:hover {
   color: var(--primary-red);
   background: var(--bg-accent);
@@ -351,13 +382,9 @@ onMounted(() => {
 }
 
 .content-wrapper {
-  padding: 2rem;
+  padding: 0;
   width: 100%;
   margin: 0;
-}
-
-.view-container {
-  animation: fadeIn 0.5s ease-out;
 }
 
 /* Transições entre views */
@@ -376,34 +403,10 @@ onMounted(() => {
   transform: translateY(-20px);
 }
 
-.welcome,
-.coming-soon {
-  text-align: center;
-  padding: 5rem 3rem;
-  background: var(--bg-secondary);
-  border-radius: 16px;
-  box-shadow: var(--shadow-light);
-}
-
-.welcome h2,
-.coming-soon h2 {
-  color: var(--text-primary);
-  margin-bottom: 2rem;
-  font-size: 2.5rem;
-  font-weight: 300;
-}
-
-.welcome p,
-.coming-soon p {
-  color: var(--text-secondary);
-  font-size: 1.3rem;
-  line-height: 1.6;
-}
-
 /* Responsividade */
 @media (max-width: 1200px) {
   .content-wrapper {
-    padding: 1.5rem;
+    padding: 0;
   }
 }
 
@@ -413,7 +416,7 @@ onMounted(() => {
   }
   
   .content-wrapper {
-    padding: 1.5rem;
+    padding: 0;
   }
 }
 
@@ -461,7 +464,7 @@ onMounted(() => {
   }
   
   .content-wrapper {
-    padding: 1rem;
+    padding: 0;
   }
 }
 
@@ -486,7 +489,7 @@ onMounted(() => {
   }
   
   .content-wrapper {
-    padding: 0.75rem;
+    padding: 0;
   }
 }
 </style>

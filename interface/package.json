@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --mode production",
+    "dev": "vite --mode development",
     "dev:local": "vite --mode development",
     "dev:prod": "vite --mode production",
     "build": "vite build",
@@ -24,6 +24,7 @@
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.2",
+    "pinia": "^3.0.3",
     "vue-router": "^4.5.1",
     "vue-toastification": "^2.0.0-rc.5"
   }
