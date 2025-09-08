@@ -398,7 +398,7 @@
              <div v-if="produtoMaisValioso" class="destaque-item">
                <div class="destaque-titulo">💰 Mais Valioso</div>
                <div class="destaque-produto">{{ produtoMaisValioso.nome }}</div>
-               <div class="destaque-valor">{{ formatCurrency(produtoMaisValioso.valorKg) }}/kg</div>
+               <div class="destaque-valor">Faturamento: {{ formatCurrency(produtoMaisValioso.total) }}</div>
              </div>
              <div v-if="produtoMaiorVolume" class="destaque-item">
                <div class="destaque-titulo">📦 Maior Volume</div>
@@ -978,7 +978,7 @@ const analiseProdutos = computed(() => {
 const produtoMaisValioso = computed(() => {
   if (analiseProdutos.value.length === 0) return null
   return analiseProdutos.value.reduce((max, produto) => 
-    produto.valorKg > max.valorKg ? produto : max
+    (produto.total || 0) > (max.total || 0) ? produto : max
   )
 })
 

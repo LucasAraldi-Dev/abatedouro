@@ -50,7 +50,7 @@
             <th>Quantidade (kg)</th>
             <th>Preço/kg</th>
             <th>Total</th>
-            <th>% Partic.</th>
+            <th>% Participação</th>
           </tr>
         </thead>
         <tbody>
@@ -62,8 +62,8 @@
               </div>
             </td>
             <td>{{ (produto.quantidade || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) }}</td>
-            <td>{{ formatCurrency(produto.preco_unitario || 0) }}</td>
-            <td>{{ formatCurrency((produto.quantidade || 0) * (produto.preco_unitario || 0)) }}</td>
+            <td>{{ formatCurrency(produto.preco_kg != null ? produto.preco_kg : (produto.preco_unitario || 0)) }}</td>
+            <td>{{ formatCurrency((produto.total != null) ? produto.total : ((produto.quantidade || 0) * (produto.preco_kg != null ? produto.preco_kg : (produto.preco_unitario || 0)))) }}</td>
             <td>{{ calcularPercentualProduto(produto) }}%</td>
           </tr>
         </tbody>
@@ -184,14 +184,6 @@
             <div class="kpi-mini">
               <span class="kpi-mini-label">Custo por Kg</span>
               <span class="kpi-mini-value">{{ custoKgRealFormatted }}</span>
-            </div>
-            <div class="kpi-mini">
-              <span class="kpi-mini-label">Custo de Energia por Kg</span>
-              <span class="kpi-mini-value">{{ formatCurrency(custoEnergiaPorKg) }}</span>
-            </div>
-            <div class="kpi-mini">
-              <span class="kpi-mini-label">Custo de Mão de Obra por Ave</span>
-              <span class="kpi-mini-value">{{ formatCurrency(custoMaoObraPorAve) }}</span>
             </div>
           </div>
         </div>
@@ -315,7 +307,7 @@
                 <div v-if="produtoMaisValioso" class="kpi-item">
                   <div class="kpi-title">Mais Valioso</div>
                   <div class="kpi-value">{{ produtoMaisValioso.nome }}</div>
-                  <div class="kpi-sub">{{ formatCurrency(produtoMaisValioso.valorKg) }}/kg</div>
+                  <div class="kpi-sub">Faturamento: {{ formatCurrency(produtoMaisValioso.total) }}</div>
                 </div>
                 <div v-if="produtoMaiorVolume" class="kpi-item">
                   <div class="kpi-title">Maior Volume</div>
@@ -324,9 +316,9 @@
                 </div>
               </div>
               
-              <!-- Seção Cortes vs Inteiro -->
+              <!-- Seção Cortes vs Frango Inteiro -->
               <div class="cortes-vs-inteiro-section">
-                <h5>🥩 Cortes vs Inteiro</h5>
+                <h5>🥩 Cortes vs Frango Inteiro</h5>
                 <div class="cortes-inteiro-grid">
                   <!-- Cortes -->
                   <div class="corte-card">
@@ -354,11 +346,11 @@
                     </div>
                   </div>
                   
-                  <!-- Inteiro -->
+                  <!-- Frango Inteiro -->
                   <div class="corte-card">
                     <div class="corte-header">
                       <span class="corte-icon">🐔</span>
-                      <span class="corte-titulo">Inteiro</span>
+                      <span class="corte-titulo">Frango Inteiro</span>
                     </div>
                     <div class="corte-dados">
                       <div class="dado-item">
@@ -375,6 +367,36 @@
                       </div>
                       <div class="dado-item">
                         <span class="dado-valor">{{ comparativoCortesInteiro.inteiro.percentualValor.toFixed(1) }}%</span>
+                        <span class="dado-label">% do Valor</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Categorias de Produtos (Agrupadas) -->
+              <div class="categorias-agrupadas-section" v-if="categoriasAgrupadas.length">
+                <h5>📦 Categorias de Produtos (Agrupadas)</h5>
+                <div class="categorias-grid">
+                  <div v-for="cat in categoriasAgrupadas" :key="cat.nome" class="categoria-card">
+                    <div class="categoria-header">
+                      <span class="categoria-titulo">{{ cat.nome }}</span>
+                    </div>
+                    <div class="categoria-dados">
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ formatWeight(cat.peso) }}</span>
+                        <span class="dado-label">Peso Total</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ formatCurrency(cat.valor) }}</span>
+                        <span class="dado-label">Valor Total</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ cat.percentualPeso.toFixed(1) }}%</span>
+                        <span class="dado-label">% do Peso</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ cat.percentualValor.toFixed(1) }}%</span>
                         <span class="dado-label">% do Valor</span>
                       </div>
                     </div>
@@ -468,6 +490,7 @@ const props = defineProps<{
     nome: string
     tipo: string
     valorKg: number
+    total: number
   } | null
   produtoMaiorVolume: {
     nome: string
@@ -478,6 +501,10 @@ const props = defineProps<{
   pesoMedioGeralFormatted: string
   // Variante do relatório
   variant?: 'produtos' | 'metricas'
+  // Indicadores consolidados opcionais (para período)
+  kgHora?: number
+  avesHora?: number
+  eficienciaOperacional?: number
 }>()
 
 // Variante normalizada e classe
@@ -537,11 +564,17 @@ const horasReais = computed(() => {
 })
 
 const kgPorHoraCalculado = computed(() => {
+  if (props.kgHora !== undefined && props.kgHora !== null && !isNaN(Number(props.kgHora))) {
+    return Number(props.kgHora)
+  }
   const horas = horasReais.value
   return horas > 0 ? props.pesoTotalProcessado / horas : 0
 })
 
 const avesPorHoraCalculado = computed(() => {
+  if (props.avesHora !== undefined && props.avesHora !== null && !isNaN(Number(props.avesHora))) {
+    return Number(props.avesHora)
+  }
   const horas = horasReais.value
   const aves = props.formData.quantidade_aves || 0
   return horas > 0 ? aves / horas : 0
@@ -559,6 +592,9 @@ const tempoMedioPorAve = computed(() => {
 })
 
 const eficienciaGeral = computed(() => {
+  if (props.eficienciaOperacional !== undefined && props.eficienciaOperacional !== null && !isNaN(Number(props.eficienciaOperacional))) {
+    return Number(props.eficienciaOperacional)
+  }
   const metaAves = 2000 // Meta de 2000 aves por hora
   const avesReais = avesPorHoraCalculado.value
   return metaAves > 0 ? (avesReais / metaAves) * 100 : 0
@@ -578,35 +614,27 @@ const kgAproveitadoPorAve = computed(() => {
 
 const kgAproveitadoPorAveFormatted = computed(() => `${kgAproveitadoPorAve.value.toLocaleString('pt-BR', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} kg`)
 
-// Custo de Energia por Kg
-const custoEnergiaPorKg = computed(() => {
-  if (!props.pesoTotalProcessado || props.pesoTotalProcessado === 0) return 0
-  return props.totalUtilidades / props.pesoTotalProcessado
-})
-
-// Custo de Mão de Obra por Ave
-const custoMaoObraPorAve = computed(() => {
-  if (!props.formData.quantidade_aves || props.formData.quantidade_aves === 0) return 0
-  return props.totalRecursosHumanos / props.formData.quantidade_aves
-})
 
 // Análise Cortes vs Inteiro
 const categorizacaoProdutos = computed(() => {
   if (!props.formData.produtos || props.formData.produtos.length === 0) {
     return {
-      inteiro: { peso: 0, valor: 0, produtos: [] },
-      cortes: { peso: 0, valor: 0, produtos: [] }
+      inteiro: { peso: 0, valor: 0, produtos: [] as any[] },
+      cortes: { peso: 0, valor: 0, produtos: [] as any[] }
     }
   }
 
-  const tiposInteiro = ['Carcaça', 'Congelado', 'Resfriado']
-  const inteiro = { peso: 0, valor: 0, produtos: [] }
-  const cortes = { peso: 0, valor: 0, produtos: [] }
+  const tiposInteiro = ['Carcaça', 'Congelado', 'Resfriado', 'Inteiro']
+  const inteiro = { peso: 0, valor: 0, produtos: [] as any[] }
+  const cortes = { peso: 0, valor: 0, produtos: [] as any[] }
 
-  props.formData.produtos.forEach(produto => {
+  props.formData.produtos.forEach((produto: any) => {
     const categoria = tiposInteiro.includes(produto.tipo) ? inteiro : cortes
-    categoria.peso += produto.quantidade || 0
-    categoria.valor += (produto.quantidade || 0) * (produto.preco_kg || 0)
+    const qtd = Number(produto.quantidade) || 0
+    const preco = (produto.preco_kg != null) ? Number(produto.preco_kg) : (Number(produto.preco_unitario) || 0)
+    const totalVal = (produto.total != null) ? Number(produto.total) : (qtd * (preco || 0))
+    categoria.peso += qtd
+    categoria.valor += totalVal
     categoria.produtos.push(produto)
   })
 
@@ -671,28 +699,99 @@ const totalCustosOperacionais = computed(() => {
          props.totalOperacionais
 })
 
-// Produtos ordenados por percentual de participação
+// Calcular percentual de cada produto
+const calcularPercentualProduto = (produto: any): string => {
+  const preco = (produto?.preco_kg ?? produto?.preco_unitario ?? 0)
+  const totalProduto = (produto?.total != null) ? produto.total : ((produto?.quantidade || 0) * preco)
+  return props.valorTotalProdutos > 0 ? ((totalProduto / props.valorTotalProdutos) * 100).toFixed(1) : '0.0'
+}
+
+// Produtos ordenados por percentual de participação (decrescente)
 const produtosOrdenados = computed(() => {
-  if (!props.formData.produtos || props.formData.produtos.length === 0) return []
+  if (!props.formData.produtos || props.formData.produtos.length === 0) {
+    return []
+  }
   
-  return [...props.formData.produtos].sort((a, b) => {
-    const totalA = (a.quantidade || 0) * (a.preco_unitario || 0)
-    const totalB = (b.quantidade || 0) * (b.preco_unitario || 0)
+  return [...props.formData.produtos].sort((a: any, b: any) => {
+    const precoA = (a?.preco_kg ?? a?.preco_unitario ?? 0)
+    const precoB = (b?.preco_kg ?? b?.preco_unitario ?? 0)
+    const totalA = (a?.total != null) ? a.total : ((a?.quantidade || 0) * precoA)
+    const totalB = (b?.total != null) ? b.total : ((b?.quantidade || 0) * precoB)
     const percentualA = props.valorTotalProdutos > 0 ? (totalA / props.valorTotalProdutos) * 100 : 0
     const percentualB = props.valorTotalProdutos > 0 ? (totalB / props.valorTotalProdutos) * 100 : 0
     return percentualB - percentualA // Ordem decrescente
   })
 })
+// Agrupamento por categorias/tipos
+const normalizarTexto = (s?: string) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
 
-// Calcular percentual de cada produto
-const calcularPercentualProduto = (produto: any): string => {
-  const totalProduto = produto.total || ((produto.quantidade || 0) * (produto.preco_unitario || 0))
-  return props.valorTotalProdutos > 0 ? ((totalProduto / props.valorTotalProdutos) * 100).toFixed(1) : '0.0'
+const obterGrupoProduto = (p: any): string => {
+  const tipoN = normalizarTexto(p?.tipo)
+  const nomeN = normalizarTexto(p?.nome)
+
+  // Frango Inteiro: Carcaça/Congelado/Resfriado/Inteiro
+  if (['carcaca', 'congelado', 'resfriado', 'inteiro'].some(k => tipoN.includes(k) || nomeN.includes(k))) {
+    return 'Frango Inteiro'
+  }
+  // Coxa e Sobrecoxa
+  if (['coxa', 'sobrecoxa'].some(k => tipoN.includes(k) || nomeN.includes(k))) {
+    return 'Coxa e Sobrecoxa'
+  }
+  // Peito, Asa, Miúdos
+  if (tipoN.includes('peito') || nomeN.includes('peito')) return 'Peito'
+  if (tipoN.includes('asa') || nomeN.includes('asa')) return 'Asa'
+  if (tipoN.includes('miudos') || tipoN.includes('miudo') || nomeN.includes('miudo')) return 'Miúdos'
+  // Outros
+  return 'Outros'
 }
+
+const categoriasAgrupadas = computed(() => {
+  const produtos = (props.formData as any)?.produtos || []
+  if (!Array.isArray(produtos) || produtos.length === 0) return [] as any[]
+
+  const grupos = new Map<string, { nome: string; peso: number; valor: number }>()
+  let totalPeso = 0
+  let totalValor = 0
+
+  produtos.forEach((p: any) => {
+    const grupo = obterGrupoProduto(p)
+    const peso = Number(p?.quantidade) || 0
+    const preco = (p?.preco_kg != null ? Number(p.preco_kg) : (Number(p?.preco_unitario) || 0))
+    const valor = (p?.total != null) ? Number(p.total) : (peso * (preco || 0))
+
+    totalPeso += peso
+    totalValor += valor
+
+    if (!grupos.has(grupo)) grupos.set(grupo, { nome: grupo, peso: 0, valor: 0 })
+    const g = grupos.get(grupo)!
+    g.peso += peso
+    g.valor += valor
+  })
+
+  const arr = Array.from(grupos.values())
+  return arr
+    .map(g => ({
+      ...g,
+      percentualPeso: totalPeso > 0 ? (g.peso / totalPeso) * 100 : 0,
+      percentualValor: totalValor > 0 ? (g.valor / totalValor) * 100 : 0
+    }))
+    .sort((a, b) => b.valor - a.valor)
+})
+
 </script>
 
 <style scoped>
 /* Estilos para impressão */
+.categorias-agrupadas-section { margin-top: 16px; }
+.categorias-agrupadas-section h5 { margin: 0 0 8px; font-size: 16px; font-weight: 600; color: #111827; }
+.categorias-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.categoria-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+.categoria-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.categoria-titulo { font-weight: 600; color: #374151; }
+.categoria-dados { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.categoria-dados .dado-item { display: flex; flex-direction: column; }
+.categoria-dados .dado-valor { font-weight: 700; color: #111827; }
+.categoria-dados .dado-label { font-size: 12px; color: #6b7280; }
 @media print {
   @page {
     size: A4 landscape;
@@ -710,8 +809,8 @@ const calcularPercentualProduto = (produto: any): string => {
     margin: 0;
     padding: 10mm;
     font-family: 'Arial', sans-serif;
-    font-size: 10px;
-    line-height: 1.2;
+    font-size: 11px;
+    line-height: 1.3;
     color: #000;
     background: white;
     width: 100%;
@@ -723,18 +822,6 @@ const calcularPercentualProduto = (produto: any): string => {
   }
   /* Em impressão, deixar a seção de produtos preencher toda a área útil (dentro das margens de 15mm) */
   .secao-produtos.full-width { width: 100%; margin-left: 0; margin-right: 0; }
-  
-  /* Estilos compactos para impressão */
-  .secao-dados, .secao-produtos { margin-top: 4px; }
-  .secao-dados h3, .secao-produtos h3 { margin: 0 0 3px 0; font-size: 11px; }
-  .dados-grid { gap: 3px; }
-  .dado-item { padding: 3px 5px; border-radius: 1px; }
-  .dado-item .label { font-size: 9px; }
-  .dado-item .valor { font-size: 9px; }
-  .tabela-produtos { font-size: 9px; }
-  .tabela-produtos thead th { padding: 1px 3px; font-size: 9px; }
-  .tabela-produtos tbody td { padding: 1px 3px; }
-  .tabela-produtos tfoot td { padding: 1px 3px; }
   
   .secao-duas-colunas {
     display: flex;
@@ -780,15 +867,15 @@ const calcularPercentualProduto = (produto: any): string => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #dc2626;
-  padding-bottom: 10px;
-  margin-bottom: 16px;
+  border-bottom: 3px solid #dc2626;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
 }
 
-.logo { height: 50px; width: auto; }
+.logo { height: 60px; width: auto; }
 .titulo-section { text-align: center; flex: 1; }
-.titulo-section h1 { font-size: 20px; font-weight: bold; color: #dc2626; margin: 0; }
-.titulo-section h2 { font-size: 14px; color: #666; margin: 3px 0 0 0; }
+.titulo-section h1 { font-size: 24px; font-weight: bold; color: #dc2626; margin: 0; }
+.titulo-section h2 { font-size: 16px; color: #666; margin: 5px 0 0 0; }
 .data-section { text-align: right; font-size: 14px; }
 .data-section p { margin: 2px 0; }
 .card-abate { display: inline-block; border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 12px; min-width: 160px; }
@@ -796,45 +883,45 @@ const calcularPercentualProduto = (produto: any): string => {
 .card-abate .card-date { font-size: 14px; text-align: center; margin-top: 4px; font-weight: 600; }
 
 /* Seções genéricas */
-.secao-dados, .secao-produtos, .secao-despesas, .secao-indicadores, .secao-financeiro { margin-top: 6px; }
+.secao-dados, .secao-produtos, .secao-despesas, .secao-indicadores, .secao-financeiro { margin-top: 24px; }
 .secao-dados h3, .secao-produtos h3, .secao-despesas h3, .secao-indicadores h3, .secao-financeiro h3 { 
-  margin: 0 0 4px 0; color: #dc2626; font-size: 12px; font-weight: 700;
+  margin: 0 0 12px 0; color: #dc2626; font-size: 18px; font-weight: 700;
 }
 
 /* Dados básicos */
-.dados-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
-.dado-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 2px; padding: 4px 6px; display: flex; justify-content: space-between; }
-.dado-item .label { color: #6b7280; font-weight: 600; font-size: 10px; }
-.dado-item .valor { color: #111827; font-weight: 700; font-size: 10px; }
+.dados-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.dado-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; }
+.dado-item .label { color: #6b7280; font-weight: 600; }
+.dado-item .valor { color: #111827; font-weight: 700; }
 
 /* Tabela de produtos */
-.tabela-produtos { width: 100%; border-collapse: collapse; font-size: 10px; }
+.tabela-produtos { width: 100%; border-collapse: collapse; }
 .tabela-produtos th, .tabela-produtos td { border: 1px solid #e5e7eb; }
-.tabela-produtos thead th { background: #f3f4f6; color: #111827; text-align: left; font-weight: 700; padding: 2px 4px; font-size: 10px; }
-.tabela-produtos tbody td { padding: 2px 4px; }
-.tabela-produtos tfoot td { padding: 2px 4px; }
+.tabela-produtos thead th { background: #f3f4f6; color: #111827; text-align: left; font-weight: 700; padding: 10px; }
+.tabela-produtos tbody td { padding: 10px; }
+.tabela-produtos tfoot td { padding: 10px; }
 .tabela-produtos .total-row { background: #fff; }
 .tabela-produtos .total-row td strong { color: #111827; }
 
 /* Despesas por categoria */
-.despesas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 6px; }
-.categoria-despesa { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 3px; padding: 6px; text-align: center; }
-.categoria-despesa h4 { margin: 0 0 4px 0; color: #374151; font-size: 12px; }
-.categoria-despesa p { margin: 0; font-weight: 700; color: #111827; font-size: 11px; }
+.despesas-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.categoria-despesa { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; text-align: center; }
+.categoria-despesa h4 { margin: 0 0 8px 0; color: #374151; font-size: 14px; }
+.categoria-despesa p { margin: 0; font-weight: 700; color: #111827; }
 
 /* Indicadores de performance */
-.metricas-grid { display: grid; grid-template-columns: 1fr; gap: 8px; }
-.indicadores-categoria { background: #fff; border: 1px solid #e5e7eb; border-radius: 4px; padding: 6px; }
-.indicadores-categoria h4 { margin: 0 0 4px 0; color: #374151; font-size: 12px; }
-.indicadores-dupla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
-.indicador-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 3px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
-.indicador-item .valor-destaque { font-size: 14px; font-weight: 800; color: #111827; }
-.indicador-item .label { font-size: 10px; color: #6b7280; }
-.indicador-item .percentual { font-size: 10px; color: #2563eb; font-weight: 700; }
+.metricas-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.indicadores-categoria { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }
+.indicadores-categoria h4 { margin: 0 0 10px 0; color: #374151; font-size: 16px; }
+.indicadores-dupla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.indicador-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 4px; }
+.indicador-item .valor-destaque { font-size: 18px; font-weight: 800; color: #111827; }
+.indicador-item .label { font-size: 12px; color: #6b7280; }
+.indicador-item .percentual { font-size: 12px; color: #2563eb; font-weight: 700; }
 
 /* Resumo financeiro */
-.financeiro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.financeiro-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; }
+.financeiro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.financeiro-item { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
 .financeiro-item .label { color: #6b7280; font-weight: 600; }
 .financeiro-item .valor { color: #111827; font-weight: 800; }
 .financeiro-item.receita .valor { color: #16a34a; }
@@ -843,7 +930,7 @@ const calcularPercentualProduto = (produto: any): string => {
 .financeiro-item.lucro.prejuizo .valor { color: #dc2626; }
 
 /* Rodapé */
-.footer-impressao { border-top: 2px solid #dc2626; margin-top: 20px; padding-top: 8px; display: flex; justify-content: space-between; gap: 12px; }
+.footer-impressao { border-top: 3px solid #dc2626; margin-top: 28px; padding-top: 12px; display: flex; justify-content: space-between; gap: 16px; }
 .footer-info p { margin: 2px 0; color: #374151; }
 .footer-assinatura { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 60%; }
 .linha-assinatura { text-align: center; }
@@ -866,9 +953,9 @@ const calcularPercentualProduto = (produto: any): string => {
 /* Resumo Financeiro Principal */
 .resumo-financeiro-principal {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 25px;
 }
 
 .kpi-destaque {
@@ -937,35 +1024,35 @@ const calcularPercentualProduto = (produto: any): string => {
 .indicadores-compactos {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 20px;
+  margin-bottom: 25px;
 }
 
 .grupo-indicadores {
   background: #ffffff;
   border: 1px solid #e9ecef;
-  border-radius: 6px;
-  padding: 12px;
+  border-radius: 8px;
+  padding: 20px;
 }
 
 .grupo-indicadores h4 {
-  margin: 0 0 10px 0;
-  font-size: 14px;
+  margin: 0 0 15px 0;
+  font-size: 16px;
   color: #495057;
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 6px;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 8px;
 }
 
 .kpi-mini-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 15px;
 }
 
 .kpi-mini {
   background: #f8f9fa;
-  border-radius: 4px;
-  padding: 8px;
+  border-radius: 6px;
+  padding: 12px;
   text-align: center;
 }
 
@@ -1097,23 +1184,23 @@ const calcularPercentualProduto = (produto: any): string => {
 .custos-operacionais {
   background: #ffffff;
   border: 1px solid #e9ecef;
-  border-radius: 6px;
-  padding: 12px;
-  margin-bottom: 12px;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
 }
 
 .custos-operacionais h4 {
-  margin: 0 0 10px 0;
-  font-size: 14px;
+  margin: 0 0 15px 0;
+  font-size: 16px;
   color: #495057;
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 6px;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 8px;
 }
 
 .custos-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
 }
 
 .custo-item {
@@ -1121,8 +1208,8 @@ const calcularPercentualProduto = (produto: any): string => {
   justify-content: space-between;
   align-items: center;
   background: #f8f9fa;
-  border-radius: 4px;
-  padding: 8px;
+  border-radius: 6px;
+  padding: 12px;
 }
 
 .custo-label {
@@ -1140,8 +1227,8 @@ const calcularPercentualProduto = (produto: any): string => {
 /* Layout de duas colunas */
 .secao-duas-colunas {
   display: flex;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 20px;
+  margin-top: 20px;
 }
 
 .coluna-despesas,
@@ -1163,9 +1250,9 @@ const calcularPercentualProduto = (produto: any): string => {
 .despesas-detalhadas-card {
   background: #ffffff;
   border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .despesas-detalhadas-card .card-header {

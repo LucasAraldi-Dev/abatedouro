@@ -356,9 +356,11 @@ const mediaValorKgProcessadoFormatted = computed(() => {
   const val = kg > 0 ? receitaBruta.value / kg : 0
   return formatCurrency(val)
 })
-const custoKgRealFormatted = computed(() => formatCurrency(pesoTotalProcessado.value > 0 ? custosTotais.value / pesoTotalProcessado.value : 0))
-const custoAveRealFormatted = computed(() => formatCurrency(safeNumber(props.formData?.quantidade_aves) > 0 ? custosTotais.value / safeNumber(props.formData?.quantidade_aves) : 0))
-const custoAbateKgFormatted = computed(() => formatCurrency(safeNumber(props.formData?.custo_abate_kg)))
+// Total de despesas operacionais (exclui compra do frango)
+const operacionaisTotal = computed(() => totalRecursosHumanos.value + totalUtilidades.value + totalMateriais.value + totalOperacionais.value)
+const custoKgRealFormatted = computed(() => formatCurrency(pesoTotalProcessado.value > 0 ? operacionaisTotal.value / pesoTotalProcessado.value : 0))
+const custoAveRealFormatted = computed(() => formatCurrency(safeNumber(props.formData?.quantidade_aves) > 0 ? operacionaisTotal.value / safeNumber(props.formData?.quantidade_aves) : 0))
+const custoAbateKgFormatted = computed(() => formatCurrency(pesoTotalProcessado.value > 0 ? operacionaisTotal.value / pesoTotalProcessado.value : 0))
 const custoFrangoFormatted = computed(() => formatCurrency(safeNumber(props.formData?.custo_frango)))
 const lucroKgFormatted = computed(() => formatCurrency(pesoTotalProcessado.value > 0 ? lucroLiquido.value / pesoTotalProcessado.value : 0))
 const lucroFrangoFormatted = computed(() => formatCurrency(safeNumber(props.formData?.quantidade_aves) > 0 ? lucroLiquido.value / safeNumber(props.formData?.quantidade_aves) : 0))
@@ -398,8 +400,17 @@ const produtoMaisValioso = computed(() => {
   if (props.formData?.produtoMaisValioso) return props.formData.produtoMaisValioso
   const arr = produtos.value
   if (!arr.length) return null
-  const max = [...arr].sort((a: any, b: any) => safeNumber(b.preco_unitario) - safeNumber(a.preco_unitario))[0]
-  return max ? { nome: max.nome, valorKg: safeNumber(max.preco_unitario) } : null
+  const max = [...arr].sort((a: any, b: any) => {
+     const precoA = safeNumber(a.preco_kg ?? a.preco_unitario)
+     const precoB = safeNumber(b.preco_kg ?? b.preco_unitario)
+     const totalA = safeNumber(a.total) || (safeNumber(a.quantidade) * precoA)
+     const totalB = safeNumber(b.total) || (safeNumber(b.quantidade) * precoB)
+     return totalB - totalA
+   })[0]
+   if (!max) return null
+   const precoSel = safeNumber(max.preco_kg ?? max.preco_unitario)
+   const totalSel = safeNumber(max.total) || (safeNumber(max.quantidade) * precoSel)
+   return { nome: max.nome, valorKg: precoSel, total: totalSel }
 })
 const produtoMaiorVolume = computed(() => {
   if (props.formData?.produtoMaiorVolume) return props.formData.produtoMaiorVolume
