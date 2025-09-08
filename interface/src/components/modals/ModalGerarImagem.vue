@@ -48,6 +48,10 @@
         <div class="relatorio-actions">
           <button class="btn-secondary" @click="showRelatorio = false">Fechar</button>
           <button class="btn-primary" @click="baixarRelatorioImagem">Baixar como Imagem</button>
+          <button class="btn-primary" @click="exportarPDF">
+            <span class="btn-icon">📄</span>
+            Exportar PDF
+          </button>
         </div>
       </div>
       <div class="relatorio-modal-body">
@@ -59,41 +63,44 @@
             :rendimento-final="dadosConsolidados?.pesoTotalVivo > 0 ? (dadosConsolidados.pesoTotalProcessado / dadosConsolidados.pesoTotalVivo) * 100 : 0"
              :rendimento-percentual="dadosConsolidados?.pesoTotalVivo > 0 ? ((dadosConsolidados.pesoTotalProcessado / dadosConsolidados.pesoTotalVivo) * 100).toFixed(2) + '%' : '0%'"
             :valor-total-produtos="dadosConsolidados?.receitaTotal || 0"
-            :total-recursos-humanos="0"
-            :total-utilidades="0"
-            :total-materiais="0"
-            :total-operacionais="0"
-            :total-perdas="0"
-            :receita-bruta="dadosConsolidados?.receitaTotal || 0"
-            :custos-totais="dadosConsolidados?.custoTotal || 0"
-            :lucro-liquido="(dadosConsolidados?.receitaTotal || 0) - (dadosConsolidados?.custoTotal || 0)"
-            :media-valor-kg-processado-formatted="'R$ 0,00'"
-            :custo-kg-real-formatted="'R$ 0,00'"
-            :custo-ave-real-formatted="'R$ 0,00'"
-            :custo-abate-kg-formatted="'R$ 0,00'"
-            :custo-frango-formatted="'R$ 0,00'"
-            :lucro-kg-formatted="'R$ 0,00'"
-            :lucro-frango-formatted="'R$ 0,00'"
-            :lucro-total-formatted="'R$ 0,00'"
-            :margem-lucro-formatted="'0%'"
-            :percentual-media-valor-kg="'0%'"
-            :percentual-custo-kg-real="'0%'"
-            :percentual-custo-ave="'0%'"
-            :percentual-custo-abate-kg="'0%'"
-            :percentual-custo-frango="'0%'"
-            :percentual-lucro-kg="'0%'"
-            :percentual-lucro-frango="'0%'"
-            :percentual-lucro-total="'0%'"
-            :peso-total-perdas-formatted="'0 kg'"
-            :percentual-perda-total-formatted="'0%'"
-            :valor-perdas-formatted="'R$ 0,00'"
-            :perdas-por-categoria="{}"
-            :eficiencia-aproveitamento-formatted="'0%'"
-            :analise-produtos="[]"
-            :produto-mais-valioso="null"
-            :produto-maior-volume="null"
-            :diversificacao-produtos-formatted="'0'"
-            :peso-medio-geral-formatted="'0 kg'"
+            :total-recursos-humanos="totalRecursosHumanos"
+            :total-utilidades="totalUtilidades"
+            :total-materiais="totalMateriais"
+            :total-operacionais="totalOperacionais"
+            :total-perdas="totalPerdas"
+            :receita-bruta="receitaBruta"
+            :custos-totais="custosTotais"
+            :lucro-liquido="lucroLiquido"
+            :media-valor-kg-processado-formatted="mediaValorKgProcessadoFormatted"
+            :custo-kg-real-formatted="custoKgRealFormatted"
+            :custo-ave-real-formatted="custoAveRealFormatted"
+            :custo-abate-kg-formatted="custoAbateKgFormatted"
+            :custo-frango-formatted="custoFrangoFormatted"
+            :lucro-kg-formatted="lucroKgFormatted"
+            :lucro-frango-formatted="lucroFrangoFormatted"
+            :lucro-total-formatted="lucroTotalFormatted"
+            :margem-lucro-formatted="margemLucroFormatted"
+            :percentual-media-valor-kg="percentualMediaValorKg"
+            :percentual-custo-kg-real="percentualCustoKgReal"
+            :percentual-custo-ave="percentualCustoAve"
+            :percentual-custo-abate-kg="percentualCustoAbateKg"
+            :percentual-custo-frango="percentualCustoFrango"
+            :percentual-lucro-kg="percentualLucroKg"
+            :percentual-lucro-frango="percentualLucroFrango"
+            :percentual-lucro-total="percentualLucroTotal"
+            :peso-total-perdas-formatted="pesoTotalPerdasFormatted"
+            :percentual-perda-total-formatted="percentualPerdaTotalFormatted"
+            :valor-perdas-formatted="valorPerdasFormatted"
+            :perdas-por-categoria="perdasPorCategoria"
+            :eficiencia-aproveitamento-formatted="eficienciaAproveitamentoFormatted"
+            :analise-produtos="analiseProdutos"
+            :produto-mais-valioso="produtoMaisValioso"
+            :produto-maior-volume="produtoMaiorVolume"
+            :diversificacao-produtos-formatted="diversificacaoProdutosFormatted"
+            :peso-medio-geral-formatted="pesoMedioGeralFormatted"
+            :kg-hora="safeNumber(dadosConsolidados?.indicadores?.kg_hora)"
+            :aves-hora="safeNumber(dadosConsolidados?.indicadores?.aves_hora)"
+            :eficiencia-operacional="safeNumber(dadosConsolidados?.indicadores?.eficiencia_operacional)"
             :variant="variantRelatorio"
           />
         </div>
@@ -129,6 +136,21 @@ const showRelatorio = ref(false)
 const gerando = ref(false)
 const relatorioCaptureRef = ref<HTMLElement>()
 
+// Helpers
+const safeNumber = (v: any) => (typeof v === 'number' && !isNaN(v) ? v : Number(v) || 0)
+const formatCurrency = (value: number): string => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+// Formata uma data YYYY-MM-DD sem aplicar fuso/UTC, evitando deslocamento de dia
+const formatDateLocal = (dateStr?: string): string => {
+  if (!dateStr) return ''
+  const parts = dateStr.split('-').map(Number)
+  if (parts.length !== 3 || parts.some((n) => Number.isNaN(n))) return ''
+  const [y, m, d] = parts
+  const dd = String(d).padStart(2, '0')
+  const mm = String(m).padStart(2, '0')
+  const yyyy = String(y).padStart(4, '0')
+  return `${dd}/${mm}/${yyyy}`
+}
+
 // Computed
 const tipoRelatorioFormatado = computed(() => {
   // Mapear os tipos de filtro para os nomes corretos das abas
@@ -145,45 +167,177 @@ const variantRelatorio = computed(() => {
 })
 
 const dataInicioFormatada = computed(() => {
-  if (!props.filtros.dataInicio) return 'Não definida'
-  // Adicionar T00:00:00 para evitar problemas de fuso horário
-  return new Date(props.filtros.dataInicio + 'T00:00:00').toLocaleDateString('pt-BR')
+  const f = formatDateLocal(props.filtros.dataInicio)
+  return f || 'Não definida'
 })
 
 const dataFimFormatada = computed(() => {
-  if (!props.filtros.dataFim) return 'Não definida'
-  // Adicionar T00:00:00 para evitar problemas de fuso horário
-  return new Date(props.filtros.dataFim + 'T00:00:00').toLocaleDateString('pt-BR')
+  const f = formatDateLocal(props.filtros.dataFim)
+  return f || 'Não definida'
 })
 
 const unidade = computed(() => {
   return props.filtros.unidade || 'Todas as unidades'
 })
 
+// Totais consolidados e derivadas
+const totalAves = computed(() => safeNumber(props.dadosConsolidados?.totalAves))
+const pesoTotalVivo = computed(() => safeNumber(props.dadosConsolidados?.pesoTotalVivo))
+const pesoTotalProcessado = computed(() => safeNumber(props.dadosConsolidados?.pesoTotalProcessado))
+const receitaBruta = computed(() => safeNumber(props.dadosConsolidados?.receitaTotal))
+const totalRecursosHumanos = computed(() => safeNumber(props.dadosConsolidados?.despesasFixas?.recursos_humanos))
+const totalUtilidades = computed(() => safeNumber(props.dadosConsolidados?.despesasFixas?.utilidades))
+const totalMateriais = computed(() => safeNumber(props.dadosConsolidados?.despesasFixas?.materiais))
+const totalOperacionais = computed(() => safeNumber(props.dadosConsolidados?.despesasFixas?.operacionais))
+const totalCompraFrango = computed(() => safeNumber(props.dadosConsolidados?.despesasFixas?.compra_frango_vivo))
+const custosTotais = computed(() => safeNumber(props.dadosConsolidados?.custoTotal))
+const lucroLiquido = computed(() => receitaBruta.value - custosTotais.value)
+
+// Preço médio do kg do frango vivo (para perdas e cabeçalho do relatório)
+const precoKgVivoMedio = computed(() => {
+  const kg = pesoTotalVivo.value
+  const total = totalCompraFrango.value
+  return kg > 0 ? total / kg : 0
+})
+
+// Produtos convertidos para compatibilidade (preco_kg)
+const produtosCompat = computed(() => {
+  const arr = Array.from(props.dadosConsolidados?.produtos?.values?.() || [])
+  return arr.map((p: any) => ({
+    id: String(p.nome || p.id || ''),
+    nome: p.nome,
+    tipo: p.tipo,
+    quantidade: safeNumber(p.quantidade),
+    preco_kg: safeNumber(p.preco_unitario),
+    total: safeNumber(p.total)
+  }))
+})
+
 const dadosRelatorio = computed(() => {
   if (!props.dadosConsolidados) return null
   
-  // Formatar período de datas para exibição no relatório
-  const dataInicioFormatada = props.filtros.dataInicio ? 
-    new Date(props.filtros.dataInicio + 'T00:00:00').toLocaleDateString('pt-BR') : ''
-  const dataFimFormatada = props.filtros.dataFim ? 
-    new Date(props.filtros.dataFim + 'T00:00:00').toLocaleDateString('pt-BR') : ''
+  // Formatar período de datas para exibição no relatório (sem deslocamento de fuso)
+  const dataInicioFormatadaLocal = formatDateLocal(props.filtros.dataInicio)
+  const dataFimFormatadaLocal = formatDateLocal(props.filtros.dataFim)
   
-  const periodoFormatado = dataInicioFormatada && dataFimFormatada ? 
-    `${dataInicioFormatada} a ${dataFimFormatada}` : 
+  const periodoFormatado = dataInicioFormatadaLocal && dataFimFormatadaLocal ? 
+    `${dataInicioFormatadaLocal} a ${dataFimFormatadaLocal}` : 
     'Período não definido'
   
   return {
-    data_abate: periodoFormatado, // RelatorioImpressao vai usar isso para exibir o período
+    data_abate: periodoFormatado, // RelatorioImpressao usa para exibir o período
     unidade: unidade.value,
-    quantidade_aves: props.dadosConsolidados.totalAves,
-    peso_total_kg: props.dadosConsolidados.pesoTotalVivo, // RelatorioImpressao espera peso_total_kg
-    peso_total_processado: props.dadosConsolidados.pesoTotalProcessado,
-    produtos: Array.from(props.dadosConsolidados.produtos.values())
+    quantidade_aves: totalAves.value,
+    peso_total_kg: pesoTotalVivo.value, // RelatorioImpressao espera peso_total_kg
+    peso_total_processado: pesoTotalProcessado.value,
+    valor_kg_vivo: precoKgVivoMedio.value,
+    produtos: produtosCompat.value
   }
 })
 
-// Computeds removidas - dados passados diretamente via props
+// Indicadores formatados e percentuais
+const mediaValorKgProcessadoFormatted = computed(() => {
+  const kg = pesoTotalProcessado.value
+  const val = kg > 0 ? receitaBruta.value / kg : 0
+  return formatCurrency(val)
+})
+const operacionaisTotal = computed(() => totalRecursosHumanos.value + totalUtilidades.value + totalMateriais.value + totalOperacionais.value)
+const custoKgRealFormatted = computed(() => formatCurrency(pesoTotalProcessado.value > 0 ? operacionaisTotal.value / pesoTotalProcessado.value : 0))
+const custoAveRealFormatted = computed(() => formatCurrency(totalAves.value > 0 ? operacionaisTotal.value / totalAves.value : 0))
+const custoAbateKgFormatted = computed(() => {
+  return formatCurrency(pesoTotalProcessado.value > 0 ? operacionaisTotal.value / pesoTotalProcessado.value : 0)
+})
+const pesoMedioPorAve = computed(() => (totalAves.value > 0 ? pesoTotalVivo.value / totalAves.value : 0))
+
+const custoFrangoFormatted = computed(() => {
+  const val = totalAves.value > 0 ? totalCompraFrango.value / totalAves.value : 0
+  return formatCurrency(val)
+})
+const lucroKgFormatted = computed(() => formatCurrency(pesoTotalProcessado.value > 0 ? lucroLiquido.value / pesoTotalProcessado.value : 0))
+const lucroFrangoFormatted = computed(() => formatCurrency(totalAves.value > 0 ? lucroLiquido.value / totalAves.value : 0))
+const lucroTotalFormatted = computed(() => formatCurrency(lucroLiquido.value))
+const margemLucroFormatted = computed(() => {
+  const rec = receitaBruta.value
+  const perc = rec > 0 ? (lucroLiquido.value / rec) * 100 : 0
+  return `${perc.toFixed(1)}%`
+})
+
+const percentualMediaValorKg = computed(() => '0.0')
+const percentualCustoKgReal = computed(() => '0.0')
+const percentualCustoAve = computed(() => '0.0')
+const percentualCustoAbateKg = computed(() => '0.0')
+const percentualCustoFrango = computed(() => '0.0')
+const percentualLucroKg = computed(() => '0.0')
+const percentualLucroFrango = computed(() => '0.0')
+const percentualLucroTotal = computed(() => '0.0')
+
+// Perdas
+const perdasKg = computed(() => safeNumber(props.dadosConsolidados?.indicadores?.perdas_kg))
+const pesoTotalPerdasFormatted = computed(() => `${perdasKg.value.toFixed(2)} kg`)
+const percentualPerdaTotalFormatted = computed(() => {
+  const perc = pesoTotalVivo.value > 0 ? (perdasKg.value / pesoTotalVivo.value) * 100 : 0
+  return `${perc.toFixed(1)}%`
+})
+const valorPerdasFormatted = computed(() => formatCurrency(perdasKg.value * precoKgVivoMedio.value))
+const perdasPorCategoria = computed(() => ({
+  mortos_plataforma: { valor: 0, peso_estimado: 0 },
+  escaldagem_eviceracao: { valor: 0, peso_estimado: 0 },
+  pe_graxaria: { valor: 0, peso_estimado: 0 },
+  descarte: { valor: 0, peso_estimado: 0 }
+}))
+
+// Aproveitamento
+const eficienciaAproveitamentoFormatted = computed(() => {
+  const vivo = pesoTotalVivo.value
+  const proc = pesoTotalProcessado.value
+  const perc = vivo > 0 ? (proc / vivo) * 100 : 0
+  return `${perc.toFixed(1)}%`
+})
+
+// Produtos para destaques
+const analiseProdutos = computed(() => {
+  const arr = produtosCompat.value
+  const totalRec = receitaBruta.value || arr.reduce((s, p) => s + safeNumber(p.total), 0)
+  return arr.map((p: any) => ({
+    nome: p.nome,
+    quantidade: safeNumber(p.quantidade),
+    total: safeNumber(p.total),
+    pesoMedio: 0,
+    valorKg: safeNumber(p.preco_kg),
+    participacao: totalRec > 0 ? (safeNumber(p.total) / totalRec) * 100 : 0
+  }))
+})
+const produtoMaisValioso = computed(() => {
+  const arr = produtosCompat.value
+  if (!arr.length) return null
+  const max = [...arr].sort((a: any, b: any) => {
+     const precoA = safeNumber(a.preco_kg ?? a.preco_unitario)
+     const precoB = safeNumber(b.preco_kg ?? b.preco_unitario)
+     const totalA = safeNumber(a.total) || (safeNumber(a.quantidade) * precoA)
+     const totalB = safeNumber(b.total) || (safeNumber(b.quantidade) * precoB)
+     return totalB - totalA
+   })[0]
+   if (!max) return null
+   const precoSel = safeNumber(max.preco_kg ?? max.preco_unitario)
+   const totalSel = safeNumber(max.total) || (safeNumber(max.quantidade) * precoSel)
+   return { nome: max.nome, tipo: max.tipo, valorKg: precoSel, total: totalSel }
+})
+const produtoMaiorVolume = computed(() => {
+  const arr = produtosCompat.value
+  if (!arr.length) return null
+  const max = [...arr].sort((a: any, b: any) => safeNumber(b.quantidade) - safeNumber(a.quantidade))[0]
+  return max ? { nome: max.nome, tipo: max.tipo, quantidade: safeNumber(max.quantidade) } : null
+})
+const diversificacaoProdutosFormatted = computed(() => {
+  const set = new Set((produtosCompat.value || []).map((p: any) => p.nome))
+  return `${set.size}`
+})
+const pesoMedioGeralFormatted = computed(() => {
+  const aves = totalAves.value
+  const peso = pesoTotalVivo.value
+  const val = aves > 0 ? peso / aves : 0
+  return `${val.toFixed(3)} kg`
+})
 
 // Métodos
 const closeModal = () => {
@@ -221,6 +375,104 @@ const baixarRelatorioImagem = async () => {
   } catch (error) {
     console.error('Erro ao gerar imagem:', error)
     alert('Erro ao gerar imagem do relatório')
+  }
+}
+
+const exportarPDF = async () => {
+  if (!relatorioCaptureRef.value) return
+  
+  try {
+    // Capturar a imagem do relatório usando html2canvas
+    const canvas = await html2canvas(relatorioCaptureRef.value, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff'
+    })
+    
+    // Converter canvas para imagem
+    const imgData = canvas.toDataURL('image/png')
+    
+    // Criar uma nova janela para o PDF
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) {
+      alert('Não foi possível abrir a janela de impressão. Verifique se o bloqueador de pop-ups está desabilitado.')
+      return
+    }
+
+    const dataFormatada = new Date().toLocaleDateString('pt-BR')
+    const titulo = `Relatório - ${props.filtros.tipoRelatorio} - ${dataFormatada}`
+
+    // Criar documento HTML otimizado para uma única página
+    printWindow.document.write('<!DOCTYPE html>')
+    printWindow.document.write('<html><head>')
+    printWindow.document.write('<meta charset="utf-8">')
+    printWindow.document.write(`<title>${titulo}</title>`)
+    printWindow.document.write('<style>')
+    printWindow.document.write('@page {')
+    printWindow.document.write('  size: A4 portrait;')
+    printWindow.document.write('  margin: 5mm;')
+    printWindow.document.write('}')
+    printWindow.document.write('* {')
+    printWindow.document.write('  margin: 0;')
+    printWindow.document.write('  padding: 0;')
+    printWindow.document.write('  box-sizing: border-box;')
+    printWindow.document.write('}')
+    printWindow.document.write('html, body {')
+    printWindow.document.write('  width: 100%;')
+    printWindow.document.write('  height: 100vh;')
+    printWindow.document.write('  overflow: hidden;')
+    printWindow.document.write('}')
+    printWindow.document.write('body {')
+    printWindow.document.write('  display: flex;')
+    printWindow.document.write('  align-items: center;')
+    printWindow.document.write('  justify-content: center;')
+    printWindow.document.write('  background: white;')
+    printWindow.document.write('}')
+    printWindow.document.write('.page-container {')
+    printWindow.document.write('  width: 100%;')
+    printWindow.document.write('  height: 100vh;')
+    printWindow.document.write('  display: flex;')
+    printWindow.document.write('  align-items: center;')
+    printWindow.document.write('  justify-content: center;')
+    printWindow.document.write('  padding: 5mm;')
+    printWindow.document.write('}')
+    printWindow.document.write('img {')
+    printWindow.document.write('  max-width: 100%;')
+    printWindow.document.write('  max-height: 100%;')
+    printWindow.document.write('  width: auto;')
+    printWindow.document.write('  height: auto;')
+    printWindow.document.write('  object-fit: contain;')
+    printWindow.document.write('  display: block;')
+    printWindow.document.write('}')
+    printWindow.document.write('@media print {')
+    printWindow.document.write('  html, body {')
+    printWindow.document.write('    height: 100vh !important;')
+    printWindow.document.write('    overflow: hidden !important;')
+    printWindow.document.write('  }')
+    printWindow.document.write('  .page-container {')
+    printWindow.document.write('    height: 100vh !important;')
+    printWindow.document.write('    page-break-after: avoid !important;')
+    printWindow.document.write('    page-break-before: avoid !important;')
+    printWindow.document.write('    page-break-inside: avoid !important;')
+    printWindow.document.write('  }')
+    printWindow.document.write('  img {')
+    printWindow.document.write('    page-break-after: avoid !important;')
+    printWindow.document.write('    page-break-before: avoid !important;')
+    printWindow.document.write('    page-break-inside: avoid !important;')
+    printWindow.document.write('  }')
+    printWindow.document.write('}')
+    printWindow.document.write('</style>')
+    printWindow.document.write('</head><body>')
+    printWindow.document.write('<div class="page-container">')
+    printWindow.document.write(`<img src="${imgData}" alt="Relatório" />`)
+    printWindow.document.write('</div>')
+    printWindow.document.write('<script>window.onload = function() { window.print(); window.onafterprint = function() { window.close(); }; }<\/script>')
+    printWindow.document.write('<\/body><\/html>')
+    printWindow.document.close()
+  } catch (error) {
+    console.error('Erro ao exportar PDF:', error)
+    alert('Erro ao exportar PDF do relatório')
   }
 }
 </script>

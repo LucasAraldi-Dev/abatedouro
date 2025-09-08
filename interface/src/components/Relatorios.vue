@@ -39,6 +39,14 @@ const abatesFiltrados = computed(() => {
   return resultado.sort((a, b) => new Date(b.data_abate).getTime() - new Date(a.data_abate).getTime())
 })
 
+// Função auxiliar para validar valores numéricos
+const validarValor = (valor: number, min: number | null = null, max: number | null = null): number => {
+  if (isNaN(valor) || !isFinite(valor)) return 0
+  if (min !== null && valor < min) return min
+  if (max !== null && valor > max) return max
+  return valor
+}
+
 // Dados consolidados para relatórios
 const dadosConsolidados = computed(() => {
   if (abatesFiltrados.value.length === 0) return null
@@ -60,7 +68,56 @@ const dadosConsolidados = computed(() => {
     indicadores: {
       tempo_total_horas: 0,
       perdas_kg: 0,
-      energia_kwh: 0
+      energia_kwh: 0,
+      // Indicadores básicos
+      rendimento_final: 0,
+      custo_kg: 0,
+      lucro_kg: 0,
+      // Indicadores de eficiência (média ponderada por aves)
+      aves_hora: 0,
+      kg_hora: 0,
+      eficiencia_operacional: 0,
+      // Indicadores percentuais (média aritmética)
+      percentual_perda_total: 0,
+      eficiencia_aproveitamento: 0,
+      // Indicadores por unidade (média ponderada)
+      media_valor_kg: 0,
+      custo_ave: 0,
+      custo_abate_kg: 0,
+      custo_frango: 0,
+      lucro_frango: 0,
+      lucro_total: 0,
+      // Performance e qualidade
+      score_performance: 0,
+      diversificacao_produtos: 0,
+      peso_medio_geral: 0
+    },
+    // Totais para cálculo de médias ponderadas
+    totais: {
+      receita_bruta: 0,
+      custos_totais: 0,
+      lucro_liquido: 0,
+      valor_perdas: 0
+    },
+    // Contadores para médias aritméticas
+    contadores: {
+      abates_com_dados: 0,
+      soma_percentual_perda: 0,
+      soma_eficiencia_aproveitamento: 0,
+      soma_score_performance: 0,
+      soma_diversificacao: 0,
+      // Para médias ponderadas por aves
+      soma_aves_hora_ponderada: 0,
+      soma_kg_hora_ponderada: 0,
+      soma_eficiencia_op_ponderada: 0,
+      // Para médias ponderadas por peso
+      soma_media_valor_kg_ponderada: 0,
+      soma_custo_ave_ponderada: 0,
+      soma_custo_abate_kg_ponderada: 0,
+      soma_custo_frango_ponderada: 0,
+      soma_lucro_frango_ponderada: 0,
+      soma_lucro_total_ponderada: 0,
+      soma_peso_medio_ponderada: 0
     }
   }
   
@@ -104,6 +161,39 @@ const dadosConsolidados = computed(() => {
     // Usar campos calculados se disponíveis
     consolidado.indicadores.perdas_kg += abate.peso_total_perdas || 0
     consolidado.indicadores.energia_kwh += 0 // Campo não disponível na estrutura atual
+    
+    // Somar totais para cálculo de médias ponderadas
+    consolidado.totais.receita_bruta += abate.receita_bruta || 0
+    consolidado.totais.custos_totais += abate.custos_totais || 0
+    consolidado.totais.lucro_liquido += abate.lucro_liquido || 0
+    consolidado.totais.valor_perdas += abate.valor_perdas || 0
+    
+    // Consolidar indicadores com diferentes tipos de agregação
+    consolidado.contadores.abates_com_dados++
+    
+    // Médias aritméticas (percentuais)
+    consolidado.contadores.soma_percentual_perda += abate.percentual_perda_total || 0
+    consolidado.contadores.soma_eficiencia_aproveitamento += abate.eficiencia_aproveitamento || 0
+    consolidado.contadores.soma_score_performance += abate.score_performance || 0
+    consolidado.contadores.soma_diversificacao += abate.diversificacao_produtos || 0
+    
+    // Somar indicadores de performance operacional para média aritmética
+    consolidado.contadores.soma_aves_hora_ponderada += abate.aves_hora || 0
+    consolidado.contadores.soma_kg_hora_ponderada += abate.kg_hora || 0
+    consolidado.contadores.soma_eficiencia_op_ponderada += abate.eficiencia_operacional || 0
+    
+    // Médias ponderadas por quantidade de aves (outros indicadores)
+    const aves = abate.quantidade_aves || 0
+    
+    // Médias ponderadas por peso
+    const peso = abate.peso_total_kg || 0
+    consolidado.contadores.soma_media_valor_kg_ponderada += (abate.media_valor_kg || 0) * peso
+    consolidado.contadores.soma_custo_ave_ponderada += (abate.custo_ave || 0) * aves
+    consolidado.contadores.soma_custo_abate_kg_ponderada += (abate.custo_abate_kg || 0) * peso
+    consolidado.contadores.soma_custo_frango_ponderada += (abate.custo_frango || 0) * aves
+    consolidado.contadores.soma_lucro_frango_ponderada += (abate.lucro_frango || 0) * aves
+    consolidado.contadores.soma_lucro_total_ponderada += (abate.lucro_total || 0) * aves
+    consolidado.contadores.soma_peso_medio_ponderada += (abate.peso_medio_geral || 0) * peso
   })
   
   // Calcular receita e custo total
@@ -112,6 +202,46 @@ const dadosConsolidados = computed(() => {
   })
   
   consolidado.custoTotal = Object.values(consolidado.despesasFixas).reduce((sum, val) => sum + val, 0)
+  
+  // Calcular indicadores corretos com diferentes tipos de agregação
+  const numAbates = consolidado.contadores.abates_com_dados
+  
+  // Indicadores básicos derivados dos totais - com validação completa
+  if (consolidado.pesoTotalVivo > 0) {
+    consolidado.indicadores.rendimento_final = validarValor((consolidado.pesoTotalProcessado / consolidado.pesoTotalVivo) * 100, 0, 100)
+    consolidado.indicadores.custo_kg = validarValor(consolidado.custoTotal / consolidado.pesoTotalVivo, 0)
+    consolidado.indicadores.lucro_kg = validarValor((consolidado.receitaTotal - consolidado.custoTotal) / consolidado.pesoTotalVivo)
+  }
+  
+  // Médias aritméticas (percentuais) - com validação completa
+  if (numAbates > 0) {
+    consolidado.indicadores.percentual_perda_total = validarValor(consolidado.contadores.soma_percentual_perda / numAbates, 0, 100)
+    consolidado.indicadores.eficiencia_aproveitamento = validarValor(consolidado.contadores.soma_eficiencia_aproveitamento / numAbates, 0, 100)
+    consolidado.indicadores.score_performance = validarValor(consolidado.contadores.soma_score_performance / numAbates, 0, 100)
+    consolidado.indicadores.diversificacao_produtos = validarValor(consolidado.contadores.soma_diversificacao / numAbates, 0, 100)
+  }
+  
+  // Médias aritméticas para indicadores de performance operacional
+  if (numAbates > 0) {
+    consolidado.indicadores.aves_hora = validarValor(consolidado.contadores.soma_aves_hora_ponderada / numAbates, 0)
+    consolidado.indicadores.kg_hora = validarValor(consolidado.contadores.soma_kg_hora_ponderada / numAbates, 0)
+    consolidado.indicadores.eficiencia_operacional = validarValor(consolidado.contadores.soma_eficiencia_op_ponderada / numAbates, 0, 100)
+  }
+  
+  // Médias ponderadas por quantidade de aves (outros indicadores)
+  if (consolidado.totalAves > 0) {
+    consolidado.indicadores.custo_ave = validarValor(consolidado.contadores.soma_custo_ave_ponderada / consolidado.totalAves, 0)
+    consolidado.indicadores.custo_frango = validarValor(consolidado.contadores.soma_custo_frango_ponderada / consolidado.totalAves, 0)
+    consolidado.indicadores.lucro_frango = validarValor(consolidado.contadores.soma_lucro_frango_ponderada / consolidado.totalAves)
+    consolidado.indicadores.lucro_total = validarValor(consolidado.contadores.soma_lucro_total_ponderada / consolidado.totalAves)
+  }
+  
+  // Médias ponderadas por peso - com validação completa
+  if (consolidado.pesoTotalVivo > 0) {
+    consolidado.indicadores.media_valor_kg = validarValor(consolidado.contadores.soma_media_valor_kg_ponderada / consolidado.pesoTotalVivo, 0)
+    consolidado.indicadores.custo_abate_kg = validarValor(consolidado.contadores.soma_custo_abate_kg_ponderada / consolidado.pesoTotalVivo, 0)
+    consolidado.indicadores.peso_medio_geral = validarValor(consolidado.contadores.soma_peso_medio_ponderada / consolidado.pesoTotalVivo, 0)
+  }
   
   return consolidado
 })
@@ -204,7 +334,7 @@ const totaisGerais = computed(() => {
   }
 })
 
-// Carregar dados
+// Carregar dados dos abates completos
 const carregarDados = async () => {
   loading.value = true
   error.value = ''
@@ -213,7 +343,7 @@ const carregarDados = async () => {
     // Preparar parâmetros de filtro de data para a API
     const params: any = { limit: 1000 }
     
-    // Aplicar filtros de data se definidos
+    // Aplicar filtros de data se definidos - usar endpoint principal que retorna todos os indicadores
     if (filtros.value.dataInicio || filtros.value.dataFim) {
       if (filtros.value.dataInicio) {
         params.data_inicio = filtros.value.dataInicio
@@ -223,6 +353,7 @@ const carregarDados = async () => {
       }
     }
     
+    // Usar endpoint principal que retorna todos os indicadores calculados
     const abatesData = await getAbatesCompletos(params)
     abatesCompletos.value = abatesData
   } catch (err) {
@@ -266,18 +397,7 @@ const limparFiltros = () => {
   }
 }
 
-// Função para exportar PDF
-const exportarPDF = () => {
-  if (!dadosConsolidados.value) return
-  
-  // Abrir o relatório de impressão que já tem funcionalidade de impressão/PDF
-  mostrarRelatorioImpressao.value = true
-  
-  // Aguardar um pouco para o modal aparecer e então acionar a impressão
-  setTimeout(() => {
-    window.print()
-  }, 500)
-}
+
 
 const exportarCSV = () => {
   let dados: any[] = []
@@ -377,10 +497,7 @@ onMounted(() => {
           <span class="btn-icon">🖨️</span>
           Imprimir
         </button>
-        <button @click="exportarPDF" class="btn btn-primary btn-sm" :disabled="loading || !dadosConsolidados">
-          <span class="btn-icon">📄</span>
-          Exportar PDF
-        </button>
+
       </div>
     </div>
 
@@ -538,6 +655,9 @@ onMounted(() => {
               perdas_kg: dadosConsolidados.indicadores.perdas_kg,
               energia_kwh: dadosConsolidados.indicadores.energia_kwh
             }"
+            :kg-hora="dadosConsolidados.indicadores.kg_hora"
+            :aves-hora="dadosConsolidados.indicadores.aves_hora"
+            :eficiencia-operacional="dadosConsolidados.indicadores.eficiencia_operacional"
             variant="produtos"
           />
         </div>
