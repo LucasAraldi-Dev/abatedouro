@@ -1,0 +1,572 @@
+/* Estados de Loading e Feedback do Login */
+
+/* Estados de Loading */
+.auth-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1rem;
+  animation: slideInFromTop 0.6s ease-out;
+  background: var(--container-bg);
+  border-radius: 1rem;
+  border: 1px solid var(--input-border);
+  box-shadow: 0 15px 35px var(--shadow-color);
+  margin: 1rem 0;
+}
+
+.progress-steps {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 20rem;
+  margin-bottom: 1.5rem;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  opacity: 0.6;
+  transition: all 0.4s ease;
+  position: relative;
+}
+
+.progress-step.active {
+  opacity: 1;
+  transform: translateX(5px);
+}
+
+.progress-step.completed {
+  opacity: 0.9;
+}
+
+.step-indicator {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 1rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.progress-step.active .step-indicator {
+  background: var(--primary-color);
+  box-shadow: 0 0 20px rgba(255, 111, 97, 0.4);
+  animation: pulse-indicator 2s infinite;
+}
+
+.progress-step.completed .step-indicator {
+  background: var(--success-color);
+  color: white;
+}
+
+.step-label {
+  font-size: 0.875rem;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.progress-step.active .step-label {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.progress-step.completed .step-label {
+  color: var(--success-color);
+}
+
+/* Linha conectora entre steps */
+.progress-step::after {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 2.5rem;
+  height: 0;
+  width: 2px;
+  background-color: #666;
+  transition: all 0.5s ease;
+}
+
+.progress-step:not(:last-child).active::after,
+.progress-step:not(:last-child).completed::after {
+  height: 1.5rem;
+}
+
+.progress-step.active::after {
+  background-color: var(--primary-color);
+  box-shadow: 0 0 10px rgba(255, 111, 97, 0.3);
+}
+
+.progress-step.completed::after {
+  background-color: var(--success-color);
+}
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem 0;
+  min-height: 8rem;
+  justify-content: center;
+}
+
+.status-message {
+  font-size: 1rem;
+  text-align: center;
+  color: var(--text-color);
+  margin-top: 1rem;
+  min-height: 1.5rem;
+  opacity: 0.9;
+  font-weight: 500;
+}
+
+/* Estado de Sucesso */
+.success-icon {
+  width: 4rem;
+  height: 4rem;
+  background: var(--success-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin: 1rem auto;
+  box-shadow: 0 10px 30px rgba(0, 204, 102, 0.4);
+  animation: scaleInSuccess 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  color: white;
+  font-weight: bold;
+}
+
+.success-message {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--success-color);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.redirect-message {
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+.security-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(135deg, rgba(0, 204, 102, 0.2), rgba(0, 204, 102, 0.1));
+  border: 1px solid rgba(0, 204, 102, 0.3);
+  border-radius: 1rem;
+  padding: 0.75rem 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--success-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  animation: securityPulse 2s infinite;
+}
+
+.security-badge i {
+  font-size: 1rem;
+  color: var(--success-color);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 0.25rem;
+  background: var(--input-border);
+  border-radius: 0.125rem;
+  overflow: hidden;
+  max-width: 16rem;
+  margin: 0 auto;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--success-color);
+  animation: fillProgress 4s linear forwards;
+  width: 0;
+  border-radius: 0.125rem;
+}
+
+/* Estados de Erro */
+.login-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: slideInFromTop 0.6s ease-out, shakeError 0.5s cubic-bezier(.36,.07,.19,.97) 0.2s;
+  background: var(--container-bg);
+  border-radius: 1rem;
+  border: 2px solid var(--error-color);
+  box-shadow: 0 15px 35px rgba(255, 61, 113, 0.2);
+  margin: 1rem 0;
+  padding: 2rem 1.5rem;
+}
+
+.error-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 30px rgba(255, 61, 113, 0.4);
+  animation: pulseError 2s infinite;
+  color: white;
+}
+
+/* Cores diferenciadas para tipos de erro */
+.error-icon {
+  background: var(--error-color);
+}
+
+.login-error[data-error-type="user_not_found"] .error-icon {
+  background: var(--accent-color);
+  box-shadow: 0 10px 30px rgba(233, 92, 0, 0.4);
+}
+
+.login-error[data-error-type="wrong_password"] .error-icon {
+  background: var(--error-color);
+}
+
+.login-error[data-error-type="account_blocked"] .error-icon {
+  background: #ca294a;
+  box-shadow: 0 10px 30px rgba(202, 41, 74, 0.4);
+}
+
+.login-error[data-error-type="connection"] .error-icon,
+.login-error[data-error-type="network"] .error-icon,
+.login-error[data-error-type="timeout"] .error-icon {
+  background: #3366ff;
+  box-shadow: 0 10px 30px rgba(51, 102, 255, 0.4);
+}
+
+.login-error[data-error-type="server"] .error-icon {
+  background: #8252d6;
+  box-shadow: 0 10px 30px rgba(130, 82, 214, 0.4);
+}
+
+.login-error[data-error-type="too_many_attempts"] .error-icon {
+  background: var(--warning-color);
+  box-shadow: 0 10px 30px rgba(255, 152, 0, 0.4);
+}
+
+.error-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: var(--error-color);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.error-message {
+  color: var(--text-color);
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+.error-help {
+  color: var(--text-color);
+  font-size: 0.875rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 61, 113, 0.2);
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+.error-actions {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  max-width: 20rem;
+}
+
+.retry-button {
+  flex: 1;
+  background: var(--button-bg);
+  border: 2px solid var(--primary-color);
+  color: white;
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.retry-button:hover {
+  background: var(--button-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 111, 97, 0.3);
+}
+
+.action-button {
+  flex: 1;
+  background: transparent;
+  border: 2px solid var(--input-border);
+  color: var(--text-color);
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.action-button:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.offline-button {
+  flex: 1;
+  background: transparent;
+  border: 2px solid var(--warning-color);
+  color: var(--warning-color);
+  padding: 0.875rem 1.25rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.offline-button:hover {
+  background: rgba(255, 152, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Animações */
+@keyframes slideInFromTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shakeError {
+  10%, 90% { 
+    transform: translate3d(-2px, 0, 0); 
+  }
+  20%, 80% { 
+    transform: translate3d(4px, 0, 0); 
+  }
+  30%, 50%, 70% { 
+    transform: translate3d(-6px, 0, 0); 
+  }
+  40%, 60% { 
+    transform: translate3d(6px, 0, 0); 
+  }
+}
+
+@keyframes scaleInSuccess {
+  0% { 
+    transform: scale(0) rotate(-180deg); 
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotate(-90deg);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: scale(1) rotate(0deg); 
+    opacity: 1;
+  }
+}
+
+@keyframes pulseError {
+  0% { 
+    transform: scale(1); 
+    box-shadow: 0 10px 30px rgba(255, 61, 113, 0.4); 
+  }
+  50% { 
+    transform: scale(1.05); 
+    box-shadow: 0 15px 40px rgba(255, 61, 113, 0.6); 
+  }
+  100% { 
+    transform: scale(1); 
+    box-shadow: 0 10px 30px rgba(255, 61, 113, 0.4); 
+  }
+}
+
+@keyframes pulse-indicator {
+  0% { 
+    transform: scale(1); 
+    box-shadow: 0 0 20px rgba(255, 111, 97, 0.4); 
+  }
+  50% { 
+    transform: scale(1.1); 
+    box-shadow: 0 0 30px rgba(255, 111, 97, 0.6); 
+  }
+  100% { 
+    transform: scale(1); 
+    box-shadow: 0 0 20px rgba(255, 111, 97, 0.4); 
+  }
+}
+
+@keyframes fillProgress {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+@keyframes securityPulse {
+  0% { 
+    box-shadow: 0 0 10px rgba(0, 204, 102, 0.3);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 20px rgba(0, 204, 102, 0.5);
+    transform: scale(1.02);
+  }
+  100% { 
+    box-shadow: 0 0 10px rgba(0, 204, 102, 0.3);
+    transform: scale(1);
+  }
+}
+
+/* Transições suaves entre estados */
+.auth-progress > *,
+.login-error > *,
+.loader-container > * {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(15px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* Modal Overlay para Feedback */
+.feedback-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeInModal 0.3s ease;
+}
+
+.feedback-modal {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  overflow: hidden;
+  animation: slideInModal 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInModal {
+  from { 
+    opacity: 0;
+    transform: translateY(-50px) scale(0.9);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .auth-progress,
+  .login-error {
+    padding: 1.5rem 1rem;
+    margin: 0.5rem 0;
+  }
+  
+  .progress-steps {
+    max-width: 100%;
+  }
+  
+  .step-indicator {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.75rem;
+    margin-right: 0.75rem;
+  }
+  
+  .step-label {
+    font-size: 0.8rem;
+  }
+  
+  .error-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .error-icon,
+  .success-icon {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.5rem;
+  }
+  
+  .error-title,
+  .success-message {
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .feedback-modal {
+    max-width: 95%;
+  }
+  
+  .auth-progress,
+  .login-error {
+    padding: 1rem;
+  }
+  
+  .progress-steps {
+    margin-bottom: 1rem;
+  }
+  
+  .step-indicator {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.7rem;
+  }
+  
+  .step-label {
+    font-size: 0.75rem;
+  }
+} 

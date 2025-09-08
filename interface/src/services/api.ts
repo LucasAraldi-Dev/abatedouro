@@ -257,6 +257,11 @@ export interface AbateCompletoUpdate {
   percentual_rendimento?: number;
 }
 
+// Helper para requisições com cookies de sessão (credenciais)
+function withCredentialsFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+  return fetch(input, { ...init, credentials: 'include' })
+}
+
 // Health endpoint
 export async function getHealth() {
   const res = await fetch(`${API_BASE}/saude/`)
@@ -515,4 +520,36 @@ export async function deleteProduto(id: string) {
   }
   
   return true;
+}
+
+// Abates Completos endpoints
+export async function authRegister(payload: { nome_completo: string; email: string; username: string; password: string; confirm_password: string }) {
+  const res = await withCredentialsFetch(`${API_BASE}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  const data = await res.json().catch(() => ({}))
+  return { ok: res.ok, status: res.status, data }
+}
+
+export async function authLogin(payload: { username: string; password: string }) {
+  const res = await withCredentialsFetch(`${API_BASE}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  const data = await res.json().catch(() => ({}))
+  return { ok: res.ok, status: res.status, data }
+}
+
+export async function authMe() {
+  const res = await withCredentialsFetch(`${API_BASE}/auth/me`)
+  const data = await res.json().catch(() => ({}))
+  return { ok: res.ok, status: res.status, data }
+}
+
+export async function authLogout() {
+  const res = await withCredentialsFetch(`${API_BASE}/auth/logout`, { method: 'POST' })
+  return { ok: res.ok, status: res.status }
 }
