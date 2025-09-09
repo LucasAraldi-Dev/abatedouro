@@ -82,7 +82,12 @@ export const useAuthStore = defineStore('auth', {
           else if (res.status === 401) this.error = 'Credenciais inválidas'
           else this.error = 'Erro ao realizar login'
           console.log('🔑 [AUTH STORE DEBUG] Erro definido:', this.error)
-          return { success: false }
+          return { 
+            success: false, 
+            status: res.status, 
+            data: res.data, 
+            message: this.error 
+          }
         }
         
         console.log('🔑 [AUTH STORE DEBUG] Login bem-sucedido! Buscando dados do usuário...')
@@ -108,7 +113,12 @@ export const useAuthStore = defineStore('auth', {
       } catch (e) {
         console.log('🔑 [AUTH STORE DEBUG] Erro durante login:', e)
         this.error = 'Erro de conexão'
-        return { success: false }
+        return { 
+          success: false, 
+          status: null, 
+          data: null, 
+          message: 'Erro de conexão' 
+        }
       } finally {
         console.log('🔑 [AUTH STORE DEBUG] Finalizando login. Loading:', false)
         this.loading = false
