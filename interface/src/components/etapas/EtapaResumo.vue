@@ -360,7 +360,7 @@
            </div>
            
            <div class="eficiencia-aproveitamento">
-             <div class="aproveitamento-valor" :class="{ 'aproveitamento-bom': eficienciaAproveitamento >= 85, 'aproveitamento-ruim': eficienciaAproveitamento < 75 }">{{ eficienciaAproveitamentoFormatted }}</div>
+             <div class="aproveitamento-valor" :class="{ 'aproveitamento-bom': eficienciaAproveitamento >= 85, 'aproveitamento-ruim': eficienciaAproveitamento < 80 }">{{ eficienciaAproveitamentoFormatted }}</div>
              <div class="aproveitamento-label">Taxa de Aproveitamento</div>
              <div class="aproveitamento-desc">Peso processado / Peso vivo</div>
            </div>
@@ -1143,12 +1143,12 @@ const alertasCriticos = computed(() => {
   const alertas = []
   
   // Alerta de rendimento muito baixo
-  if (rendimentoFinal.value < 70) {
+  if (rendimentoFinal.value < 75) {
     alertas.push({
       tipo: 'critico',
       icone: '🚨',
       titulo: 'Rendimento Crítico',
-      mensagem: `Rendimento de ${rendimentoFinal.value.toFixed(1)}% está muito abaixo do esperado (>75%)`,
+      mensagem: `Rendimento de ${rendimentoFinal.value.toFixed(1)}% está muito abaixo do esperado (>80%)`,
       valor: `${rendimentoFinal.value.toFixed(1)}%`,
       categoria: 'rendimento'
     })
