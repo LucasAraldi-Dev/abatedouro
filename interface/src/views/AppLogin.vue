@@ -71,14 +71,14 @@
                 />
                 <label>Senha</label>
                 <button type="button" @click="togglePassword" class="password-toggle">
-                  <svg v-if="showPassword" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="5" y="10" width="14" height="10" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <path d="M8 10V7a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
-                  </svg>
-                  <svg v-else width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <svg v-if="showPassword" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
                     <rect x="5" y="10" width="14" height="10" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
                     <path d="M16 10V7a4 4 0 00-8 0" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
+                  </svg>
+                  <svg v-else width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="5" y="10" width="14" height="10" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M8 10V7a4 4 0 118 0v3" fill="none" stroke="currentColor" stroke-width="2"/>
                     <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
                   </svg>
                 </button>
@@ -205,17 +205,21 @@
                   @input="checkPasswordStrength"
                   placeholder=" "
                   required
+                  autocomplete="new-password"
+                  autocorrect="off"
+                  autocapitalize="none"
+                  spellcheck="false"
                 />
                 <label>Senha</label>
                 <button type="button" @click="toggleRegisterPassword" class="password-toggle">
-                  <svg v-if="showRegisterPassword" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="5" y="10" width="14" height="10" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <path d="M8 10V7a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
-                  </svg>
-                  <svg v-else width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <svg v-if="showRegisterPassword" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
                     <rect x="5" y="10" width="14" height="10" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
                     <path d="M16 10V7a4 4 0 00-8 0" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
+                  </svg>
+                  <svg v-else width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="5" y="10" width="14" height="10" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M8 10V7a4 4 0 118 0v3" fill="none" stroke="currentColor" stroke-width="2"/>
                     <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
                   </svg>
                 </button>
@@ -230,17 +234,21 @@
                   v-model="registerData.confirmPassword"
                   placeholder=" "
                   required
+                  autocomplete="new-password"
+                  autocorrect="off"
+                  autocapitalize="none"
+                  spellcheck="false"
                 />
                 <label>Confirmar Senha</label>
                 <button type="button" @click="toggleConfirmPassword" class="password-toggle">
-                  <svg v-if="showConfirmPassword" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="5" y="10" width="14" height="10" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <path d="M8 10V7a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="2"/>
-                    <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
-                  </svg>
-                  <svg v-else width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <svg v-if="showConfirmPassword" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
                     <rect x="5" y="10" width="14" height="10" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
                     <path d="M16 10V7a4 4 0 00-8 0" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
+                  </svg>
+                  <svg v-else width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="5" y="10" width="14" height="10" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                    <path d="M8 10V7a4 4 0 118 0v3" fill="none" stroke="currentColor" stroke-width="2"/>
                     <circle cx="12" cy="15" r="1.5" fill="currentColor"/>
                   </svg>
                 </button>
@@ -329,6 +337,14 @@
       </div>
     </div>
 
+    <!-- Overlay de Transição -->
+    <div v-if="showTransitionOverlay" class="transition-overlay">
+      <div class="transition-content">
+        <div class="transition-spinner"></div>
+        <div class="transition-message">Carregando dashboard...</div>
+      </div>
+    </div>
+
     <!-- Componentes Modais -->
     <TermsModal 
       :isVisible="showTermsModal" 
@@ -413,6 +429,7 @@ export default {
     const errorMessage = ref('')
     const errorHelp = ref('')
     const showFeedbackModal = ref(false)
+    const showTransitionOverlay = ref(false)
 
     // Estados do registro
     const registerData = reactive({
@@ -679,22 +696,39 @@ export default {
     }
     
     const performActualLogin = async () => {
+      console.log('🔐 [LOGIN DEBUG] Iniciando performActualLogin...')
+      console.log('🔐 [LOGIN DEBUG] Username:', username.value)
+      console.log('🔐 [LOGIN DEBUG] Password length:', password.value?.length || 0)
+      
       const originalPush = router.push
       let blockedNavigation = null
       try {
+        console.log('🔐 [LOGIN DEBUG] Limpando erros do store...')
         authStore.clearError()
+        
+        console.log('🔐 [LOGIN DEBUG] Bloqueando navegação durante login...')
         router.push = (location) => {
+          console.log('🔐 [LOGIN DEBUG] Navegação bloqueada para:', location)
           blockedNavigation = location
           return Promise.resolve()
         }
+        
+        console.log('🔐 [LOGIN DEBUG] Chamando authStore.login...')
         const result = await authStore.login({
           username: username.value,
           password: password.value
         })
+        
+        console.log('🔐 [LOGIN DEBUG] Resultado do login:', result)
         if (!result || !result.success) {
+          console.log('🔐 [LOGIN DEBUG] Login falhou:', result)
+          
           // Se status 400/401 OU mensagem de credenciais, nunca lançar backend-offline
           const credenciaisMsg = (result.message?.toLowerCase().includes('credenciais') || result.data?.message?.toLowerCase().includes('credenciais'))
+          console.log('🔐 [LOGIN DEBUG] Mensagem de credenciais detectada:', credenciaisMsg)
+          
           if (result.status === 400 || result.status === 401 || credenciaisMsg) {
+            console.log('🔐 [LOGIN DEBUG] Erro de credenciais (400/401):', result.status)
             const error = new Error(result?.message || 'Credenciais inválidas')
             error.response = {
               status: result?.status || 400,
@@ -727,17 +761,62 @@ export default {
     }
     
     const showLoginSuccess = async () => {
+      console.log('✅ [LOGIN SUCCESS DEBUG] Iniciando showLoginSuccess...')
+      
       currentStep.value = 4
-      // Exibe tela de sucesso por 1.5 segundos
+      console.log('✅ [LOGIN SUCCESS DEBUG] Step 4 - Mostrando sucesso')
+      
+      // Aguarda um momento para mostrar o feedback de sucesso
+      console.log('✅ [LOGIN SUCCESS DEBUG] Aguardando 1200ms para mostrar feedback...')
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      
+      // Oculta o modal de feedback mas mantém na página de login
+      console.log('✅ [LOGIN SUCCESS DEBUG] Ocultando modal de feedback')
+      showFeedbackModal.value = false
+      
+      // Aguarda mais um momento para o usuário ver a transição
+      console.log('✅ [LOGIN SUCCESS DEBUG] Aguardando 400ms para transição...')
+      await new Promise(resolve => setTimeout(resolve, 400))
+      
+      // Ativa o overlay de transição escuro
+      console.log('✅ [LOGIN SUCCESS DEBUG] Ativando overlay de transição')
+      showTransitionOverlay.value = true
+      
+      // Inicializa a autenticação em background
+      console.log('✅ [LOGIN SUCCESS DEBUG] Inicializando autenticação...')
+      const authStore = useAuthStore()
+      console.log('✅ [LOGIN SUCCESS DEBUG] Estado atual do auth store:', { user: authStore.user, isAuthenticated: authStore.isAuthenticated })
+      
+      await authStore.initializeAuth()
+      console.log('✅ [LOGIN SUCCESS DEBUG] Autenticação inicializada. Novo estado:', { user: authStore.user, isAuthenticated: authStore.isAuthenticated })
+      
+      // Aguarda que o dashboard esteja pronto para carregar
+      console.log('✅ [LOGIN SUCCESS DEBUG] Aguardando 800ms para dashboard...')
+      await new Promise(resolve => setTimeout(resolve, 800))
+      
+      // Agora sim redireciona
+      const targetRoute = window.pendingNavigation || '/dashboard'
+      console.log('✅ [LOGIN SUCCESS DEBUG] Rota de destino:', targetRoute)
+      console.log('✅ [LOGIN SUCCESS DEBUG] Navegação pendente:', window.pendingNavigation)
+      
+      window.pendingNavigation = null
+      console.log('✅ [LOGIN SUCCESS DEBUG] Limpou navegação pendente')
+      
+      // Desativa o overlay após o redirecionamento
       setTimeout(() => {
-        showFeedbackModal.value = false
+        console.log('✅ [LOGIN SUCCESS DEBUG] Desativando overlay e isLoggingIn (500ms)')
+        showTransitionOverlay.value = false
         isLoggingIn.value = false
-        const authStore = useAuthStore()
-        authStore.initializeAuth()
-        const targetRoute = window.pendingNavigation || '/dashboard'
-        window.pendingNavigation = null
-        router.push(targetRoute)
-      }, 1500)
+      }, 500)
+      
+      console.log('✅ [LOGIN SUCCESS DEBUG] Executando router.push para:', targetRoute)
+      router.push(targetRoute)
+      
+      // Aguarda o dashboard carregar e então remove o overlay
+      setTimeout(() => {
+        console.log('✅ [LOGIN SUCCESS DEBUG] Desativando overlay final (800ms)')
+        showTransitionOverlay.value = false
+      }, 800)
     }
     
     const showLoginError = (type, message) => {
@@ -1117,6 +1196,7 @@ export default {
       errorMessage,
       errorHelp,
       showFeedbackModal,
+      showTransitionOverlay,
       
       // Registro
       registerData,
@@ -1414,7 +1494,7 @@ export default {
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 0.25rem;
-  color: var(--primary-color);
+  color: #dc2626;
   text-shadow: 0 2px 4px var(--shadow-color);
 }
 
@@ -1457,6 +1537,7 @@ export default {
 .input-box {
   position: relative;
   margin-bottom: 1.5rem;
+  backface-visibility: hidden;
 }
 
 .input-box.select-box select {
@@ -1501,6 +1582,7 @@ export default {
   color: var(--primary-color);
   z-index: 3;
   transition: color 0.3s ease;
+  backface-visibility: hidden;
 }
 
 .input-box input {
@@ -1767,18 +1849,24 @@ export default {
 
 .password-toggle {
   position: absolute;
-  right: 15px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   color: #dc2626;
   cursor: pointer;
-  font-size: 18px;
-  padding: 5px;
+  font-size: 16px;
+  padding: 4px;
   border-radius: 50%;
   transition: all 0.3s ease;
   z-index: 5;
+  backface-visibility: hidden;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .password-toggle:hover {
@@ -2324,5 +2412,57 @@ export default {
     font-size: 1rem;
     margin-bottom: 1.2rem;
   }
+}
+
+/* Overlay de Transição */
+.transition-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeInOverlay 0.3s ease-out;
+}
+
+.transition-content {
+  text-align: center;
+  color: white;
+}
+
+.transition-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid #dc2626;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px;
+}
+
+.transition-message {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+@keyframes fadeInOverlay {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>

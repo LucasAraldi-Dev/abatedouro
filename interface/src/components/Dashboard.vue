@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import '@/styles/common-headers.css'
+import { ref, onMounted, onUnmounted, onActivated, onDeactivated, computed } from 'vue'
 import { getLotesAbate, getProdutos, getAbatesCompletos, type LoteAbate, type Produto, type AbateCompleto } from '../services/api'
 import { exportToCSV, exportToPDF, formatDate, formatCurrency, formatWeight, type ExportColumn } from '../utils/exportUtils'
 import ModalConfiguracaoLimites from './ModalConfiguracaoLimites.vue'
@@ -730,51 +731,62 @@ const carregarConfiguracaoLimites = async () => {
 
 // Lifecycle
 onMounted(() => {
+  console.log('🔧 [DASHBOARD DEBUG] Componente Dashboard montado')
   inicializarDatas()
   carregarConfiguracaoLimites()
   loadData()
+})
+
+onUnmounted(() => {
+  console.log('🔧 [DASHBOARD DEBUG] Componente Dashboard desmontado')
+})
+
+onActivated(() => {
+  console.log('🔧 [DASHBOARD DEBUG] Componente Dashboard ativado (keep-alive)')
+})
+
+onDeactivated(() => {
+  console.log('🔧 [DASHBOARD DEBUG] Componente Dashboard desativado (keep-alive)')
 })
 </script>
 
 <template>
   <div class="dashboard-container">
-    <div class="dashboard-header">
-      <div class="header-content">
-        <div>
-          <h2 class="dashboard-title">Dashboard</h2>
-          <p class="dashboard-subtitle">Visão geral do sistema</p>
-        </div>
-        <div class="header-actions">
-          <button @click="abrirModalConfiguracaoLimites" class="btn btn-config btn-sm">
-            <span class="btn-icon">⚙️</span>
-            Configurar Limites
+    <div class="page-header">
+      <div class="page-header-content">
+        <h2 class="page-title">Dashboard</h2>
+        <p class="page-subtitle">Visão geral do sistema</p>
+      </div>
+      <div class="page-header-actions">
+        <button @click="abrirModalConfiguracaoLimites" class="btn btn-config btn-sm">
+          <span class="btn-icon">⚙️</span>
+          Configurar Limites
+        </button>
+        <button @click="loadData" class="btn btn-secondary btn-sm" :disabled="loading">
+          <span class="btn-icon">🔄</span>
+          {{ loading ? 'Atualizando...' : 'Atualizar' }}
+        </button>
+        <div class="export-actions">
+          <button @click="exportarDashboard('csv')" class="btn btn-secondary btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10,9 9,9 8,9"/>
+            </svg>
+            Exportar CSV
           </button>
-          <button @click="loadData" class="btn btn-secondary btn-sm" :disabled="loading">
-            <span class="btn-icon">🔄</span>
-            {{ loading ? 'Atualizando...' : 'Atualizar' }}
+          <button @click="exportarDashboard('pdf')" class="btn btn-primary btn-sm">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14,2 14,8 20,8"/>
+              <line x1="16" y1="13" x2="8" y2="17"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10,9 9,9 8,9"/>
+            </svg>
+            Exportar PDF
           </button>
-          <div class="export-actions">
-            <button @click="exportarDashboard('csv')" class="btn btn-secondary btn-sm">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14,2 14,8 20,8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10,9 9,9 8,9"/>
-              </svg>
-              Exportar CSV
-            </button>
-            <button @click="exportarDashboard('pdf')" class="btn btn-primary btn-sm">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14,2 14,8 20,8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10,9 9,9 8,9"/>
-              </svg>
-              Exportar PDF
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -1283,9 +1295,13 @@ onMounted(() => {
 @import url('../styles/colors.css');
 
 .dashboard-container {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 0;
+  width: 100%;
+  padding: 2rem;
+  background: var(--bg-primary);
+  min-height: 100vh;
+  color: var(--text-primary);
+  border-left: 4px solid var(--primary-red);
+  border-right: 4px solid var(--primary-red);
 }
 
 .dashboard-header {
@@ -2371,7 +2387,7 @@ onMounted(() => {
 
 @media (max-width: 480px) {
   .dashboard-container {
-    padding: 0.5rem;
+    padding: 1rem;
   }
   
   .dashboard-title {

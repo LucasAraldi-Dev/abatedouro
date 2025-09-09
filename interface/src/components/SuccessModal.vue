@@ -125,8 +125,9 @@ export default {
   background: var(--bg-primary);
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-  max-width: 500px;
-  width: 90%;
+  width: 40%;
+  min-width: 600px;
+  max-width: 800px;
   max-height: 90vh;
   overflow: hidden;
   animation: modalSlideIn 0.3s ease-out;
@@ -179,8 +180,9 @@ export default {
 .content-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  gap: 2.5rem;
   align-items: start;
+  margin-top: 1.5rem;
 }
 
 /* Success Icon */
@@ -198,17 +200,18 @@ export default {
 .details-section {
   background: var(--bg-accent);
   border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  padding: 2rem;
   border: 1px solid var(--border-light);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .detail-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0;
+  padding: 1rem 0;
   border-bottom: 1px solid var(--border-light);
+  transition: all 0.2s ease;
 }
 
 .detail-item:last-child {
@@ -238,9 +241,10 @@ export default {
 .approval-info {
   background: var(--bg-accent);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 2rem;
   border: 1px solid var(--border-light);
   border-left: 4px solid var(--warning-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .approval-header {
@@ -285,11 +289,12 @@ export default {
 .step {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
   background: var(--bg-primary);
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--border-light);
+  transition: all 0.2s ease;
 }
 
 .step i {
@@ -367,9 +372,17 @@ export default {
 }
 
 /* Responsividade */
+@media (max-width: 1200px) {
+  .modal-container {
+    width: 50%;
+    min-width: 500px;
+  }
+}
+
 @media (max-width: 768px) {
   .modal-container {
-    width: 95%;
+    width: 90%;
+    min-width: 400px;
     margin: 1rem;
   }
   
@@ -423,11 +436,10 @@ export default {
 }
 
 @media (max-width: 480px) {
-  .success-modal {
-    width: 100%;
-    height: auto;
-    border-radius: 0;
-    padding: 20px 15px;
+  .modal-container {
+    width: 95%;
+    min-width: 320px;
+    margin: 0.5rem;
   }
   
   .success-icon {

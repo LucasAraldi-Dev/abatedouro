@@ -1,10 +1,15 @@
 <template>
   <div class="lotes-abate">
-    <div class="header">
-      <h2>Abates</h2>
-      <button @click="showCreateForm = true" class="btn-primary">
-        Novo Lote
-      </button>
+    <div class="page-header">
+      <div class="page-header-content">
+        <h2 class="page-title">Abates</h2>
+        <p class="page-subtitle">Controle de lotes e processamento</p>
+      </div>
+      <div class="page-header-actions">
+        <button @click="showCreateForm = true" class="btn-primary">
+          Novo Lote
+        </button>
+      </div>
     </div>
 
     <!-- Busca Avançada -->
@@ -107,6 +112,7 @@
 </template>
 
 <script setup lang="ts">
+import '@/styles/common-headers.css'
 import { ref, onMounted, computed } from 'vue'
 import { getAbatesCompletos, createAbateCompleto, updateAbateCompleto, deleteAbateCompleto, getAbateCompleto } from '../services/api'
 import BuscaAvancada from './BuscaAvancada.vue'
@@ -475,28 +481,7 @@ onMounted(() => {
   border-right: 4px solid var(--primary-red);
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: var(--bg-secondary);
-  border-radius: 16px;
-  box-shadow: var(--shadow-light);
-  border: 1px solid var(--border-light);
-}
-
-.header h2 {
-  color: var(--text-primary);
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* Estilos do header removidos - usando common-headers.css */
 
 .export-actions {
   display: flex;
