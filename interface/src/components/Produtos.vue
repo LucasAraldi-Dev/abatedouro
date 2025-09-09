@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '@/styles/common-headers.css'
 import { ref, onMounted, computed } from 'vue'
 import { getProdutos, createProduto, updateProduto, deleteProduto, type Produto, type ProdutoCreate, type ProdutoUpdate } from '../services/api'
 import BuscaAvancada from './BuscaAvancada.vue'
@@ -358,11 +359,16 @@ onMounted(() => {
 
 <template>
   <div class="produtos-container">
-    <div class="header">
-      <h2>Produtos e Cortes</h2>
-      <button @click="openModal()" class="btn-primary">
-        Novo Produto
-      </button>
+    <div class="page-header">
+      <div class="page-header-content">
+        <h2 class="page-title">Produtos e Cortes</h2>
+        <p class="page-subtitle">Gerencie produtos, cortes e preços</p>
+      </div>
+      <div class="page-header-actions">
+        <button @click="openModal()" class="btn-primary">
+          Novo Produto
+        </button>
+      </div>
     </div>
 
     <!-- Busca Avançada -->
@@ -504,8 +510,6 @@ onMounted(() => {
                   <option value="Sobrecoxa">Sobrecoxa</option>
                   <option value="Asa">Asa</option>
                   <option value="Carcaça">Carcaça</option>
-                  <option value="Asa">Asa</option>
-                  <option value="Carcaça">Carcaça</option>
                   <option value="Miúdos">Miúdos</option>
                   <option value="Outros">Outros</option>
                 </select>
@@ -603,9 +607,13 @@ onMounted(() => {
 @import url('../styles/colors.css');
 
 .produtos-container {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 0;
+  width: 100%;
+  padding: 2rem;
+  background: var(--bg-primary);
+  min-height: 100vh;
+  color: var(--text-primary);
+  border-left: 4px solid var(--primary-red);
+  border-right: 4px solid var(--primary-red);
 }
 
 .export-actions {
@@ -615,28 +623,7 @@ onMounted(() => {
   justify-content: flex-end;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: var(--bg-secondary);
-  border-radius: 16px;
-  box-shadow: var(--shadow-light);
-  border: 2px solid var(--border-light);
-  border-left: 6px solid var(--primary-red);
-}
-
-.header h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
+/* Estilos do header removidos - usando common-headers.css */
 
 /* Estilos removidos - usando BuscaAvancada */
 
@@ -1225,12 +1212,10 @@ onMounted(() => {
 
 @media (max-width: 480px) {
   .produtos-container {
-    padding: 0.5rem;
+    padding: 1rem;
   }
   
-  .header h2 {
-    font-size: 1.5rem;
-  }
+  /* Estilo do título removido - usando common-headers.css */
   
   .actions {
     flex-direction: column;

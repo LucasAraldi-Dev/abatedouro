@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, watch } from 'vue'
+import '@/styles/common-headers.css'
+import { ref, onMounted, onUnmounted, onActivated, onDeactivated, computed, watch } from 'vue'
 import { getAbatesCompletos, type AbateCompleto } from '../services/api'
 import RelatorioImpressao from './relatorios/RelatorioImpressao.vue'
 import RelatorioProdutos from './relatorios/RelatorioProdutos.vue'
@@ -473,6 +474,7 @@ watch(
 
 // Lifecycle
 onMounted(() => {
+  console.log('🔧 [RELATÓRIOS DEBUG] Componente Relatórios montado')
   // Definir datas padrão (último mês)
   const hoje = new Date()
   const umMesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 1, hoje.getDate())
@@ -482,13 +484,28 @@ onMounted(() => {
   
   carregarDados()
 })
+
+onUnmounted(() => {
+  console.log('🔧 [RELATÓRIOS DEBUG] Componente Relatórios desmontado')
+})
+
+onActivated(() => {
+  console.log('🔧 [RELATÓRIOS DEBUG] Componente Relatórios ativado (keep-alive)')
+})
+
+onDeactivated(() => {
+  console.log('🔧 [RELATÓRIOS DEBUG] Componente Relatórios desativado (keep-alive)')
+})
 </script>
 
 <template>
   <div class="relatorios-container">
-    <div class="relatorios-header">
-      <h2 class="relatorios-title">Relatórios</h2>
-      <div class="header-actions">
+    <div class="page-header">
+      <div class="page-header-content">
+        <h2 class="page-title">Relatórios</h2>
+        <p class="page-subtitle">Análises e estatísticas detalhadas</p>
+      </div>
+      <div class="page-header-actions">
         <button @click="carregarDados" class="btn btn-secondary btn-sm" :disabled="loading">
           <span class="btn-icon">🔄</span>
           {{ loading ? 'Atualizando...' : 'Atualizar' }}
@@ -497,7 +514,6 @@ onMounted(() => {
           <span class="btn-icon">🖨️</span>
           Imprimir
         </button>
-
       </div>
     </div>
 
@@ -742,36 +758,15 @@ onMounted(() => {
 }
 
 .relatorios-container {
-  max-width: 100%;
-  margin: 0 auto;
-  padding: 1rem;
+  width: 100%;
+  padding: 2rem;
+  background: var(--bg-primary);
+  min-height: 100vh;
+  color: var(--text-primary);
+  border-left: 4px solid var(--primary-red);
+  border-right: 4px solid var(--primary-red);
 }
-.relatorios-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: var(--bg-secondary);
-  border-radius: 16px;
-  box-shadow: var(--shadow-light);
-  border: 1px solid var(--border-light);
-}
-
-.relatorios-title {
-  font-size: 2rem;
-  font-weight: 700;
-  margin: 0;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.header-actions {
-  display: flex;
-  gap: 0.75rem;
-}
+/* Estilos do header removidos - usando common-headers.css */
 
 .relatorios-content {
   display: flex;
@@ -1100,12 +1095,10 @@ onMounted(() => {
 
 @media (max-width: 480px) {
   .relatorios-container {
-    padding: 0.5rem;
+    padding: 1rem;
   }
   
-  .relatorios-title {
-    font-size: 1.5rem;
-  }
+  /* Estilo do título removido - usando common-headers.css */
   
   .total-card {
     padding: 1rem;

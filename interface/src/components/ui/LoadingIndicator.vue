@@ -64,7 +64,7 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(255, 255, 255, 0.9);
   z-index: 9999;
   backdrop-filter: blur(0.125rem);
 }
@@ -81,14 +81,14 @@ export default {
   justify-content: center;
   padding: 1rem;
   border-radius: 0.75rem;
-  background: linear-gradient(145deg, #3b3b3b, #2c2c2c);
-  border: 1px solid #555555;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 30px rgba(220, 38, 38, 0.1);
   transition: all 0.3s ease;
 }
 
 .loading-message {
-  color: #ffffff;
+  color: #374151;
   margin-top: 1rem;
   text-align: center;
   font-size: 0.875rem;
@@ -108,7 +108,7 @@ export default {
   height: 0.75rem;
   margin: 0 0.25rem;
   border-radius: 50%;
-  background-color: #ff6f61;
+  background-color: #dc2626;
   animation: bounce 1.4s infinite ease-in-out both;
 }
 
@@ -163,4 +163,4 @@ export default {
     margin-top: 0.75rem;
   }
 }
-</style> 
+</style>

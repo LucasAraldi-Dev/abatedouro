@@ -75,7 +75,7 @@
                 />
                 <label>Senha</label>
                 <button type="button" @click="togglePassword" class="password-toggle">
-                  <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                  <i :class="showPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
                 </button>
               </div>
             </div>
@@ -203,7 +203,7 @@
                 />
                 <label>Senha</label>
                 <button type="button" @click="toggleRegisterPassword" class="password-toggle">
-                  <i :class="showRegisterPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                  <i :class="showRegisterPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
                 </button>
               </div>
               
@@ -219,7 +219,7 @@
                 />
                 <label>Confirmar Senha</label>
                 <button type="button" @click="toggleConfirmPassword" class="password-toggle">
-                  <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                  <i :class="showConfirmPassword ? 'fas fa-eye' : 'fas fa-eye-slash'"></i>
                 </button>
               </div>
               
@@ -2279,4 +2279,4 @@ export default {
     margin-bottom: 1.2rem;
   }
 }
-</style> 
+</style>
