@@ -52,7 +52,15 @@ async def login(data: dict, response: Response, db: AsyncIOMotorDatabase = Depen
 
 @router.post("/logout")
 async def logout(response: Response):
-  response.delete_cookie("session", path="/")
+  # Importante: para que os navegadores aceitem a remoção do cookie em contexto cross-site,
+  # é necessário enviar os mesmos atributos (SameSite/Secure/Path) usados no set_cookie.
+  samesite_value = "none" if settings.COOKIE_SECURE else "lax"
+  response.delete_cookie(
+    key="session",
+    path="/",
+    secure=settings.COOKIE_SECURE,
+    samesite=samesite_value,
+  )
   return {"message": "Logout efetuado"}
 
 
