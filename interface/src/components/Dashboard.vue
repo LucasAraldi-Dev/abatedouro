@@ -135,7 +135,7 @@ const metricas = computed(() => {
     return sum + (horasTrabalhadas > 0 ? abate.quantidade_aves / horasTrabalhadas : 0)
   }, 0) / abatesFiltrados.length : 0
   
-  const eficienciaOperacional = rendimentoAbate > 0 ? Math.min(100, (rendimentoAbate / 80) * 100) : 0
+  const eficienciaOperacional = rendimentoAbate > 0 ? Math.min(100, (rendimentoAbate / 75) * 100) : 0
   
   const percentualPerdas = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
     const pesoVivo = abate.peso_total_kg
@@ -475,16 +475,16 @@ const alertas = computed(() => {
   const tendenciasData = tendencias.value
   
   // Alerta para rendimento baixo
-  if (metricasData.rendimentoAbate < 80) {
+  if (metricasData.rendimentoAbate < 75) {
     alertasAtivos.push({
       id: 'rendimento-baixo',
       tipo: 'warning',
       prioridade: 'MÉDIA',
       icone: '📉',
       titulo: 'Rendimento Abaixo do Esperado',
-      mensagem: 'O rendimento de abate está abaixo do padrão mínimo de 80%.',
+      mensagem: 'O rendimento de abate está abaixo do padrão mínimo de 75%.',
       valorAtual: `${metricasData.rendimentoAbate.toFixed(1)}%`,
-      limite: '80%'
+      limite: '75%'
     })
   }
   
@@ -586,8 +586,8 @@ const loadData = async () => {
     
     // Buscar dados em paralelo
     const [lotesResponse, produtosResponse, abatesResponse] = await Promise.all([
-      getLotesAbate(apiParams),
-      getProdutos(apiParams),
+      getLotesAbate({ limit: 1000 }),
+      getProdutos({ limit: 1000 }),
       getAbatesCompletos(apiParams)
     ])
     

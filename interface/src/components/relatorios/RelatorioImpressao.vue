@@ -374,40 +374,35 @@
                 </div>
               </div>
 
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Card Dedicado para Categorias de Produtos (100% largura) -->
-      <div class="categorias-produtos-card" v-if="categoriasAgrupadas.length">
-        <div class="card-header">
-          <div class="card-icon">📦</div>
-          <h4>Categorias de Produtos (Agrupadas)</h4>
-        </div>
-        <div class="categorias-grid-full">
-          <div v-for="cat in categoriasAgrupadas" :key="cat.nome" class="categoria-card-full">
-            <div class="categoria-header-full">
-              <span class="categoria-titulo-full">{{ cat.nome }}</span>
-            </div>
-            <div class="categoria-dados-full">
-              <div class="dado-item-full">
-                <span class="dado-valor-full">{{ formatWeight(cat.peso) }}</span>
-                <span class="dado-label-full">Peso Total</span>
+              <!-- Categorias de Produtos (Agrupadas) -->
+              <div class="categorias-agrupadas-section" v-if="categoriasAgrupadas.length">
+                <h5>📦 Categorias de Produtos (Agrupadas)</h5>
+                <div class="categorias-grid">
+                  <div v-for="cat in categoriasAgrupadas" :key="cat.nome" class="categoria-card">
+                    <div class="categoria-header">
+                      <span class="categoria-titulo">{{ cat.nome }}</span>
+                    </div>
+                    <div class="categoria-dados">
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ formatWeight(cat.peso) }}</span>
+                        <span class="dado-label">Peso Total</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ formatCurrency(cat.valor) }}</span>
+                        <span class="dado-label">Valor Total</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ cat.percentualPeso.toFixed(1) }}%</span>
+                        <span class="dado-label">% do Peso</span>
+                      </div>
+                      <div class="dado-item">
+                        <span class="dado-valor">{{ cat.percentualValor.toFixed(1) }}%</span>
+                        <span class="dado-label">% do Valor</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="dado-item-full">
-                <span class="dado-valor-full">{{ formatCurrency(cat.valor) }}</span>
-                <span class="dado-label-full">Valor Total</span>
-              </div>
-              <div class="dado-item-full">
-                <span class="dado-valor-full">{{ cat.percentualPeso.toFixed(1) }}%</span>
-                <span class="dado-label-full">% do Peso</span>
-              </div>
-              <div class="dado-item-full">
-                <span class="dado-valor-full">{{ cat.percentualValor.toFixed(1) }}%</span>
-                <span class="dado-label-full">% do Valor</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -1691,142 +1686,4 @@ const categoriasAgrupadas = computed(() => {
 /* Estilos específicos para a célula do nome do produto com o tipo abaixo */
 .tabela-produtos td .produto-nome-principal { font-weight: 600; color: #111827; }
 .tabela-produtos td .produto-tipo-secundario { font-size: 12px; color: #6b7280; margin-top: 2px; }
-
-/* Card Dedicado para Categorias de Produtos */
-.categorias-produtos-card {
-  width: 100%;
-  background: #ffffff;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  padding: 24px;
-  margin-top: 25px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.categorias-produtos-card .card-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #e9ecef;
-}
-
-.categorias-produtos-card .card-icon {
-  font-size: 24px;
-}
-
-.categorias-produtos-card h4 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 700;
-  color: #2c3e50;
-}
-
-.categorias-grid-full {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.categoria-card-full {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border: 2px solid #dee2e6;
-  border-radius: 10px;
-  padding: 20px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.categoria-card-full:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-}
-
-.categoria-header-full {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid #dee2e6;
-}
-
-.categoria-titulo-full {
-  font-weight: 700;
-  font-size: 18px;
-  color: #2c3e50;
-  text-align: center;
-}
-
-.categoria-dados-full {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-
-.dado-item-full {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  background: #ffffff;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  padding: 12px;
-}
-
-.dado-valor-full {
-  font-weight: 700;
-  font-size: 16px;
-  color: #2c3e50;
-  margin-bottom: 4px;
-}
-
-.dado-label-full {
-  font-size: 12px;
-  color: #6c757d;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Responsividade para o card de categorias */
-@media (max-width: 768px) {
-  .categorias-grid-full {
-    grid-template-columns: 1fr;
-  }
-  
-  .categoria-dados-full {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media print {
-  .categorias-produtos-card {
-    page-break-inside: avoid;
-    margin-top: 15px;
-    padding: 15px;
-  }
-  
-  .categorias-grid-full {
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 12px;
-  }
-  
-  .categoria-card-full {
-    padding: 12px;
-  }
-  
-  .categoria-titulo-full {
-    font-size: 14px;
-  }
-  
-  .dado-valor-full {
-    font-size: 14px;
-  }
-  
-  .dado-label-full {
-    font-size: 10px;
-  }
-}
 </style>
