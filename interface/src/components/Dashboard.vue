@@ -5,6 +5,7 @@ import { getLotesAbate, getProdutos, getAbatesCompletos, type LoteAbate, type Pr
 import { exportToCSV, exportToPDF, formatDate, formatCurrency, formatWeight, type ExportColumn } from '../utils/exportUtils'
 import ModalConfiguracaoLimites from './ModalConfiguracaoLimites.vue'
 import GraficosDashboard from './GraficosDashboard.vue'
+import { API_BASE_URL } from '../config/env'
 import axios from 'axios'
 
 const loading = ref(false)
@@ -720,7 +721,7 @@ const onConfiguracaoSalva = () => {
 // Carregar configuração de limites
 const carregarConfiguracaoLimites = async () => {
   try {
-    const response = await axios.get('/api/v1/configuracao-limites/')
+    const response = await axios.get(`${API_BASE_URL}/configuracao-limites/`)
     if (response.data) {
       configuracaoLimites.value = { ...configuracaoLimites.value, ...response.data }
     }

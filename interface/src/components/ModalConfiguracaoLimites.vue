@@ -262,6 +262,7 @@
 
 <script>
 import axios from 'axios'
+import { API_BASE_URL } from '../config/env'
 import { useToast } from '../composables/useToast'
 
 export default {
@@ -310,7 +311,7 @@ export default {
   methods: {
     async carregarConfiguracao() {
       try {
-        const response = await axios.get('/api/v1/configuracao-limites/')
+        const response = await axios.get(`${API_BASE_URL}/configuracao-limites/`)
         if (response.data) {
           this.config = { ...this.config, ...response.data }
         }
@@ -322,7 +323,7 @@ export default {
     async salvarConfiguracao() {
       this.isLoading = true
       try {
-        await axios.post('/api/v1/configuracao-limites/', this.config)
+        await axios.post(`${API_BASE_URL}/configuracao-limites/`, this.config)
         this.showSuccess('Configuração de limites salva com sucesso!')
         this.$emit('configuracao-salva')
         this.closeModal()
