@@ -35,12 +35,14 @@ async def login(data: dict, response: Response, db: AsyncIOMotorDatabase = Depen
     raise HTTPException(status_code=403, detail="Conta inativa")
 
   token = create_access_token(subject=user.username)
+  # Ajuste de SameSite para produção (cross-site): usar 'none' quando COOKIE_SECURE=true
+  samesite_value = "none" if settings.COOKIE_SECURE else "lax"
   cookie_params = {
     "key": "session",
     "value": token,
     "httponly": True,
     "secure": settings.COOKIE_SECURE,
-    "samesite": "lax",
+    "samesite": samesite_value,
     "path": "/",
     "max_age": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
   }
