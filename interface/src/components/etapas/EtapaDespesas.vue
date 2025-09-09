@@ -466,6 +466,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue'
 import { useToast } from '../../composables/useToast'
+import { API_BASE_URL } from '../../config/env'
 
 // Toast notifications
 const { showSuccess, showError, showInfo } = useToast()
@@ -664,7 +665,7 @@ const zerarTodas = () => {
 
 const carregarPadrao = async () => {
   try {
-    const response = await fetch('https://abatedouro-jkax.onrender.com/api/v1/despesas-padrao')
+    const response = await fetch(`${API_BASE_URL}/despesas-padrao`)
     if (response.ok) {
       const dadosPadrao = await response.json()
       if (dadosPadrao) {
@@ -733,7 +734,7 @@ const salvarComoPadrao = async () => {
       descarte: localFormData.value.despesas_fixas.descarte || 0
     }
     
-    const response = await fetch('https://abatedouro-jkax.onrender.com/api/v1/despesas-padrao', {
+    const response = await fetch(`${API_BASE_URL}/despesas-padrao`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -795,7 +796,7 @@ const todosValoresZero = () => {
 // Função para carregar valores padrão automaticamente
 const carregarPadraoAutomatico = async () => {
   try {
-    const response = await fetch('https://abatedouro-jkax.onrender.com/api/v1/despesas-padrao')
+    const response = await fetch(`${API_BASE_URL}/despesas-padrao`)
     if (response.ok) {
       const dadosPadrao = await response.json()
       if (dadosPadrao && todosValoresZero()) {

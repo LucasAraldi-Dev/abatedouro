@@ -82,6 +82,7 @@
 
 <script>
 import axios from 'axios'
+import { API_BASE_URL } from '../config/env'
 
 export default {
   name: 'ModalHistoricoProduto',
@@ -135,7 +136,7 @@ export default {
       
       try {
         const response = await axios.get(
-          `https://abatedouro-jkax.onrender.com/api/v1/produto-logs/produto/${this.produto._id}`
+          `${API_BASE_URL}/produto-logs/produto/${this.produto._id}`
         )
         
         this.historico = response.data.sort((a, b) => 

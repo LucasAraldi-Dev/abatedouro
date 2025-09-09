@@ -48,6 +48,7 @@
 
 <script>
 import axios from 'axios'
+import { API_BASE_URL } from '../config/env'
 import { useToast } from '../composables/useToast'
 
 export default {
@@ -123,7 +124,7 @@ export default {
       
       try {
         const response = await axios.patch(
-          `https://abatedouro-jkax.onrender.com/api/v1/produtos/${this.produto._id}/preco?novo_preco=${precoNumerico}`
+          `${API_BASE_URL}/produtos/${this.produto._id}/preco?novo_preco=${precoNumerico}`
         )
         
         this.$emit('preco-atualizado', response.data)
