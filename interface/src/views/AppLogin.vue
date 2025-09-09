@@ -376,6 +376,26 @@
       @close="closeAlertModal"
       @retry="retryAlertAction"
     />
+    
+    <!-- Modais de Erro Específicos -->
+    <ModalErroSenha
+      :isVisible="showPasswordErrorModal"
+      @close="closePasswordErrorModal"
+    />
+    
+    <ModalUsuarioInativo
+      :isVisible="showInactiveUserModal"
+      :userInfo="inactiveUserInfo"
+      @close="closeInactiveUserModal"
+    />
+    
+    <ModalErroServidor
+      :isVisible="showServerErrorModal"
+      :errorDetails="serverErrorDetails"
+      :showRetry="true"
+      @close="closeServerErrorModal"
+      @retry="retryFromServerError"
+    />
   </main>
 </template>
 
@@ -388,6 +408,9 @@ import SuccessModal from '../components/SuccessModal.vue'
 import MobileMessage from '../components/MobileMessage.vue'
 import LoadingIndicator from '../components/ui/LoadingIndicator.vue'
 import AlertModal from '../components/modals/AlertModal.vue'
+import ModalErroSenha from '../components/modals/ModalErroSenha.vue'
+import ModalUsuarioInativo from '../components/modals/ModalUsuarioInativo.vue'
+import ModalErroServidor from '../components/modals/ModalErroServidor.vue'
 // import { runAllTests } from '@/utils/testIntegration' // arquivo não encontrado
 import { API_BASE } from '@/services/api' // importa o serviço de API já existente
 
@@ -398,7 +421,10 @@ export default {
     SuccessModal,
     MobileMessage,
     LoadingIndicator,
-    AlertModal
+    AlertModal,
+    ModalErroSenha,
+    ModalUsuarioInativo,
+    ModalErroServidor
   },
   setup() {
     const router = useRouter()
@@ -465,6 +491,13 @@ export default {
     const alertSuggestions = ref([])
     const alertShowRetry = ref(false)
     const alertRetryAction = ref(null)
+    
+    // Estados dos modais de erro específicos
+    const showPasswordErrorModal = ref(false)
+    const showInactiveUserModal = ref(false)
+    const showServerErrorModal = ref(false)
+    const inactiveUserInfo = ref({})
+    const serverErrorDetails = ref({})
     
     // Detecta se é mobile
     const checkIfMobile = () => {
@@ -821,40 +854,32 @@ export default {
     
     const showLoginError = (type, message) => {
       isLoggingIn.value = false
-      loginError.value = true
-      errorType.value = type
+      loginError.value = false // Desativa o sistema antigo
+      showFeedbackModal.value = false // Fecha o modal de feedback
       
-      // Define mensagens específicas por tipo de erro
+      // Exibe o modal específico baseado no tipo de erro
       switch (type) {
         case 'inactive_user':
-          errorTitle.value = '⏳ Conta Aguardando Aprovação'
-          errorMessage.value = message?.message || 'Sua conta precisa ser ativada pela administração'
-          errorHelp.value = `Olá ${message?.user_info?.nome || 'usuário'}! Sua conta foi criada em ${message?.user_info?.data_cadastro || ''}, mas ainda está aguardando aprovação. Entre em contato com a administração ou gerência para ativação.`
+          inactiveUserInfo.value = message?.user_info || {}
+          showInactiveUserModal.value = true
           break
         case 'credentials':
-          errorTitle.value = 'Credenciais inválidas'
-          errorMessage.value = message || 'Usuário ou senha incorretos'
-          errorHelp.value = 'Verifique se digitou corretamente suas credenciais. Se esqueceu sua senha, entre em contato com o administrador.'
+          showPasswordErrorModal.value = true
           break
         case 'too_many_attempts':
-          errorTitle.value = 'Muitas tentativas'
-          errorMessage.value = 'Você excedeu o número de tentativas de login'
-          errorHelp.value = 'Por segurança, aguarde alguns minutos antes de tentar novamente.'
+          // Para muitas tentativas, ainda usa o modal de senha por ser relacionado a credenciais
+          showPasswordErrorModal.value = true
           break
         case 'connection':
-          errorTitle.value = 'Erro de conexão'
-          errorMessage.value = 'Não foi possível conectar ao servidor'
-          errorHelp.value = 'Verifique sua conexão com a internet e tente novamente.'
-          break
         case 'server':
-          errorTitle.value = 'Erro no servidor'
-          errorMessage.value = 'O servidor encontrou um problema'
-          errorHelp.value = 'Tente novamente em alguns instantes. Se o problema persistir, contate o suporte.'
-          break
+        case 'generic':
         default:
-          errorTitle.value = 'Erro no login'
-          errorMessage.value = message || 'Ocorreu um erro inesperado'
-          errorHelp.value = 'Tente novamente. Se o problema persistir, contate o suporte.'
+          serverErrorDetails.value = {
+            status: type === 'connection' ? 'CONEXÃO' : (type === 'server' ? 'SERVIDOR' : 'GENÉRICO'),
+            message: typeof message === 'string' ? message : (message?.message || 'Erro inesperado')
+          }
+          showServerErrorModal.value = true
+          break
       }
     }
     
@@ -876,6 +901,31 @@ export default {
     
     const closeFeedbackModal = () => {
       resetLoginState()
+    }
+    
+    // Funções para os modais de erro específicos
+    const closePasswordErrorModal = () => {
+      showPasswordErrorModal.value = false
+      resetLoginState()
+    }
+    
+    const closeInactiveUserModal = () => {
+      showInactiveUserModal.value = false
+      inactiveUserInfo.value = {}
+      resetLoginState()
+    }
+    
+    const closeServerErrorModal = () => {
+      showServerErrorModal.value = false
+      serverErrorDetails.value = {}
+      resetLoginState()
+    }
+    
+    const retryFromServerError = () => {
+      showServerErrorModal.value = false
+      serverErrorDetails.value = {}
+      // Tenta fazer login novamente
+      handleLogin()
     }
     
     // Métodos - Registro
@@ -1225,6 +1275,13 @@ export default {
       alertSuggestions,
       alertShowRetry,
       
+      // Modais de Erro Específicos
+      showPasswordErrorModal,
+      showInactiveUserModal,
+      showServerErrorModal,
+      inactiveUserInfo,
+      serverErrorDetails,
+      
       // Métodos
       toggleTheme,
       togglePassword,
@@ -1259,7 +1316,13 @@ export default {
       showAlert,
       closeAlertModal,
       retryAlertAction,
-      handleRegistrationError
+      handleRegistrationError,
+      
+      // Métodos dos modais de erro específicos
+      closePasswordErrorModal,
+      closeInactiveUserModal,
+      closeServerErrorModal,
+      retryFromServerError
     }
   }
 }

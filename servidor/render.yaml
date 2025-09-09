@@ -14,4 +14,4 @@ services:
       - key: APP_NAME
         value: Abatedouro API
       - key: BACKEND_CORS_ORIGINS
-        value: http://localhost:5173,http://127.0.0.1:5173,https://abatedouro-frontend.onrender.com,https://abatedouro-jkax.onrender.com
+        value: http://localhost:5173,http://127.0.0.1:5173,https://abatedouro-frontend.onrender.com,https://abatedouro-jkax.onrender.com,https://abatedouro.aralditech.cloud,https://abatedouro.frangofavorito.com.br
