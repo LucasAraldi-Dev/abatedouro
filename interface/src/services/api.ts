@@ -278,16 +278,12 @@ export async function getLotesAbate(params?: {
   limit?: number;
   unidade?: string;
   tipo_ave?: string;
-  data_inicio?: string;
-  data_fim?: string;
 }) {
   const searchParams = new URLSearchParams();
   if (params?.skip) searchParams.append('skip', params.skip.toString());
   if (params?.limit) searchParams.append('limit', params.limit.toString());
   if (params?.unidade) searchParams.append('unidade', params.unidade);
   if (params?.tipo_ave) searchParams.append('tipo_ave', params.tipo_ave);
-  if (params?.data_inicio) searchParams.append('data_inicio', params.data_inicio);
-  if (params?.data_fim) searchParams.append('data_fim', params.data_fim);
   
   const response = await fetch(`${API_BASE}/lotes-abate/?${searchParams}`);
   return response.json();
@@ -475,8 +471,6 @@ export async function getProdutos(params?: {
   tipo?: string;
   unidade_origem?: string;
   search?: string;
-  data_inicio?: string;
-  data_fim?: string;
 }) {
   const searchParams = new URLSearchParams();
   if (params?.skip) searchParams.append('skip', params.skip.toString());
@@ -484,8 +478,6 @@ export async function getProdutos(params?: {
   if (params?.tipo) searchParams.append('tipo', params.tipo);
   if (params?.unidade_origem) searchParams.append('unidade_origem', params.unidade_origem);
   if (params?.search) searchParams.append('search', params.search);
-  if (params?.data_inicio) searchParams.append('data_inicio', params.data_inicio);
-  if (params?.data_fim) searchParams.append('data_fim', params.data_fim);
   
   const response = await fetch(`${API_BASE}/produtos/?${searchParams}`);
   return response.json();

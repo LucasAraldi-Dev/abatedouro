@@ -38,7 +38,7 @@ Seções referenciam diretamente os arquivos e símbolos do projeto:
   - mediaPesoPorLote = pesoTotalLotes / totalLotes (se > 0)
   - precoMedioKg = valorTotalProdutos / pesoTotalProdutos (se > 0)
   - avesHora (média): para cada abate, horas = horarios.horas_reais OU horas_trabalhadas OU 8; contrib = quantidade_aves/horas (se horas>0); média
-  - eficienciaOperacional = min(100, (rendimentoAbate/80)*100)
+  - eficienciaOperacional = min(100, (rendimentoAbate/75)*100)
   - percentualPerdas (médio): para cada abate, (pesoVivo−pesoAbatido)/pesoVivo*100; média
   - scorePerformance = média de abate.score_performance, depois dividido por 10 para escala 0–10
 
@@ -75,7 +75,7 @@ Observação: esta seção usa um conjunto MAIS amplo de campos de despesas_fixa
 5) Sistema de Alertas
 - Definição: <mcsymbol name="alertas" filename="Dashboard.vue" path="C:\Users\Usuario\OneDrive\Documentos\PROJETO\abatedouro\interface\src\components\Dashboard.vue" startline="470" type="function"></mcsymbol>
 - Regras atuais:
-  - Rendimento baixo: metricas.rendimentoAbate < 80% → warning (MÉDIA)
+  - Rendimento baixo: metricas.rendimentoAbate < 75% → warning (MÉDIA)
   - Eficiência baixa: metricas.eficienciaOperacional < 80% → error (ALTA)
   - Perdas altas: metricas.percentualPerdas > configuracaoLimites.percentual_perdas_maximo → error (ALTA)
   - Performance baixa: metricas.scorePerformance < 7/10 → warning (MÉDIA)
@@ -116,7 +116,7 @@ Observação: esta seção usa um conjunto MAIS amplo de campos de despesas_fixa
   - Rendimento médio no Dashboard usa método baseado em peso_inteiro_abatido ou soma de produtos.
   - Nos agrupamentos semana/mês dos gráficos, rendimento_final é (peso_total_kg/quantidade_aves)*100, que é um indicador diferente (kg/ave convertido em % usando 1 ave = 1 unidade), podendo gerar leituras diferentes.
 - Eficiência Operacional
-  - Em metricas: eficienciaOperacional deriva do rendimento médio: min(100, (rendimentoAbate/80)*100).
+  - Em metricas: eficienciaOperacional deriva do rendimento médio: min(100, (rendimentoAbate/75)*100).
   - Nos gráficos agrupados: baseia-se em (peso/ave)/2,5 kg como referência.
 - Tendência de lucro
   - Usa lucro_liquido por abate; gráficos de lucro total usam lucro_total. Dependendo da API, esses campos podem ser iguais ou não.
