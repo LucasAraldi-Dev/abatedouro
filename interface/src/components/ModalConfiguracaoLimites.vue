@@ -278,7 +278,7 @@ export default {
     return {
       isLoading: false,
       config: {
-        rendimento_minimo: 80.0,
+        rendimento_minimo: 75.0,
         rendimento_ideal: 85.0,
         lucro_minimo_por_ave: 5.0,
         lucro_ideal_por_ave: 8.0,

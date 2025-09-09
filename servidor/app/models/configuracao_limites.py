@@ -6,7 +6,7 @@ from bson import ObjectId
 class ConfiguracaoLimitesBase(BaseModel):
     """Modelo base para configuração de limites e alertas"""
     # Limites de Performance
-    rendimento_minimo: float = Field(default=80.0, ge=0, le=100, description="Rendimento mínimo esperado (%)")
+    rendimento_minimo: float = Field(default=75.0, ge=0, le=100, description="Rendimento mínimo esperado (%)")
     rendimento_ideal: float = Field(default=85.0, ge=0, le=100, description="Rendimento ideal esperado (%)")
     
     # Limites de Lucro
