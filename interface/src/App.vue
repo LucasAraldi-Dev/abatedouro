@@ -66,7 +66,6 @@ onMounted(async () => {
       <!-- Logo Principal -->
       <div class="logo-container">
          <img 
--           src="/logo.png" 
             :src="logoUrl" 
             alt="Logo da Aplicação" 
             class="logo-pulse"
