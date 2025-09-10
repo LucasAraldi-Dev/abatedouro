@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useThemeStore } from '@/stores/theme'
-import { useAuthStore } from '@/stores/auth'
+import { useThemeStore } from '@/stores/theme.ts'
+import { useAuthStore } from '@/stores/auth.ts'
 import { getHealth } from '@/services/api'
 import logoUrl from '@/images/logo.png'
 

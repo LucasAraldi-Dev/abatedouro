@@ -402,7 +402,7 @@
 <script>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
+import { useAuthStore } from '@/stores/auth.ts'
 import TermsModal from '../components/TermsModal.vue'
 import SuccessModal from '../components/SuccessModal.vue'
 import MobileMessage from '../components/MobileMessage.vue'
