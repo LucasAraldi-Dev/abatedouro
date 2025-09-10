@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import '@/styles/common-headers.css'
-import { ref, onMounted, onUnmounted, onActivated, onDeactivated, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { getLotesAbate, getProdutos, getAbatesCompletos, type LoteAbate, type Produto, type AbateCompleto } from '../services/api'
 import { exportToCSV, exportToPDF, formatDate, formatCurrency, formatWeight, type ExportColumn } from '../utils/exportUtils'
 import ModalConfiguracaoLimites from './ModalConfiguracaoLimites.vue'
 import GraficosDashboard from './GraficosDashboard.vue'
 import { API_BASE_URL } from '../config/env'
 import axios from 'axios'
+
 
 const loading = ref(false)
 const error = ref('')
@@ -95,57 +96,35 @@ const dadosFiltrados = computed(() => {
   }
 })
 
-// Métricas calculadas com dados reais
+// Métricas calculadas com dados reais - VERSÃO SIMPLIFICADA PARA TESTE
 const metricas = computed(() => {
   const { lotesFiltrados, produtosFiltrados } = dadosFiltrados.value
-  // A API já aplica os filtros de data, usar dados diretos
   const abatesFiltrados = abatesCompletos.value
   
-  const totalLotes = lotesFiltrados.length
-  const totalProdutos = produtosFiltrados.length
-  const totalAves = abatesFiltrados.reduce((sum, abate) => sum + abate.quantidade_aves, 0)
-  const frangosCorte = abatesFiltrados.filter(a => a.tipo_ave === 'Frango de Corte').reduce((sum, abate) => sum + abate.quantidade_aves, 0)
-  const galinhasPoedeiras = abatesFiltrados.filter(a => a.tipo_ave === 'Galinha Poedeira').reduce((sum, abate) => sum + abate.quantidade_aves, 0)
-  const pesoTotalLotes = lotesFiltrados.reduce((sum, lote) => sum + lote.peso_total_kg, 0)
-  const pesoTotalProdutos = abatesFiltrados.reduce((sum, abate) => sum + abate.produtos.reduce((pSum, produto) => pSum + produto.peso_kg, 0), 0)
-  const valorTotalProdutos = abatesFiltrados.reduce((sum, abate) => sum + abate.produtos.reduce((pSum, produto) => pSum + produto.valor_total, 0), 0)
-  const custoTotalAves = abatesFiltrados.reduce((sum, abate) => sum + abate.valor_total, 0)
+  // Versão simplificada para teste de navegação
+  const totalLotes = lotesFiltrados?.length || 0
+  const totalProdutos = produtosFiltrados?.length || 0
+  const totalAves = abatesFiltrados?.length || 0
+  const frangosCorte = 0
+  const galinhasPoedeiras = 0
+  const pesoTotalLotes = 0
+  const pesoTotalProdutos = 0
+  const valorTotalProdutos = 0
+  const custoTotalAves = 0
+  const custoOperacionalTotal = 0
   
-  // Calcular custos operacionais totais
-  const custoOperacionalTotal = abatesFiltrados.reduce((sum, abate) => {
-    const despesas = abate.despesas_fixas
-    return sum + (despesas.funcionarios + despesas.agua + despesas.energia + despesas.embalagem + despesas.gelo + despesas.manutencao)
-  }, 0)
-  
-  const custoAbatePorKg = pesoTotalProdutos > 0 ? custoOperacionalTotal / pesoTotalProdutos : 0
-  const lucroTotal = valorTotalProdutos - custoTotalAves - custoOperacionalTotal
-  const lucroPorAve = totalAves > 0 ? lucroTotal / totalAves : 0
-  const rendimentoAbate = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
-    const pesoVivo = abate.peso_total_kg
-    const pesoAbatido = abate.peso_inteiro_abatido || abate.produtos.reduce((pSum, produto) => pSum + produto.peso_kg, 0)
-    return sum + (pesoVivo > 0 ? (pesoAbatido / pesoVivo) * 100 : 0)
-  }, 0) / abatesFiltrados.length : 0
-  const mediaAvesPorLote = totalLotes > 0 ? totalAves / totalLotes : 0
-  const mediaPesoPorLote = totalLotes > 0 ? pesoTotalLotes / totalLotes : 0
-  const precoMedioKg = pesoTotalProdutos > 0 ? valorTotalProdutos / pesoTotalProdutos : 0
-  
-  // Novas métricas de performance calculadas
-  const avesHora = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
-    const horasTrabalhadas = abate.horarios?.horas_reais || abate.horarios?.horas_trabalhadas || 8
-    return sum + (horasTrabalhadas > 0 ? abate.quantidade_aves / horasTrabalhadas : 0)
-  }, 0) / abatesFiltrados.length : 0
-  
-  const eficienciaOperacional = rendimentoAbate > 0 ? Math.min(100, (rendimentoAbate / 80) * 100) : 0
-  
-  const percentualPerdas = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
-    const pesoVivo = abate.peso_total_kg
-    const pesoAbatido = abate.peso_inteiro_abatido || abate.produtos.reduce((pSum, produto) => pSum + produto.peso_kg, 0)
-    return sum + (pesoVivo > 0 ? ((pesoVivo - pesoAbatido) / pesoVivo) * 100 : 0)
-  }, 0) / abatesFiltrados.length : 0
-  
-  const scorePerformance = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
-    return sum + (abate.score_performance || 0)
-  }, 0) / abatesFiltrados.length / 10 : 0  // Dividir por 10 para converter de 0-100 para 0-10
+  // Versão simplificada dos cálculos para teste
+  const custoAbatePorKg = 0
+  const lucroTotal = 0
+  const lucroPorAve = 0
+  const rendimentoAbate = 0
+  const mediaAvesPorLote = 0
+  const mediaPesoPorLote = 0
+  const precoMedioKg = 0
+  const avesHora = 0
+  const eficienciaOperacional = 0
+  const percentualPerdas = 0
+  const scorePerformance = 0
   
   return {
     totalLotes,
@@ -742,13 +721,7 @@ onUnmounted(() => {
   console.log('🔧 [DASHBOARD DEBUG] Componente Dashboard desmontado')
 })
 
-onActivated(() => {
-  console.log('🔧 [DASHBOARD DEBUG] Componente Dashboard ativado (keep-alive)')
-})
 
-onDeactivated(() => {
-  console.log('🔧 [DASHBOARD DEBUG] Componente Dashboard desativado (keep-alive)')
-})
 </script>
 
 <template>
@@ -763,7 +736,7 @@ onDeactivated(() => {
           <span class="btn-icon">⚙️</span>
           Configurar Limites
         </button>
-        <button @click="loadData" class="btn btn-secondary btn-sm" :disabled="loading">
+        <button @click="loadData()" class="btn btn-secondary btn-sm" :disabled="loading">
           <span class="btn-icon">🔄</span>
           {{ loading ? 'Atualizando...' : 'Atualizar' }}
         </button>
@@ -853,7 +826,7 @@ onDeactivated(() => {
 
     <!-- Loading -->
     <div v-if="loading" class="loading">
-      Carregando dados do dashboard...
+      <img src="../images/logo.png" alt="Carregando dashboard" class="loading-logo" />
     </div>
 
     <!-- Dashboard Content -->
@@ -2335,10 +2308,24 @@ onDeactivated(() => {
 }
 
 .loading {
-  text-align: center;
-  padding: 3rem;
-  color: var(--text-secondary);
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  background: #ffffff;
+}
+
+.loading-logo {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
 }
 
 .no-data {

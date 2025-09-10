@@ -573,7 +573,7 @@ onDeactivated(() => {
 
     <!-- Loading -->
     <div v-if="loading" class="loading">
-      Carregando relatórios...
+      <img src="/logo.png" alt="Loading" class="loading-logo" />
     </div>
 
     <!-- Conteúdo dos Relatórios -->
@@ -1043,10 +1043,29 @@ onDeactivated(() => {
 }
 
 .loading {
-  text-align: center;
-  padding: 3rem;
-  color: var(--text-secondary);
-  font-size: 1.1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  background: var(--bg-primary);
+}
+
+.loading-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
 }
 
 /* Responsividade */

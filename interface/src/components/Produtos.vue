@@ -410,7 +410,7 @@ onMounted(() => {
 
     <!-- Loading -->
     <div v-if="loading" class="loading">
-      Carregando produtos...
+      <img src="../images/logo.png" alt="Carregando produtos" class="loading-logo" />
     </div>
 
     <!-- Tabela de produtos -->
@@ -1100,10 +1100,24 @@ onMounted(() => {
 }
 
 .loading {
-  text-align: center;
-  padding: 3rem;
-  color: var(--text-secondary);
-  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  background: #ffffff;
+}
+
+.loading-logo {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
 }
 
 .delete-item {

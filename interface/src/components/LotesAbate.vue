@@ -46,7 +46,7 @@
 
     <!-- Loading -->
     <div v-if="loading" class="loading">
-      Carregando lotes...
+      <img src="/logo.png" alt="Loading" class="loading-logo" />
     </div>
 
     <!-- Lista de Lotes -->
@@ -493,13 +493,31 @@ onMounted(() => {
 
 
 .loading {
-  text-align: center;
-  padding: 60px;
-  color: var(--primary-red);
-  font-size: 1.1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
   background: var(--bg-secondary);
   border-radius: 12px;
   box-shadow: var(--shadow-light);
+}
+
+.loading-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
 }
 
 .empty-state {

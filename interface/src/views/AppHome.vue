@@ -154,13 +154,7 @@ checkApi()
     <!-- Main Content -->
     <main class="main-content">
       <div class="content-wrapper">
-        <router-view v-slot="{ Component, route }">
-          <Transition name="slide" mode="out-in">
-            <keep-alive>
-              <component :is="Component" :key="route.path" />
-            </keep-alive>
-          </Transition>
-        </router-view>
+        <router-view />
       </div>
     </main>
     
