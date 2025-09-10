@@ -2,6 +2,7 @@ services:
   - type: web
     name: abatedouro-frontend
     env: node
+    rootDir: ./interface
     buildCommand: npm ci && npm run build
     staticPublishPath: ./dist
     envVars:
