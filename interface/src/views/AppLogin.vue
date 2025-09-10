@@ -402,7 +402,7 @@
 <script>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '../stores/auth.ts'
+import { useAuthStore } from '../stores/auth'
 import TermsModal from '../components/TermsModal.vue'
 import SuccessModal from '../components/SuccessModal.vue'
 import MobileMessage from '../components/MobileMessage.vue'
@@ -412,7 +412,7 @@ import ModalErroSenha from '../components/modals/ModalErroSenha.vue'
 import ModalUsuarioInativo from '../components/modals/ModalUsuarioInativo.vue'
 import ModalErroServidor from '../components/modals/ModalErroServidor.vue'
 // import { runAllTests } from '@/utils/testIntegration' // arquivo não encontrado
-import { API_BASE } from '../services/api.ts' // importa o serviço de API já existente
+import { API_BASE } from '../services/api' // importa o serviço de API já existente
 
 export default {
   name: 'AppLogin',

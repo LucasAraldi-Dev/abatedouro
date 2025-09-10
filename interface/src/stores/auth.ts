@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { authLogin, authRegister, authLogout, authMe } from '../services/api.ts'
+import { authLogin, authRegister, authLogout, authMe } from '../services/api'
 
 interface AuthState {
   user: null | { username: string; is_active: boolean; created_at: string }

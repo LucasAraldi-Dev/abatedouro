@@ -14,3 +14,20 @@ services:
         value: 1.0.0
       - key: VITE_ENVIRONMENT
         value: production
+  - type: web
+    name: abatedouro-backend
+    env: python
+    rootDir: ./servidor
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: MONGODB_URI
+        value: mongodb://lucasaraldi:R6pXvaislUmmKm8A@ac-nqlllrv-shard-00-00.tvwmq9c.mongodb.net:27017,ac-nqlllrv-shard-00-01.tvwmq9c.mongodb.net:27017,ac-nqlllrv-shard-00-02.tvwmq9c.mongodb.net:27017/abatedouro?ssl=true&authSource=admin&retryWrites=true&w=majority
+      - key: MONGODB_DBNAME
+        value: abatedouro
+      - key: API_V1_STR
+        value: /api/v1
+      - key: APP_NAME
+        value: Abatedouro API
+      - key: BACKEND_CORS_ORIGINS
+        value: http://localhost:5173,http://127.0.0.1:5173,https://abatedouro-frontend.onrender.com,https://abatedouro-jkax.onrender.com,https://abatedouro.aralditech.cloud,https://abatedouro.frangofavorito.com.br

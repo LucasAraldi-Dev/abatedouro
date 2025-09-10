@@ -6,7 +6,7 @@ import LotesAbate from '../components/LotesAbate.vue'
 import Produtos from '../components/Produtos.vue'
 import Relatorios from '../components/Relatorios.vue'
 import Graficos from '../components/Graficos.vue'
-import { useAuthStore } from '../stores/auth.ts'
+import { useAuthStore } from '../stores/auth'
 
 const routes = [
   {
