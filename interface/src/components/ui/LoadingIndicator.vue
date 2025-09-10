@@ -2,10 +2,8 @@
   <div class="loading-container" :class="{ 'overlay': overlay, 'inline': !overlay }">
     <div class="loading-indicator" :class="sizeClass">
       <div class="spinner">
-        <!-- Círculos animados com cores do tema atual -->
-        <div class="circle"></div>
-        <div class="circle"></div>
-        <div class="circle"></div>
+        <!-- Círculo girando -->
+        <div class="spinning-circle"></div>
       </div>
       <!-- Mensagem opcional -->
       <div v-if="message" class="loading-message">{{ message }}</div>
@@ -102,52 +100,43 @@ export default {
   justify-content: center;
 }
 
-.circle {
-  display: inline-block;
-  width: 0.75rem;
-  height: 0.75rem;
-  margin: 0 0.25rem;
+.spinning-circle {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #dc2626;
   border-radius: 50%;
-  background-color: #dc2626;
-  animation: bounce 1.4s infinite ease-in-out both;
-}
-
-.circle:nth-child(1) {
-  animation-delay: -0.32s;
-}
-
-.circle:nth-child(2) {
-  animation-delay: -0.16s;
+  animation: spin 1s linear infinite;
 }
 
 /* Tamanhos */
-.size-small .circle {
-  width: 0.5rem;
-  height: 0.5rem;
-  margin: 0 0.1875rem;
+.size-small .spinning-circle {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-width: 2px;
 }
 
 .size-small .loading-message {
   font-size: 0.75rem;
 }
 
-.size-large .circle {
-  width: 1rem;
-  height: 1rem;
-  margin: 0 0.3125rem;
+.size-large .spinning-circle {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-width: 4px;
 }
 
 .size-large .loading-message {
   font-size: 1rem;
 }
 
-/* Animação de bounce */
-@keyframes bounce {
-  0%, 80%, 100% { 
-    transform: scale(0);
+/* Animação de rotação */
+@keyframes spin {
+  0% { 
+    transform: rotate(0deg);
   } 
-  40% { 
-    transform: scale(1.0);
+  100% { 
+    transform: rotate(360deg);
   }
 }
 
