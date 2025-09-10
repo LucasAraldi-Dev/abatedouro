@@ -2,15 +2,7 @@
   <div class="graficos-dashboard">
     <h3 class="section-title">📊 Análise Comparativa dos Abates</h3>
     
-    <!-- Informação sobre agrupamento de dados -->
-    <div v-if="props.dadosAbates && props.dadosAbates.length > 0" class="info-agrupamento">
-      <div class="info-card">
-        <span class="info-icon">ℹ️</span>
-        <span class="info-text">
-          {{ getInfoAgrupamento() }}
-        </span>
-      </div>
-    </div>
+
     
     <div class="graficos-grid">
       <!-- Gráfico de Lucro Total -->
@@ -137,23 +129,7 @@ const calcularDiferencaDias = (dados: any[]) => {
   return Math.ceil(diferencaMs / (1000 * 60 * 60 * 24)) + 1 // +1 para incluir o dia inicial
 }
 
-// Função para obter informação sobre o agrupamento dos dados
-const getInfoAgrupamento = () => {
-  if (!props.dadosAbates || props.dadosAbates.length === 0) {
-    return 'Nenhum dado disponível'
-  }
-  
-  const diasPeriodo = calcularDiferencaDias(props.dadosAbates)
-  const totalRegistros = props.dadosAbates.length
-  
-  if (diasPeriodo <= 15) {
-    return `Dados por dia (${totalRegistros} registros, ${diasPeriodo} dias)`
-  } else if (diasPeriodo >= 16 && diasPeriodo <= 32) {
-    return `Dados agrupados por semana (${totalRegistros} registros, ${diasPeriodo} dias)`
-  } else {
-    return `Dados agrupados por mês (${totalRegistros} registros, ${diasPeriodo} dias)`
-  }
-}
+
 
 // Função para otimizar dados para visualização baseada no período de tempo
 const otimizarDadosParaGraficos = (dados: any[]) => {
@@ -1292,31 +1268,7 @@ onUnmounted(() => {
   text-align: center;
 }
 
-.info-agrupamento {
-  margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: center;
-}
 
-.info-card {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.info-icon {
-  font-size: 1rem;
-}
-
-.info-text {
-  font-weight: 500;
-}
 
 .graficos-grid {
   display: grid;

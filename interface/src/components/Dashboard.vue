@@ -372,6 +372,18 @@ const custosOperacionais = computed(() => {
   return custos
 })
 
+// Totais dos custos operacionais por categoria
+const custosOperacionaisTotais = computed(() => {
+  const custos = custosOperacionais.value
+  return {
+    recursosHumanos: custos.maoDeObra,
+    utilidades: custos.agua + custos.energia,
+    materiais: custos.embalagem + custos.gelo,
+    operacionais: custos.manutencao,
+    total: custos.maoDeObra + custos.agua + custos.energia + custos.embalagem + custos.gelo + custos.manutencao
+  }
+})
+
 // Análise de tendências e performance
 const tendencias = computed(() => {
   // A API já aplica os filtros de data, usar dados diretos
@@ -949,59 +961,52 @@ onUnmounted(() => {
       <!-- Custos e Despesas do Abatedouro -->
       <section class="costs-section">
         <h3 class="section-title">Custos e Despesas Operacionais</h3>
+        
+        <!-- Card de Total Geral -->
+        <div class="cost-card total-compact">
+          <div class="cost-header">
+            <span class="cost-icon">💰</span>
+            <span class="cost-title">Total Geral</span>
+          </div>
+          <div class="cost-value">{{ formatCurrency(custosOperacionaisTotais.total) }}</div>
+        </div>
+
+        <!-- Cards por Categoria -->
         <div class="costs-grid">
-          <div class="cost-card">
+          <div class="cost-card recursos-humanos">
             <div class="cost-header">
-              <span class="cost-icon">🏭</span>
-              <span class="cost-title">Mão de Obra</span>
+              <span class="cost-icon">👥</span>
+              <span class="cost-title">Recursos Humanos</span>
             </div>
-            <div class="cost-value">{{ formatCurrency(custosOperacionais.maoDeObra) }}</div>
-            <div class="cost-description">Custos com pessoal</div>
+            <div class="cost-value">{{ formatCurrency(custosOperacionaisTotais.recursosHumanos) }}</div>
+            <div class="cost-description">Mão de Obra</div>
           </div>
           
-          <div class="cost-card">
-            <div class="cost-header">
-              <span class="cost-icon">💧</span>
-              <span class="cost-title">Água</span>
-            </div>
-            <div class="cost-value">{{ formatCurrency(custosOperacionais.agua) }}</div>
-            <div class="cost-description">Consumo de água</div>
-          </div>
-          
-          <div class="cost-card">
+          <div class="cost-card utilidades">
             <div class="cost-header">
               <span class="cost-icon">⚡</span>
-              <span class="cost-title">Energia</span>
+              <span class="cost-title">Utilidades</span>
             </div>
-            <div class="cost-value">{{ formatCurrency(custosOperacionais.energia) }}</div>
-            <div class="cost-description">Energia elétrica</div>
+            <div class="cost-value">{{ formatCurrency(custosOperacionaisTotais.utilidades) }}</div>
+            <div class="cost-description">Água e Energia</div>
           </div>
           
-          <div class="cost-card">
+          <div class="cost-card materiais">
             <div class="cost-header">
               <span class="cost-icon">📦</span>
-              <span class="cost-title">Embalagem</span>
+              <span class="cost-title">Materiais</span>
             </div>
-            <div class="cost-value">{{ formatCurrency(custosOperacionais.embalagem) }}</div>
-            <div class="cost-description">Material de embalagem</div>
+            <div class="cost-value">{{ formatCurrency(custosOperacionaisTotais.materiais) }}</div>
+            <div class="cost-description">Embalagem e Gelo</div>
           </div>
           
-          <div class="cost-card">
-            <div class="cost-header">
-              <span class="cost-icon">🧊</span>
-              <span class="cost-title">Gelo</span>
-            </div>
-            <div class="cost-value">{{ formatCurrency(custosOperacionais.gelo) }}</div>
-            <div class="cost-description">Refrigeração</div>
-          </div>
-          
-          <div class="cost-card">
+          <div class="cost-card operacionais">
             <div class="cost-header">
               <span class="cost-icon">🔧</span>
-              <span class="cost-title">Manutenção</span>
+              <span class="cost-title">Operacionais</span>
             </div>
-            <div class="cost-value">{{ formatCurrency(custosOperacionais.manutencao) }}</div>
-            <div class="cost-description">Manutenção equipamentos</div>
+            <div class="cost-value">{{ formatCurrency(custosOperacionaisTotais.operacionais) }}</div>
+            <div class="cost-description">Manutenção</div>
           </div>
         </div>
       </section>
@@ -1484,6 +1489,47 @@ onUnmounted(() => {
 .cost-description {
   font-size: 0.75rem;
   color: var(--text-secondary);
+}
+
+/* Card de Total Compacto */
+.cost-card.total-compact {
+  background: var(--bg-primary);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid var(--border-light);
+  border-left: 3px solid var(--primary-red);
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.cost-card.total-compact:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  border-left-color: var(--accent-red);
+  border-left-width: 4px;
+}
+
+.cost-card.total-compact .cost-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-red);
+}
+
+/* Cards de Categorias */
+.cost-card.recursos-humanos {
+  border-left-color: #10B981;
+}
+
+.cost-card.utilidades {
+  border-left-color: #F59E0B;
+}
+
+.cost-card.materiais {
+  border-left-color: #8B5CF6;
+}
+
+.cost-card.operacionais {
+  border-left-color: #EF4444;
 }
 
 /* Performance Section */

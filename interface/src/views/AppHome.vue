@@ -72,16 +72,26 @@ checkApi()
           </div>
         </div>
         <div class="header-actions">
-          <button @click="toggleTheme" class="theme-toggle" :title="currentTheme === 'light' ? 'Modo Escuro' : 'Modo Claro'">
-            <span v-if="currentTheme === 'light'">🌙</span>
-            <span v-else>☀️</span>
+          <button @click="toggleTheme" class="theme-toggle-btn" :title="currentTheme === 'light' ? 'Modo Escuro' : 'Modo Claro'">
+            <span class="theme-icon" v-if="currentTheme === 'light'">🌙</span>
+            <span class="theme-icon" v-else>☀️</span>
+            <span class="theme-text">{{ currentTheme === 'light' ? 'Escuro' : 'Claro' }}</span>
           </button>
-          <span class="status-indicator" :class="{ 'online': isOnline, 'offline': !isOnline }">
-            {{ isOnline ? 'Online' : 'Offline' }}
-          </span>
-          <div class="user-actions">
-            <span class="user-label">{{ auth.user?.username }}</span>
-            <button @click="openLogoutModal" class="logout-btn">Sair</button>
+          
+          <div class="status-badge" :class="{ 'online': isOnline, 'offline': !isOnline }">
+            <div class="status-dot"></div>
+            <span class="status-text">{{ isOnline ? 'Online' : 'Offline' }}</span>
+          </div>
+          
+          <div class="user-section">
+            <div class="user-info">
+              <div class="user-avatar">{{ auth.user?.username?.charAt(0).toUpperCase() }}</div>
+              <span class="user-name">{{ auth.user?.username }}</span>
+            </div>
+            <button @click="openLogoutModal" class="logout-button">
+              <span class="logout-icon">🚪</span>
+              <span class="logout-text">Sair</span>
+            </button>
           </div>
         </div>
       </div>
@@ -236,75 +246,162 @@ checkApi()
   gap: 1.5rem;
 }
 
-.theme-toggle {
+/* Botão de Tema Melhorado */
+.theme-toggle-btn {
   background: var(--bg-tertiary);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 0.5rem;
+  border-radius: 10px;
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
-  font-size: 1.2rem;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.theme-toggle:hover {
+.theme-toggle-btn:hover {
   background: var(--bg-hover);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-red);
 }
 
-.status-indicator {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
+.theme-icon {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.theme-toggle-btn:hover .theme-icon {
+  transform: rotate(15deg) scale(1.1);
+}
+
+.theme-text {
+  font-weight: 600;
+}
+
+/* Status Badge Melhorado */
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.status-indicator.online {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
-  border: 1px solid rgba(34, 197, 94, 0.2);
+.status-badge.online {
+  background: rgba(34, 197, 94, 0.15);
+  color: #16a34a;
+  border: 1px solid rgba(34, 197, 94, 0.3);
 }
 
-.status-indicator.offline {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+.status-badge.offline {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 }
 
-.user-actions {
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.status-badge.online .status-dot {
+  background: #16a34a;
+}
+
+.status-badge.offline .status-dot {
+  background: #dc2626;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Seção do Usuário Melhorada */
+.user-section {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
+  padding: 0.25rem;
+  border-radius: 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.user-label {
-  font-weight: 500;
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.5rem;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-red), var(--accent-red));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+}
+
+.user-name {
+  font-weight: 600;
   color: var(--text-primary);
   font-size: 0.875rem;
 }
 
-.logout-btn {
+.logout-button {
   background: var(--primary-red);
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.875rem;
-  transition: all 0.2s ease;
-  margin-left: 1rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
 }
 
-.logout-btn:hover {
+.logout-button:hover {
   background: var(--accent-red);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.4);
+}
+
+.logout-icon {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.logout-button:hover .logout-icon {
+  transform: rotate(-15deg) scale(1.1);
+}
+
+.logout-text {
+  font-weight: 600;
 }
 
 .main-nav {
