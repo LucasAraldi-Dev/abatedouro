@@ -359,17 +359,7 @@ onMounted(() => {
 
 <template>
   <div class="produtos-container">
-    <div class="page-header">
-      <div class="page-header-content">
-        <h2 class="page-title">Produtos e Cortes</h2>
-        <p class="page-subtitle">Gerencie produtos, cortes e preços</p>
-      </div>
-      <div class="page-header-actions">
-        <button @click="openModal()" class="btn-primary">
-          Novo Produto
-        </button>
-      </div>
-    </div>
+
 
     <!-- Busca Avançada -->
     <BuscaAvancada

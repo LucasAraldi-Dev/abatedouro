@@ -500,22 +500,7 @@ onDeactivated(() => {
 
 <template>
   <div class="relatorios-container">
-    <div class="page-header">
-      <div class="page-header-content">
-        <h2 class="page-title">Relatórios</h2>
-        <p class="page-subtitle">Análises e estatísticas detalhadas</p>
-      </div>
-      <div class="page-header-actions">
-        <button @click="carregarDados" class="btn btn-secondary btn-sm" :disabled="loading">
-          <span class="btn-icon">🔄</span>
-          {{ loading ? 'Atualizando...' : 'Atualizar' }}
-        </button>
-        <button @click="abrirModalGerarImagem" class="btn btn-primary btn-sm" :disabled="loading || !dadosConsolidados">
-          <span class="btn-icon">🖨️</span>
-          Imprimir
-        </button>
-      </div>
-    </div>
+
 
     <!-- Filtros -->
     <section class="filtros-section">
@@ -1051,10 +1036,10 @@ onDeactivated(() => {
 }
 
 .loading-logo {
-  width: 80px;
-  height: 80px;
+  width: 140px;
+  height: 140px;
   object-fit: contain;
-  animation: pulse 2s infinite;
+  animation: pulse 1s ease-in-out infinite;
 }
 
 @keyframes pulse {

@@ -1,16 +1,6 @@
 <template>
   <div class="lotes-abate">
-    <div class="page-header">
-      <div class="page-header-content">
-        <h2 class="page-title">Abates</h2>
-        <p class="page-subtitle">Controle de lotes e processamento</p>
-      </div>
-      <div class="page-header-actions">
-        <button @click="showCreateForm = true" class="btn-primary">
-          Novo Lote
-        </button>
-      </div>
-    </div>
+
 
     <!-- Busca Avançada -->
     <BuscaAvancada
@@ -503,10 +493,10 @@ onMounted(() => {
 }
 
 .loading-logo {
-  width: 80px;
-  height: 80px;
+  width: 140px;
+  height: 140px;
   object-fit: contain;
-  animation: pulse 2s infinite;
+  animation: pulse 1s ease-in-out infinite;
 }
 
 @keyframes pulse {
