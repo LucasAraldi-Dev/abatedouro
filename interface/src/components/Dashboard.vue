@@ -96,35 +96,85 @@ const dadosFiltrados = computed(() => {
   }
 })
 
-// Métricas calculadas com dados reais - VERSÃO SIMPLIFICADA PARA TESTE
+// Métricas calculadas com dados reais
 const metricas = computed(() => {
   const { lotesFiltrados, produtosFiltrados } = dadosFiltrados.value
   const abatesFiltrados = abatesCompletos.value
   
-  // Versão simplificada para teste de navegação
+  // Cálculos básicos
   const totalLotes = lotesFiltrados?.length || 0
   const totalProdutos = produtosFiltrados?.length || 0
-  const totalAves = abatesFiltrados?.length || 0
-  const frangosCorte = 0
-  const galinhasPoedeiras = 0
-  const pesoTotalLotes = 0
-  const pesoTotalProdutos = 0
-  const valorTotalProdutos = 0
-  const custoTotalAves = 0
-  const custoOperacionalTotal = 0
+  const totalAves = abatesFiltrados.reduce((sum, abate) => sum + (abate.quantidade_aves || 0), 0)
   
-  // Versão simplificada dos cálculos para teste
-  const custoAbatePorKg = 0
-  const lucroTotal = 0
-  const lucroPorAve = 0
-  const rendimentoAbate = 0
-  const mediaAvesPorLote = 0
-  const mediaPesoPorLote = 0
-  const precoMedioKg = 0
-  const avesHora = 0
-  const eficienciaOperacional = 0
-  const percentualPerdas = 0
-  const scorePerformance = 0
+  // Contagem por tipo de ave
+  const frangosCorte = abatesFiltrados
+    .filter(abate => abate.tipo_ave === 'Frango de Corte')
+    .reduce((sum, abate) => sum + (abate.quantidade_aves || 0), 0)
+  
+  const galinhasPoedeiras = abatesFiltrados
+    .filter(abate => abate.tipo_ave === 'Galinha Poedeira')
+    .reduce((sum, abate) => sum + (abate.quantidade_aves || 0), 0)
+  
+  // Pesos e valores
+  const pesoTotalLotes = abatesFiltrados.reduce((sum, abate) => sum + (abate.peso_total_kg || 0), 0)
+  
+  const pesoTotalProdutos = abatesFiltrados.reduce((sum, abate) => {
+    return sum + (abate.produtos || []).reduce((pSum, produto) => pSum + (produto.peso_kg || 0), 0)
+  }, 0)
+  
+  const valorTotalProdutos = abatesFiltrados.reduce((sum, abate) => {
+    return sum + (abate.produtos || []).reduce((pSum, produto) => pSum + (produto.valor_total || 0), 0)
+  }, 0)
+  
+  const custoTotalAves = abatesFiltrados.reduce((sum, abate) => sum + (abate.valor_total || 0), 0)
+  
+  // Custos operacionais (6 campos principais)
+  const custoOperacionalTotal = abatesFiltrados.reduce((sum, abate) => {
+    const despesas = abate.despesas_fixas || {}
+    return sum + (despesas.funcionarios || 0) + (despesas.agua || 0) + 
+           (despesas.energia || 0) + (despesas.embalagem || 0) + 
+           (despesas.gelo || 0) + (despesas.manutencao || 0)
+  }, 0)
+  
+  // Cálculos derivados
+  const custoAbatePorKg = pesoTotalProdutos > 0 ? custoOperacionalTotal / pesoTotalProdutos : 0
+  const lucroTotal = valorTotalProdutos - custoTotalAves - custoOperacionalTotal
+  const lucroPorAve = totalAves > 0 ? lucroTotal / totalAves : 0
+  
+  // Rendimento de abate (média por abate)
+  const rendimentoAbate = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
+    const pesoVivo = abate.peso_total_kg || 0
+    const pesoAbatido = abate.peso_inteiro_abatido || 
+      (abate.produtos || []).reduce((pSum, produto) => pSum + (produto.peso_kg || 0), 0)
+    return sum + (pesoVivo > 0 ? (pesoAbatido / pesoVivo) * 100 : 0)
+  }, 0) / abatesFiltrados.length : 0
+  
+  // Médias
+  const mediaAvesPorLote = totalLotes > 0 ? totalAves / totalLotes : 0
+  const mediaPesoPorLote = totalLotes > 0 ? pesoTotalLotes / totalLotes : 0
+  const precoMedioKg = pesoTotalProdutos > 0 ? valorTotalProdutos / pesoTotalProdutos : 0
+  
+  // Aves por hora (média)
+  const avesHora = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
+    const horas = abate.horarios?.horas_reais || abate.horarios?.horas_trabalhadas || 8
+    return sum + (horas > 0 ? (abate.quantidade_aves || 0) / horas : 0)
+  }, 0) / abatesFiltrados.length : 0
+  
+  // Eficiência operacional
+  const eficienciaOperacional = Math.min(100, (rendimentoAbate / 80) * 100)
+  
+  // Percentual de perdas (média)
+  const percentualPerdas = abatesFiltrados.length > 0 ? abatesFiltrados.reduce((sum, abate) => {
+    const pesoVivo = abate.peso_total_kg || 0
+    const pesoAbatido = abate.peso_inteiro_abatido || 
+      (abate.produtos || []).reduce((pSum, produto) => pSum + (produto.peso_kg || 0), 0)
+    return sum + (pesoVivo > 0 ? ((pesoVivo - pesoAbatido) / pesoVivo) * 100 : 0)
+  }, 0) / abatesFiltrados.length : 0
+  
+  // Score de performance (média dividida por 10 para escala 0-10)
+  const scorePerformance = abatesFiltrados.length > 0 ? 
+    abatesFiltrados.reduce((sum, abate) => sum + (abate.score_performance || 0), 0) / 
+    abatesFiltrados.length / 10 : 0
   
   return {
     totalLotes,
