@@ -76,33 +76,33 @@
 
 /* Modo Escuro */
 [data-theme="dark"] {
-  --bg-primary: #111827;         /* Fundo principal escuro */
-  --bg-secondary: #1F2937;       /* Fundo secundário escuro */
-  --bg-tertiary: #374151;        /* Fundo terciário escuro */
+  --bg-primary: #2D2D2D;         /* Fundo principal escuro - cinza claro */
+  --bg-secondary: #3D3D3D;       /* Fundo secundário escuro - cinza médio claro */
+  --bg-tertiary: #4D4D4D;        /* Fundo terciário escuro - cinza mais claro */
   --bg-accent: #450A0A;          /* Fundo vermelho escuro */
-  --bg-hover: #4B5563;           /* Fundo hover escuro */
+  --bg-hover: #5D5D5D;           /* Fundo hover escuro - cinza bem claro */
   
-  --text-primary: #F9FAFB;       /* Texto principal claro */
-  --text-secondary: #D1D5DB;     /* Texto secundário claro */
-  --text-muted: #9CA3AF;         /* Texto esmaecido claro */
+  --text-primary: #F5F5F5;       /* Texto principal claro - cinza muito claro */
+  --text-secondary: #D0D0D0;     /* Texto secundário claro - cinza claro */
+  --text-muted: #9A9A9A;         /* Texto esmaecido claro - cinza médio */
   --text-accent: #EF4444;        /* Texto vermelho claro */
   --text-white: #FFFFFF;         /* Texto branco */
   
-  --border-light: #374151;       /* Borda clara escura */
-  --border-medium: #4B5563;      /* Borda média escura */
-  --border-dark: #6B7280;        /* Borda escura clara */
+  --border-light: #4D4D4D;       /* Borda clara escura - cinza médio claro */
+  --border-medium: #5D5D5D;      /* Borda média escura - cinza claro */
+  --border-dark: #6D6D6D;        /* Borda escura clara - cinza mais claro */
   --border-accent: #DC2626;      /* Borda vermelha escura */
 
-  --shadow-sm: 0 1px 2px 0 rgba(239, 68, 68, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(239, 68, 68, 0.15);
-  --shadow-lg: 0 10px 15px -3px rgba(239, 68, 68, 0.2);
-  --shadow-xl: 0 20px 25px -5px rgba(239, 68, 68, 0.25);
+  --shadow-sm: 0 1px 2px 0 rgba(220, 38, 38, 0.15);
+  --shadow-md: 0 4px 6px -1px rgba(220, 38, 38, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(220, 38, 38, 0.25);
+  --shadow-xl: 0 20px 25px -5px rgba(220, 38, 38, 0.3);
   --shadow-light: var(--shadow-sm);
   
   /* Gradientes Modo Escuro */
   --gradient-primary: #EF4444;
-  --gradient-secondary: linear-gradient(135deg, #374151 0%, #4B5563 100%);
-  --gradient-accent: linear-gradient(135deg, #FBBF24 0%, #FCD34D 100%);
+  --gradient-secondary: linear-gradient(135deg, #3D3D3D 0%, #5D5D5D 100%);
+  --gradient-accent: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
 }
 
 /* Classes Utilitárias */
